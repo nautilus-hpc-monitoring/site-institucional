@@ -1,47 +1,54 @@
+const e = require("express");
 var empresaModel = require("../models/empresaModel");
 
-function buscarPorCnpj(req, res) {
-  var cnpj = req.query.cnpj;
-
-  empresaModel.buscarPorCnpj(cnpj).then((resultado) => {
-    res.status(200).json(resultado);
-  });
-}
-
-function listar(req, res) {
-  empresaModel.listar().then((resultado) => {
-    res.status(200).json(resultado);
-  });
-}
-
-function buscarPorId(req, res) {
-  var id = req.params.id;
-
-  empresaModel.buscarPorId(id).then((resultado) => {
-    res.status(200).json(resultado);
-  });
-}
 
 function cadastrar(req, res) {
-  var cnpj = req.body.cnpj;
-  var razaoSocial = req.body.razaoSocial;
 
-  empresaModel.buscarPorCnpj(cnpj).then((resultado) => {
-    if (resultado.length > 0) {
-      res
-        .status(401)
-        .json({ mensagem: `a empresa com o cnpj ${cnpj} já existe` });
+    var razaoSocial = req.body.razaoSocialServer;
+    var cnpj = req.body.cnpjServer;
+    var dataRegistro = req.body.dataRegistroServer;
+    var logradouro = req.body.logradouroServer;
+    var numero = req.body.numeroServer;
+    var cidade = req.body.cidadeServer;
+    var estado = req.body.estadoServer;
+
+
+    // Faça as validações dos valores
+    if (razaoSocial == undefined) {
+        res.status(400).send("Sua razão Social está undefined!");
+    } else if (cnpj == undefined) {
+        res.status(400).send("Seu cnpj está undefined!");
+    } else if (dataRegistro == undefined) {
+        res.status(400).send("Sua data de registro está undefined!");
+    } else if (logradouro == undefined) {
+        res.status(400).send("Seu logradouro está undefined!");
+    } else if (numero == undefined) {
+        res.status(400).send("Seu número está undefined!");
+    } else if (cidade == undefined) {
+        res.status(400).send("Sua cidade está undefined!");
+    } else if (estado == undefined) {
+        res.status(400).send("Seu estado está undefined!");
     } else {
-      empresaModel.cadastrar(razaoSocial, cnpj).then((resultado) => {
-        res.status(201).json(resultado);
-      });
+
+        // Passe os valores como parâmetro e vá para o arquivo empresaModel.js
+        empresaModel.cadastrar(razaoSocial, cnpj, dataRegistro, numero, cidade, estado, logradouro)
+            .then(
+                function (resultado) {
+                    res.json(resultado);
+                }
+            ).catch(
+                function (erro) {
+                    console.log(erro);
+                    console.log(
+                        "\nHouve um erro ao realizar o cadastro! Erro: ",
+                        erro.sqlMessage
+                    );
+                    res.status(500).json(erro.sqlMessage);
+                }
+            );
     }
-  });
 }
 
 module.exports = {
-  buscarPorCnpj,
-  buscarPorId,
-  cadastrar,
-  listar,
-};
+    cadastrar
+}
