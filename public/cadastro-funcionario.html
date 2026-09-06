@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./css/funcionario.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="mobile-header">
+        <button id="open-sidebar-btn" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+        <img src="./assets/img/logo.png" alt="Logo" class="mobile-header-logo">
+    </div>
+
+    <div id="sidebar-overlay"></div>
+
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <div class="mobile-sidebar-header">
+            <div class="mobile-logo">
+                <img src="./assets/img/logo.png" alt="Nautilus Logo">
+                <span>NAUTILUS</span>
+            </div>
+            <button id="close-sidebar-btn" aria-label="Fechar menu"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="mobile-sidebar-items">
+            <li class="nav-item"><a href="#"><i class="fa-solid fa-border-all"></i> <span>Visão Geral</span></a></li>
+            <li class="nav-item"><a href="#"><i class="fa-solid fa-database"></i> <span>Ambientes</span></a></li>
+            <li class="nav-item"><a href="#"><i class="fa-solid fa-chart-line"></i> <span>Clusters</span></a></li>
+            <li class="nav-item"><a href="#"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a></li>
+            <li class="nav-item active"><a href="#"><i class="fa-solid fa-users"></i> <span>Funcionários</span></a></li>
+        </ul>
+        <div class="mobile-sidebar-bottom">
+            <a href="#" class="nav-item"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+        </div>
+    </aside>
+
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <div id="logo">
+                <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
+                <p id="logo_infos"><span class="item-description">NAUTILUS</span></p>
+            </div>
+            <ul id="side_items">
+                <li class="side-item"><a href="#"><i class="fa-solid fa-border-all"></i> <span class="item-description">Visão Geral</span></a></li>
+                <li class="side-item"><a href="#"><i class="fa-solid fa-database"></i> <span class="item-description">Ambientes</span></a></li>
+                <li class="side-item"><a href="#"><i class="fa-solid fa-chart-line"></i> <span class="item-description">Clusters</span></a></li>
+                <li class="side-item"><a href="#"><i class="fa-solid fa-memory"></i> <span class="item-description">Nodes</span></a></li>
+                <li class="side-item active"><a href="#"><i class="fa-solid fa-users"></i> <span class="item-description">Funcionários</span></a></li>
+            </ul>
+        </div>
+        <ul id="side_bottom">
+            <li class="side-item"><a href="#"><i class="fa-solid fa-sliders"></i> <span class="item-description">Configurações</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="main-container">
+        <main class="page-content">
+            <a href="#" class="back-link">&larr; Voltar para funcionários</a>
+            <h1 class="page-title">Cadastrar Funcionário</h1>
+            <p class="page-subtitle">Adicione um novo usuário à organização e defina o nível de acesso à plataforma.</p>
+
+            <form class="form-card">
+                <div class="form-section">
+                    <div class="step-badge">01</div>
+                    <div class="section-body">
+                        <h2 class="section-title">Dados do usuário</h2>
+                        <p class="section-subtitle">Preencha as informações básicas do funcionário.</p>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nome completo <span class="required">*</span></label>
+                                <input type="text" placeholder="Ex.: João da Silva">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>E-mail corporativo <span class="required">*</span></label>
+                                <input type="email" placeholder="Ex: joao.silva@petrobras.com.br">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Senha inicial <span class="required">*</span></label>
+                                <input type="password" placeholder="Mínimo 8 caracteres">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Confirmar senha <span class="required">*</span></label>
+                                <div class="input-password-wrapper">
+                                    <input type="password" placeholder="Confirme a senha inicial">
+                                    <i class="fa-regular fa-eye password-icon"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Nível de acesso <span class="required">*</span></label>
+                                <div class="select-wrapper">
+                                    <select>
+                                        <option value="" disabled selected>Selecione um nível de acesso</option>
+                                        <option value="admin">Administrador</option>
+                                        <option value="gerente">Gestor</option>
+                                        <option value="operador">Operador</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-alert">
+                            <div class="alert-icon-wrapper">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </div>
+                            <div class="conteudo-alert">
+                                <strong>Permissões do nível selecionado</strong>
+                                <span>Selecione um nível de acesso para visualizar as permissões associadas.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar usuário</button>
+                </div>
+            </form>
+
+            <div class="qtd-users">
+                <div class="card-users" id="card01">
+                    <p>Total de usuários</p>
+                    <span>4</span>
+                </div>
+                <div class="card-users" id="card02">
+                    <p>Administradores</p>
+                    <span>1</span>
+                </div>
+                <div class="card-users" id="card03">
+                    <p>Gestores</p>
+                    <span>1</span>
+                </div>
+                <div class="card-users" id="card04">
+                    <p>Operadores</p>
+                    <span>2</span>
+                </div>
+                <div class="card-users" id="card05">
+                    <p>Inativos</p>
+                    <span>0</span>
+                </div>
+            </div>
+
+            <div class="search-user">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Buscar por nome ou e-mail...">
+                </div>
+                <div class="select-wrapper select-filter">
+                    <select>
+                        <option value="todos" selected>Todos os níveis</option>
+                        <option value="admin">Administradores</option>
+                        <option value="gestores">Gestores</option>
+                        <option value="operadores">Operadores</option>
+                        <option value="inativos">Inativos</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>USUÁRIO</th>
+                            <th>E-MAIL</th>
+                            <th>NÍVEL DE ACESSO</th>
+                            <th>STATUS</th>
+                            <th class="text-right">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="avatar-circle">RC</div>
+                                    <span class="user-name-text">Raphael Canuto</span>
+                                </div>
+                            </td>
+                            <td class="email-text">raphael.canuto@petrobras.com.br</td>
+                            <td><span class="badge badge-admin">Administrador</span></td>
+                            <td><span class="status-indicator active"><span class="dot"></span> Ativo</span></td>
+                            <td class="text-right">
+                                <button class="action-btn"><i class="fa-regular fa-pen-to-square"></i></button>
+                                <button class="action-btn delete"><i class="fa-regular fa-trash-can"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+<script>
+    document.getElementById('open-sidebar-btn').onclick = function() {
+    mobileSidebar.classList.add('active');
+    document.getElementById('sidebar-overlay').classList.add('active');
+};
+
+document.getElementById('close-sidebar-btn').onclick = function() {
+    mobileSidebar.classList.remove('active');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+};
+
+document.getElementById('sidebar-overlay').onclick = function() {
+    mobileSidebar.classList.remove('active');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+};
+</script>
+</html>
+
