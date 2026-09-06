@@ -10,10 +10,14 @@
 body {
     min-height: 100vh;
     display: flex;
+    background-color: #f8fafc;
 }
 
-main {
-    padding: 40px;
+#main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .mobile-header,
@@ -210,16 +214,14 @@ main {
 
 /* PÁGINA E FORMULÁRIO */
 .page-content {
-    padding: 32px;
+    padding: 32px 48px;
     max-width: 1920px;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    margin: 0 auto;
 }
 
 .back-link {
-    color: #0E5E75;
+    color: #64748B;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
@@ -242,23 +244,20 @@ main {
     background-color: #FFFFFF;
     border-radius: 12px;
     padding: 32px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     border: 1px solid #E2E8F0;
 }
 
 .form-section {
     display: flex;
     gap: 16px;
-    padding-bottom: 24px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #F1F5F9;
 }
 
 .step-badge {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background-color: #ECFDF5;
+    background-color: #E6F4F1;
     color: #0D9488;
     font-weight: 600;
     font-size: 13px;
@@ -287,7 +286,7 @@ main {
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px 20px;
+    gap: 16px 24px;
 }
 
 .form-grid.align-center {
@@ -304,7 +303,7 @@ main {
     grid-column: 1 / -1;
 }
 
-.label {
+.form-group label {
     font-size: 13px;
     font-weight: 600;
     color: #1e293b;
@@ -315,32 +314,40 @@ main {
 }
 
 input[type="text"],
-select, 
-textarea {
+input[type="email"],
+input[type="password"], 
+select {
     width: 100%;
-    padding: 10px 14px;
+    height: 42px;
+    padding: 0 14px;
     border: 1px solid #E2E8F0;
     border-radius: 6px;
     font-size: 13px;
-    color: #0f172A;
+    color: #0F172A;
     outline: none;
-    transition: border-color 0.2s ease;
+    background-color: #FFFFFF;
+    transition: border-color 0.2s ease; 
 }
 
-input::placeholder,
-textarea::placeholder {
+input::placeholder {
     color: #94A3B8;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus {
     border-color: #0E5E75;
 }
 
-textarea {
-    min-height: 80px;
-    resize: vertical;
+.input-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-icon {
+    position: absolute;
+    right: 14px;
+    color: #94A3B8;
+    cursor: pointer;
 }
 
 .select-wrapper {
@@ -349,15 +356,16 @@ textarea {
 
 .select-wrapper select {
     appearance: none;
-    background-color: #ffffff;
     cursor: pointer;
 }
 
 .select-wrapper::after {
-    content: "⌵";
+    content: "\f107";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
     position: absolute;
     right: 14px;
-    top: 40%;
+    top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
     color: #64748B;
