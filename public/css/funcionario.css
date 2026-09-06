@@ -18,6 +18,8 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 100vh;
+    background-color: #F8FAFC;
 }
 
 .mobile-header,
@@ -159,15 +161,6 @@ body {
 
 #sidebar:hover #logo_infos {
     opacity: 1;
-}
-
-#main-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #F8FAFC;
-    min-width: 0; 
 }
 
 .top-header {
@@ -494,7 +487,6 @@ input:focus, select:focus {
     width: 220px;
 }
 
-
 .table-container {
     background-color: #FFFFFF;
     border-radius: 8px;
@@ -608,11 +600,8 @@ input:focus, select:focus {
     color: #EF4444;
 }
 
-
-
-/* Responsividade */
+/* Responsividade Aprimorada */
 @media (max-width: 768px) {
-
     #main-container {
         padding-top: 52px;
     }
@@ -748,8 +737,45 @@ input:focus, select:focus {
         padding-top: 12px;
     }
 
+    /* Redimensionamento e Ajustes para Celular */
+    .page-content {
+        padding: 16px;
+    }
+
+    .top-header {
+        padding: 0 16px;
+    }
+
+    .form-card {
+        padding: 16px;
+    }
+
+    .form-section {
+        flex-direction: column;
+    }
+
     .form-grid,
     .form-grid.align-center {
         grid-template-columns: 1fr;
+    }
+
+    .qtd-users {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    }
+
+    .search-user {
+        flex-direction: column;
+    }
+
+    .select-filter {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .btn {
+        width: 100%;
     }
 }
