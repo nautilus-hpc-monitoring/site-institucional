@@ -1,6 +1,6 @@
 var database = require("../database/config");
 
-function cadastrar(nomeFuncionario,emailFuncionario,senhaFuncionario,NivelAcessoFuncionario) {
+function cadastrarFuncionario(nomeFuncionario,emailFuncionario,senhaFuncionario,NivelAcessoFuncionario) {
     var instrucaoSql = `
     INSERT INTO nivel_acesso (nome) 
     VALUES
@@ -13,4 +13,8 @@ function cadastrar(nomeFuncionario,emailFuncionario,senhaFuncionario,NivelAcesso
     ("${nomeFuncionario}", "${emailFuncionario}", "${senhaFuncionario}",)
     `
 
+}
+
+module.exports = {
+    cadastrarFuncionario
 }
