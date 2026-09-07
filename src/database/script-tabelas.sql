@@ -7,12 +7,11 @@ DROP DATABASE IF EXISTS nautilus;
 CREATE DATABASE nautilus;
 USE nautilus;
 
-
-
 CREATE TABLE empresa(
     id INT PRIMARY KEY AUTO_INCREMENT,
     razao_social VARCHAR(45),
     cnpj CHAR(14),
+	token_instalacao VARCHAR(100) UNIQUE,
     dt_registro DATE
 );
 
@@ -50,6 +49,7 @@ CREATE TABLE node(
     ip VARCHAR(45),
     status VARCHAR(45),
     sistema_operacional VARCHAR(45),
+	token_node VARCHAR(100) UNIQUE,
     fk_cluster INT NOT NULL,
     FOREIGN KEY (fk_cluster) REFERENCES cluster(id)
 );
