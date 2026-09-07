@@ -7,6 +7,8 @@ DROP DATABASE IF EXISTS nautilus;
 CREATE DATABASE nautilus;
 USE nautilus;
 
+
+
 CREATE TABLE empresa(
     id INT PRIMARY KEY AUTO_INCREMENT,
     razao_social VARCHAR(45),
