@@ -109,8 +109,38 @@ function cadastrar(req, res) {
 
 }
 
+function ativarAgente(req, res) {
+    console.log("Entrou")
+    console.log("BODY:", req.body)
+
+    const tokenInstalacao = req.body.tokenInstalacaoServer;
+    const hostname = req.body.hostnameServer;
+
+    if (tokenInstalacao == undefined) {
+        return res.status(400).send("Token de instalação está undefined");
+    }
+
+    if (hostname == undefined) {
+        return res.status(400).send("Hostname está undefined");
+    }
+
+    nodesModel.ativarAgente(tokenInstalacao, hostname)
+        .then(function(resultado) {
+            if (resultado.length == 0) {
+                return res.status(404).send("Node não encontrado para essa empresa");
+            }
+
+            return res.json({
+                tokenNode: resultado[0].token_node
+            });
+        }).catch(function (erro) {
+            return res.status(500).json(erro.sqlMessage);
+        }) 
+}
+
 module.exports = {
     cadastrar,
     chamarHPC,
-    chamarCluster
+    chamarCluster,
+    ativarAgente
 }
