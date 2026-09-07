@@ -1,5 +1,7 @@
 const e = require("express");
 const crypto = require("crypto");
+const path = require("path");
+const { ZipArchive } = require("archiver");
 var empresaModel = require("../models/empresaModel");
 
 
@@ -51,6 +53,103 @@ function cadastrar(req, res) {
     }
 }
 
+async function baixarAgente(req, res) {
+    try {
+        const idEmpresa = req.params.idEmpresa;
+
+        const resultado = await empresaModel.buscarTokenInstalacao(idEmpresa);
+
+        if (resultado.length == 0) {
+            return res.status(404).json({
+                message: "Empresa não encontrada"
+            });
+        }
+
+        const tokenInstalacao = resultado[0].token_instalacao;
+
+        const config = JSON.stringify({
+            token_instalacao: tokenInstalacao
+        }, null, 4);
+
+        res.attachment("nautilus-agent.zip");
+
+        const zip = new ZipArchive({
+            zlib: {
+                level: 9
+            }
+        });
+
+        zip.pipe(res);
+
+        const caminhoAgente = path.join(__dirname, "../agente");
+
+        // Scripts principais
+        zip.file(
+            path.join(caminhoAgente, "captura.py"),
+            {
+                name: "captura.py"
+            }
+        );
+
+        zip.file(
+            path.join(caminhoAgente, "leitura.py"),
+            {
+                name: "leitura.py"
+            }
+        );
+
+        zip.file(
+            path.join(caminhoAgente, "requirements.txt"),
+            {
+                name: "requirements.txt"
+            }
+        );
+
+        // Módulos utilizados pelo agente
+        zip.directory(
+            path.join(caminhoAgente, "cpu"),
+            "cpu"
+        );
+
+        zip.directory(
+            path.join(caminhoAgente, "disco"),
+            "disco"
+        );
+
+        zip.directory(
+            path.join(caminhoAgente, "ram"),
+            "ram"
+        );
+
+        zip.directory(
+            path.join(caminhoAgente, "swap"),
+            "swap"
+        );
+
+        zip.directory(
+            path.join(caminhoAgente, "utils"),
+            "utils"
+        );
+
+        // Config personalizado da empresa
+        zip.append(config, {
+            name: "config.json"
+        });
+
+        await zip.finalize();
+
+    } catch (error) {
+        console.log(error);
+
+        if (!res.headersSent) {
+            res.status(500).json({
+                message: "Erro ao gerar agente"
+            });
+        }
+    }
+}
+
 module.exports = {
-    cadastrar
+    cadastrar,
+    baixarAgente
 }
