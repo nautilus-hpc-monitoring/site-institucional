@@ -21,7 +21,7 @@ function autenticar(req, res) {
                         console.log(resultadoAutenticar);
 
                                     res.json({
-                                        id: resultadoAutenticar[0].id,
+                                        id_usuario: resultadoAutenticar[0].id,
                                         email: resultadoAutenticar[0].email,
                                         nome: resultadoAutenticar[0].nome,
                                         senha: resultadoAutenticar[0].senha,
@@ -51,6 +51,7 @@ function cadastrar(req, res) {
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
     var fkEmpresa = req.body.idEmpresaVincularServer;
+    var fkNivelAcesso = req.body.idNivelAcessoServer;
 
     // Faça as validações dos valores
     if (nome == undefined) {
@@ -64,7 +65,7 @@ function cadastrar(req, res) {
     } else {
 
         // Passe os valores como parâmetro e vá para o arquivo usuarioModel.js
-        usuarioModel.cadastrar(nome, email, senha, fkEmpresa)
+        usuarioModel.cadastrar(nome, email, senha, fkEmpresa,fkNivelAcesso)
             .then(
                 function (resultado) {
                     res.json(resultado);

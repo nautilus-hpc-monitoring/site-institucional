@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
+        integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/formulario-cadastro.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
+    <link rel="stylesheet" href="./css/cadastro-empresa.css">
+    <title>Nautilus - Cadastro Empresa</title>
+</head>
+
+<body>
+
+    <div class="mobile-header">
+        <button id="open-sidebar-btn" aria-label="Abrir menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <img src="./assets/img/logo.png" alt="Logo" class="mobile-header-logo">
+    </div>
+
+    <div id="sidebar-overlay"></div>
+
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <div class="mobile-sidebar-header">
+            <div class="mobile-logo">
+                <img src="./assets/img/logo.png" alt="Nautilus Logo">
+                <span>NAUTILUS</span>
+            </div>
+            <button id="close-sidebar-btn" aria-label="Fechar menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <ul class="mobile-sidebar-items">
+            <li class="nav-item">
+                <a href="#"><i class="fa-solid fa-border-all"></i> <span>Visão Geral</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="#"><i class="fa-solid fa-database"></i> <span>Ambientes</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="#"><i class="fa-solid fa-chart-line"></i> <span>Clusters</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="./cadastro-node.html"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a>
+            </li>
+            <li class="nav-item active">
+                <a href="./cadastro-empresa.html"><i class="fa-solid fa-building"></i> <span>Empresas</span></a>
+            </li>
+        </ul>
+
+        <div class="mobile-sidebar-bottom">
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+    </aside>
+
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <div id="logo">
+                <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
+                <p id="logo_infos">
+                    <span class="item-description">NAUTILUS</span>
+                </p>
+            </div>
+
+            <ul id="side_items">
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-border-all"></i>
+                        <span class="item-description">Visão Geral</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-database"></i>
+                        <span class="item-description">Ambientes</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Clusters</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-node.html">
+                        <i class="fa-solid fa-memory"></i>
+                        <span class="item-description">Nodes</span>
+                    </a>
+                </li>
+
+                <li class="side-item active">
+                    <a href="./cadastro-empresa.html">
+                        <i class="fa-solid fa-building"></i>
+                        <span class="item-description">Empresas</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+        <ul id="side_bottom">
+            <li class="side-item">
+                <a href="#">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="item-description">Configurações</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div id="main-container">
+        <header class="top-header">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <span class="user-name">dsads</span>
+            </div>
+        </header>
+        <main class="page-content">
+            <a href="#" class="back-link">&larr; Voltar para empresas</a>
+            <h1 class="page-title">Cadastrar nova empresa</h1>
+            <p class="page-subtitle">Adicione uma nova empresa ao sistema de gerenciamento.</p>
+
+            <form class="form-card">
+                <div class="form-section">
+                    <div class="step-badge">01</div>
+                    <div class="section-body">
+                        <h2 class="section-title">Dados da empresa</h2>
+                        <p class="section-subtitle">Informações básicas de registro da empresa.</p>
+
+                        <div class="form-grid empresa-identificacao">
+                            <div class="form-group full-width">
+                                <label for="razao-social">Razão Social <span class="required">*</span></label>
+                                <input id="razao-social" name="razaoSocial" type="text"
+                                    placeholder="Ex.: Nautilus Tecnologia S.A." required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cnpj">CNPJ <span class="required">*</span></label>
+                                <input id="cnpj" name="cnpj" type="text" inputmode="numeric"
+                                    placeholder="Ex.: 00.000.000/0001-00" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="data-registro">Data de Registro <span class="required">*</span></label>
+                                <input id="data-registro" name="dataRegistro" type="text" inputmode="numeric"
+                                    placeholder="Ex.: DD/MM/AAAA" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="step-badge">02</div>
+                    <div class="section-body">
+                        <h2 class="section-title">Endereço</h2>
+                        <p class="section-subtitle">Localização da sede da empresa.</p>
+
+                        <div class="form-grid endereco-grid">
+                            <div class="form-group full-width">
+                                <label for="logradouro">Logradouro <span class="required">*</span></label>
+                                <input id="logradouro" name="logradouro" type="text" placeholder="Ex.: Avenida Paulista"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="numero">Número <span class="required">*</span></label>
+                                <input id="numero" name="numero" type="text" inputmode="numeric" placeholder="Ex.: 1000"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cidade">Cidade <span class="required">*</span></label>
+                                <input id="cidade" name="cidade" type="text" placeholder="Ex.: São Paulo" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estado">Estado <span class="required">*</span></label>
+                                <div class="select-wrapper">
+                                    <select id="estado" name="estado" required>
+                                        <option value="" disabled selected>Selecione o estado</option>
+                                        <option value="AC">Acre</option>
+                                        <option value="AL">Alagoas</option>
+                                        <option value="AP">Amapá</option>
+                                        <option value="AM">Amazonas</option>
+                                        <option value="BA">Bahia</option>
+                                        <option value="CE">Ceará</option>
+                                        <option value="DF">Distrito Federal</option>
+                                        <option value="ES">Espírito Santo</option>
+                                        <option value="GO">Goiás</option>
+                                        <option value="MA">Maranhão</option>
+                                        <option value="MT">Mato Grosso</option>
+                                        <option value="MS">Mato Grosso do Sul</option>
+                                        <option value="MG">Minas Gerais</option>
+                                        <option value="PA">Pará</option>
+                                        <option value="PB">Paraíba</option>
+                                        <option value="PR">Paraná</option>
+                                        <option value="PE">Pernambuco</option>
+                                        <option value="PI">Piauí</option>
+                                        <option value="RJ">Rio de Janeiro</option>
+                                        <option value="RN">Rio Grande do Norte</option>
+                                        <option value="RS">Rio Grande do Sul</option>
+                                        <option value="RO">Rondônia</option>
+                                        <option value="RR">Roraima</option>
+                                        <option value="SC">Santa Catarina</option>
+                                        <option value="SP">São Paulo</option>
+                                        <option value="SE">Sergipe</option>
+                                        <option value="TO">Tocantins</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="step-badge">03</div>
+                    <div class="section-body">
+                        <h2 class="section-title">Observações (opcional)</h2>
+                        <p class="section-subtitle">Informações adicionais sobre a empresa.</p>
+
+                        <div class="form-group full-width">
+                            <textarea id="observacoes" name="observacoes"
+                                placeholder="Ex.: Horário de funcionamento, contatos principais, observações relevantes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="cadastrar()">
+                        Cadastrar empresa
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+
+
+</body>
+<script>
+    document.getElementById('open-sidebar-btn').onclick = function () {
+        mobileSidebar.classList.add('active');
+        document.getElementById('sidebar-overlay').classList.add('active');
+    };
+
+    document.getElementById('close-sidebar-btn').onclick = function () {
+        mobileSidebar.classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    };
+
+    document.getElementById('sidebar-overlay').onclick = function () {
+        mobileSidebar.classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    };
+</script>
+
+<script>
+    function cadastrar() {
+
+        var razaoSocialVar = document.getElementById("razao-social").value;
+        var cnpjVar = document.getElementById("cnpj").value;
+        var dataRegistroVar = document.getElementById("data-registro").value;
+        var logradouroVar = document.getElementById("logradouro").value;
+        var numeroVar = document.getElementById("numero").value;
+        var cidadeVar = document.getElementById("cidade").value;
+        var estadoVar = document.getElementById("estado").value;
+
+        console.log({
+            razaoSocialServer: razaoSocialVar,
+            cnpjServer: cnpjVar,
+            dataRegistroServer: dataRegistroVar,
+            logradouroServer: logradouroVar,
+            numeroServer: numeroVar,
+            cidadeServer: cidadeVar,
+            estadoServer: estadoVar
+        });
+
+        dataRegistroTratadaVar = tratamento_validacao_data(dataRegistroVar)
+        cnpjTratadoVar = tratamento_validacao_cnpj(cnpjVar)
+
+        fetch("/empresa/cadastrar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                razaoSocialServer: razaoSocialVar,
+                cnpjServer: cnpjTratadoVar,
+                dataRegistroServer: dataRegistroTratadaVar,
+                logradouroServer: logradouroVar,
+                numeroServer: numeroVar,
+                cidadeServer: cidadeVar,
+                estadoServer: estadoVar
+            })
+        })
+            .then(function (resposta) {
+
+                console.log("Status:", resposta.status);
+
+                return resposta.text().then(function (texto) {
+
+                    console.log("Resposta do servidor:", texto);
+
+                    if (!resposta.ok) {
+                        throw texto;
+                    }
+
+                    return texto;
+                });
+            })
+            .catch(function (erro) {
+                console.log("ERRO:", erro);
+            });
+    }
+
+    function tratamento_validacao_data(data){
+        console.log(data);
+        if(data[2] != "/" || data[5] != "/"){
+            alert("Digite corretamente: DD/MM/AAAA")
+        } else {
+            let partes = data.split("/");
+            return `${partes[2]}-${partes[1]}-${partes[0]}`;
+        }
+    }
+
+    function tratamento_validacao_cnpj(cnpj){
+        if(cnpj[2] != "." || cnpj[6] != "." || cnpj[10] != "/" || cnpj[15] != "-"){
+            alert ("Digite o CNPJ corretamente: XX.XXX.XXX/XXXX.XX")
+        } else {
+            return cnpj.replace(/\D/g, "");
+        }
+    }
+</script>
+
+</html>

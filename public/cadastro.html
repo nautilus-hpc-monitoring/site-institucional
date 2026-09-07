@@ -6,91 +6,152 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>AquaTech | Cadastro</title>
-
   <script src="./js/sessao.js"></script>
 
-  <link rel="stylesheet" href="./css/estilo.css" />
-  <link rel="icon" href="./assets/icon/favicon2.ico" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link rel="stylesheet" href="./css/navbar.css">
+  <link rel="stylesheet" href="./css/cadastro.css" />
+  <link rel="stylesheet" href="./css/global.css">
+
+  <script src="./js/navbar.js" defer></script>
 </head>
 
-<body onload="listar()">
-  <!--header inicio-->
-  <div class="header">
-    <div class="container">
-      <h1 class="titulo">AquaTech</h1>
-      <ul class="navbar">
-        <li>
-          <a href="index.html">Inicial</a>
-        </li>
-        <li>
-          <a href="simulador.html">Simulador</a>
-        </li>
-        <li>|</li>
-        <li>
-          <a href="login.html">Login</a>
-        </li>
-        <li class="agora">
-          <a href="#">Cadastro</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <!--header fim-->
+<body class="body-formulario" onload="listar()">
+  <header class="navbar">
+    <div class="navbar_container">
 
-  <div class="login">
+      <div class="navbar_left">
+
+        <button class="navbar_menu" id="btnMenu" aria-label="Abrir menu">
+          ☰
+        </button>
+
+        <a href="./index.html" class="navbar_logo">
+          <img src="./assets/img/logo.png" alt="Nautilus Logo">
+          Nautilus
+        </a>
+
+        <nav class="navbar_nav">
+          <a href="#">
+            Serviço como solução
+            <span class="navbar_setas">
+              <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+              <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+            </span>
+          </a>
+
+          <a href="./sobre-nos.html">
+            Sobre nós
+            <span class="navbar_setas">
+              <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+              <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+            </span>
+          </a>
+
+        </nav>
+
+      </div>
+
+      <div class="navbar_actions">
+        <button><a href="./login.html">Login</a></button>
+        <button><a href="./cadastro.html">Cadastre-se</a></button>
+      </div>
+
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar_topo">
+      <a href="./index.html" class="sidebar_logo">
+        <img src="./assets/img/logo.png" alt="Nautilus Logo">
+        Nautilus
+      </a>
+
+      <button class="sidebar_fechar" id="btnFechar">
+        ✕
+      </button>
+    </div>
+
+    <nav class="sidebar_nav">
+
+      <a href="#">
+        <span>Serviço como solução</span>
+
+        <span class="sidebar_setas">
+          <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+          <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+        </span>
+      </a>
+
+      <a href="./sobre-nos.html">
+        <span>Sobre nós</span>
+
+        <span class="sidebar_setas">
+          <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+          <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+        </span>
+      </a>
+
+
+    </nav>
+
+    <div class="sidebar_actions">
+      <button><a href="./login.html">Login</a></button>
+      <button><a href="./cadastro.html">Cadastre-se</a></button>
+    </div>
+
+  </aside>
+
+  <div class="cadastro">
     <div class="alerta_erro">
       <div class="card_erro" id="cardErro">
         <span id="mensagem_erro"></span>
       </div>
-    </div>
-    <div class="container">
-      <div class="card card-cadastro">
-        <h2>Bem-vindo!</h2>
-        <div class="formulario">
-          <!--
-                         Para inserir mais um campo, copie uma das inputs abaixo.
-                         Assim que inserir vá para o script abaixo.
-                     -->
-          <div class="campo">
-            <span>Código de ativação:</span>
-            <input id="codigo_input" type="text" placeholder="Insira aqui seu código" />
-          </div>
-          <div class="campo">
-            <span>Nome:</span>
-            <input id="nome_input" type="text" placeholder="Seu nome" />
-          </div>
-          <div class="campo">
-            <span>E-mail:</span>
-            <input id="email_input" type="text" placeholder="meuemail@provedor.com" />
-          </div>
-          <div class="campo">
-            <span>Senha:</span>
-            <input id="senha_input" type="password" placeholder="******" />
-          </div>
-          <div class="campo">
-            <span>Confirmação da Senha:</span>
-            <input id="confirmacao_senha_input" type="password" placeholder="******" />
-          </div>
-          <button class="botao" onclick="cadastrar()">Cadastrar</button>
-        </div>
-        <div id="div_aguardar" class="loading-div">
-          <img src="./assets/circle-loading.gif" id="loading-gif" />
-        </div>
 
-        <div id="div_erros_login"></div>
+      <div class="container-cadastro">
+        <div class="card">
+          <div class="inicio-cadastro">
+            <img src="assets/imgs/Group 36.png" alt="">
+            <h2>Crie sua conta na NAUTILUS</h2>
+            <h3>Cadastre-se para acessar sua plataforma de monitoramento de alta performance.</h3>
+          </div>
+
+          <div class="formulario">
+
+            <div class="campo">
+              <input id="nome_input" type="text" placeholder="Nome" />
+            </div>
+            <div class="campo">
+              <input id="email_input" type="text" placeholder="Email" />
+            </div>
+            <div class="campo">
+              <input id="senha_input" type="password" placeholder="Senha" />
+            </div>
+            <div class="campo">
+              <input id="confirmacao_senha_input" type="password" placeholder="Confirme sua senha" />
+            </div>
+            <button class="botao" onclick="cadastrar()">Cadastrar</button>
+          </div>
+
+        </div>
+        <div class="imagem-login">
+          <img src="assets/imgs/imgcaracol.png" class="img-caracol" alt="">
+          <div class="textos-login">
+            <h1>Performance começa com<br>inteligência.</h1>
+
+            <div class="linha-login"></div>
+
+            <p>
+              Cadastra-se na Nautilus e tenha<br>
+              acesso a uma plataforma segura,<br>
+              inteligente e de alta<br>
+              performance.
+            </p>
+          </div>
+          <img src="assets/imgs/Group 30.png" class="img-circulo2" alt="">
+        </div>
       </div>
     </div>
-  </div>
-
-  <!--footer inicio-->
-  <div class="footer">
-    <div class="container">
-      <h4>Feito com amor por aluno &hearts; SPTech &copy; 2023-2026</h4>
-    </div>
-  </div>
-  <!--footer fim-->
 </body>
 
 </html>
@@ -109,7 +170,7 @@
     var emailVar = email_input.value;
     var senhaVar = senha_input.value;
     var confirmacaoSenhaVar = confirmacao_senha_input.value;
-    var codigoVar = codigo_input.value;
+
     var idEmpresaVincular = 1;
 
     // Verificando se há algum campo em branco
@@ -117,8 +178,7 @@
       nomeVar == "" ||
       emailVar == "" ||
       senhaVar == "" ||
-      confirmacaoSenhaVar == "" ||
-      codigoVar == ""
+      confirmacaoSenhaVar == ""
     ) {
       cardErro.style.display = "block";
       mensagem_erro.innerHTML =
@@ -131,17 +191,7 @@
     }
 
     // Verificando se o código de ativação é de alguma empresa cadastrada
-    for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
-      if (listaEmpresasCadastradas[i].codigo_ativacao == codigoVar) {
-        idEmpresaVincular = listaEmpresasCadastradas[i].id
-        console.log("Código de ativação válido.");
-        break;
-      } else {
-        cardErro.style.display = "block";
-        mensagem_erro.innerHTML = "(Mensagem de erro para código inválido)";
-        finalizarAguardar();
-      }
-    }
+
 
     // Enviando o valor da nova input
     fetch("/usuarios/cadastrar", {
@@ -155,7 +205,10 @@
         nomeServer: nomeVar,
         emailServer: emailVar,
         senhaServer: senhaVar,
-        idEmpresaVincularServer: idEmpresaVincular
+        idEmpresaVincularServer: 1,
+        idNivelAcessoServer: 1
+
+
       }),
     })
       .then(function (resposta) {
@@ -183,26 +236,6 @@
       });
 
     return false;
-  }
-
-  // Listando empresas cadastradas 
-  function listar() {
-    fetch("/empresas/listar", {
-      method: "GET",
-    })
-      .then(function (resposta) {
-        resposta.json().then((empresas) => {
-          empresas.forEach((empresa) => {
-            listaEmpresasCadastradas.push(empresa);
-
-            console.log("listaEmpresasCadastradas")
-            console.log(listaEmpresasCadastradas[0].codigo_ativacao)
-          });
-        });
-      })
-      .catch(function (resposta) {
-        console.log(`#ERRO: ${resposta}`);
-      });
   }
 
   function sumirMensagem() {

@@ -1,0 +1,412 @@
+body.body-formulario {
+    margin: 0;
+    min-height: 100vh;
+
+    background: linear-gradient(to bottom,
+            var(--cor-secundaria),
+            var(--cor-primaria));
+
+    padding-top: 72px;
+
+    box-sizing: border-box;
+}
+
+.navbar {
+    background-color: var(--cor-branco);
+}
+
+.cadastro {
+    min-height: calc(100vh - 72px);
+}
+
+.cadastro .container-cadastro {
+    width: 100%;
+    min-height: calc(100vh - 72px);
+
+    display: flex;
+
+    margin: 0;
+}
+
+.card {
+    width: 37%;
+    min-height: calc(100vh - 72px);
+
+    background-color: var(--cor-branco);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding-block: clamp(32px, 4vh, 64px);
+
+    box-sizing: border-box;
+}
+
+.inicio-cadastro {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: clamp(12px, 2vh, 22px);
+}
+
+.inicio-cadastro img {
+    width: clamp(90px, 8vw, 150px);
+    height: auto;
+}
+
+.inicio-cadastro h2 {
+    margin: 0;
+
+    color: var(--cor-secundaria);
+
+    font-size: clamp(1.5rem, 1.6vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+
+    text-align: center;
+}
+
+.inicio-cadastro h3 {
+    width: min(70%, 460px);
+
+    margin: 0;
+
+    color: var(--cor-secundaria);
+
+    font-size: clamp(1rem, 1vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+.formulario {
+    width: min(68%, 500px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: clamp(18px, 3vh, 30px);
+
+    margin-top: clamp(30px, 5vh, 58px);
+}
+
+.campo {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+}
+
+.formulario input {
+    width: 100%;
+    height: clamp(48px, 6.5vh, 58px);
+
+    box-sizing: border-box;
+
+    padding-inline: clamp(14px, 1vw, 20px);
+
+    border: 1px solid var(--cor-secundaria);
+
+    background-color: var(--cor-branco);
+    color: var(--cor-preto);
+
+    font-size: clamp(0.95rem, 0.85vw, 1.1rem);
+    font-family: inherit;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.formulario input::placeholder {
+    color: var(--cor-secundaria);
+    opacity: 0.65;
+}
+
+.formulario input:focus {
+    border-color: var(--cor-primaria);
+
+    box-shadow: 0 0 0 3px rgba(67, 174, 202, 0.15);
+}
+
+.botao {
+    width: 100%;
+    height: clamp(48px, 6.5vh, 58px);
+
+    border: 1px solid var(--cor-secundaria);
+
+    background-color: var(--cor-secundaria);
+    color: var(--cor-branco);
+
+    font-size: clamp(0.95rem, 0.9vw, 1.1rem);
+    font-weight: 600;
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.botao:hover {
+    background-color: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.botao:active {
+    transform: translateY(0);
+}
+
+.imagem-login {
+    width: 63%;
+    min-height: calc(100vh - 72px);
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+.img-grade {
+    position: absolute;
+
+    width: clamp(400px, 37.3vw, 720px);
+    height: auto;
+
+    top: 2vh;
+    left: 0;
+}
+
+.img-circulo {
+    position: absolute;
+
+    width: clamp(420px, 33.2vw, 650px);
+    height: auto;
+
+    right: -7vw;
+    bottom: -8vh;
+}
+
+.textos-login {
+    position: absolute;
+
+    top: 50%;
+    left: 57%;
+
+    transform: translateY(-50%);
+
+    color: var(--cor-branco);
+}
+
+.textos-login h1 {
+    width: clamp(280px, 21vw, 420px);
+
+    margin: 0;
+
+    font-size: clamp(1.9rem, 2.2vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.linha-login {
+    width: clamp(45px, 3vw, 70px);
+    height: clamp(4px, 0.7vh, 7px);
+
+    margin-top: clamp(18px, 2.5vh, 28px);
+    margin-bottom: clamp(18px, 2.5vh, 28px);
+
+    background-color: var(--cor-primaria);
+}
+
+.textos-login p {
+    width: clamp(250px, 19vw, 370px);
+
+    margin: 0;
+
+    font-size: clamp(1rem, 1vw, 1.2rem);
+    font-weight: 300;
+    line-height: 1.55;
+}
+
+.img-caracol {
+    position: absolute;
+
+    width: clamp(340px, 28.92vw, 560px);
+    height: auto;
+
+    top: 2vh;
+    left: 0;
+}
+
+.img-circulo2 {
+    position: absolute;
+
+    width: clamp(420px, 33.2vw, 650px);
+    height: auto;
+
+    right: -7vw;
+    bottom: -8vh;
+}
+
+@media (max-width: 1200px) {
+    .card {
+        width: 42%;
+    }
+
+    .imagem-login {
+        width: 58%;
+    }
+
+    .formulario {
+        width: 74%;
+    }
+
+    .inicio-cadastro h3 {
+        width: 76%;
+    }
+
+    .textos-login {
+        left: 51%;
+    }
+
+    .textos-login h1 {
+        width: 26vw;
+    }
+
+    .textos-login p {
+        width: 24vw;
+    }
+
+    .img-grade {
+        width: 44vw;
+    }
+
+    .img-caracol {
+        width: 34vw;
+    }
+}
+
+@media (max-width: 900px) {
+    body.body-formulario {
+        padding-top: 72px;
+    }
+
+    .cadastro,
+    .cadastro .container-cadastro {
+        min-height: calc(100vh - 72px);
+    }
+
+    .cadastro .container-cadastro {
+        flex-direction: column;
+    }
+
+    .card {
+        width: 100%;
+        min-height: calc(100vh - 72px);
+
+        padding: clamp(40px, 7vh, 70px) 24px;
+    }
+
+    .imagem-login {
+        display: none;
+    }
+
+    .inicio-cadastro img {
+        width: clamp(80px, 16vw, 110px);
+    }
+
+    .inicio-cadastro h2 {
+        font-size: clamp(1.45rem, 4vw, 1.8rem);
+    }
+
+    .inicio-cadastro h3 {
+        width: min(90%, 520px);
+
+        font-size: clamp(1rem, 2.8vw, 1.15rem);
+    }
+
+    .formulario {
+        width: min(90%, 520px);
+
+        margin-top: clamp(28px, 5vh, 44px);
+
+        gap: 20px;
+    }
+
+    .formulario input,
+    .botao {
+        height: 52px;
+    }
+
+    .formulario input {
+        font-size: 1rem;
+    }
+
+    .botao {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .card {
+        justify-content: flex-start;
+
+        padding: 44px 18px 32px;
+    }
+
+    .inicio-cadastro {
+        gap: 14px;
+    }
+
+    .inicio-cadastro img {
+        width: 78px;
+    }
+
+    .inicio-cadastro h2 {
+        font-size: clamp(1.35rem, 6vw, 1.6rem);
+    }
+
+    .inicio-cadastro h3 {
+        width: 100%;
+
+        font-size: clamp(0.95rem, 4vw, 1.05rem);
+    }
+
+    .formulario {
+        width: 100%;
+
+        margin-top: 30px;
+
+        gap: 16px;
+    }
+
+    .formulario input,
+    .botao {
+        height: 50px;
+    }
+
+    .formulario input {
+        padding-inline: 14px;
+
+        font-size: 1rem;
+    }
+
+    .botao {
+        font-size: 1rem;
+    }
+}

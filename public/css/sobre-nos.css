@@ -1,0 +1,332 @@
+.main-content-area{
+	margin-top: 8%;
+	display: flex;
+	justify-content: space-between;
+}
+
+.main-text{
+	padding-top: 1%;
+	display: flex;
+	flex-direction: column;
+	width: 40%;
+}
+
+.main-img-area{
+	width: 50%;
+}
+
+.main-img-area img,.img-area-historia img{
+	width: 100%;
+	height: 100%;
+}
+
+.subtitulo{
+	font-size: 1.7rem;
+	color: var(--cor-primaria);
+	font-weight: 600;
+}
+
+.titulo{
+	margin-top: 2%;
+	font-size: clamp(2rem, 5vw + 1rem, 3.8rem);
+	color: var(--cor-secundaria);
+}
+
+.text-size{
+	font-size: 1.5rem;
+}
+
+.main-desc{
+	margin-top: 25%;
+	/* border: solid 2px blue; */
+}
+
+.carrossel{
+	margin-top: 5%;
+	display: flex;
+	/* border: dashed 1px blue; */
+	height: 25vh;
+	justify-content: space-between;
+}
+
+.card{
+	display: flex;
+	flex-direction: column;
+	/* justify-content: center; */
+	align-items: center;
+	gap: 5%;
+	padding: 1%;
+	width: 15%;
+}
+
+.img-card{
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	align-items: center;
+}
+
+.titulo-card{
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+
+.text-card{
+	text-align: center;
+	font-size: 1.1rem;
+	padding:5%;
+}
+
+.nossa-historia{
+	margin-top: 4%;
+	display: flex;
+}
+
+.text-area-historia{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 40%;
+}
+
+.p-historia{
+	margin-top: 5%;
+}
+
+.img-area-historia{
+	width: 60%;
+}
+
+.nossa-equipe {
+    margin-top: 4%;
+    display: flex;
+    flex-direction: column;
+    align-items: left
+}
+
+.text-area-equipe {
+    text-align: left;
+}
+
+.grid-equipe {
+	margin-top: 4%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px 20px;
+    width: 100%;
+}
+
+.card-membro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.foto-membro {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid var(--cor-primaria);
+}
+
+.nome-membro {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: var(--cor-secundaria);
+    margin-bottom: 5px;
+}
+
+.cargo-membro {
+    font-size: 1rem;
+    color: gray;
+    margin-bottom: 15px;
+}
+
+.redes-sociais {
+    display: flex;
+	flex-direction: column;
+    gap: 15px;
+}
+
+.redes-sociais button {
+    width: 150px;
+    height: 50px;
+    transition: transform 0.3s ease;
+}
+
+.redes-sociais button:hover {
+    transform: translateY(-2px);
+}
+
+.compromisso-banner {
+    margin-top: 10%;
+    background-color: var(--cor-secundaria);
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.compromisso-conteudo {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.compromisso-text {
+    width: 50%; 
+	padding: 8% 0;
+}
+
+.img-area-compromisso img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left;
+}
+
+.img-area-compromisso {
+    position: absolute; 
+    right: 0;
+    top: 0;
+    height: 100%; 
+    width: 70%;
+    z-index: -1;
+}
+
+.subtitulo-banner {
+    color: var(--cor-primaria);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 2%;
+}
+
+.titulo-banner {
+    font-size: clamp(1.8rem, 4vw + 1rem, 3rem);
+    margin-bottom: 4%;
+    color: white;
+}
+
+.destaque-banner {
+    color: var(--cor-primaria);
+}
+
+.desc-banner {
+    font-size: 1.2rem;
+    margin-bottom: 6%;
+    line-height: 1.5;
+	color: white;
+}
+
+.btn-banner {
+    background-color: transparent;
+    border: 1px solid white;
+	border-radius: 5px;
+    color: white;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.btn-banner:hover {
+    background-color: white;
+    color: var(--cor-secundaria); 
+}
+
+.linkedin:hover {
+    background-color: var(--cor-primaria);
+    color: white; 
+}
+
+.github:hover {
+    background-color: var(--cor-secundaria);
+    color: white; 
+}
+
+.linkedin {
+	background-color: transparent;
+	border: 1px solid var(--cor-primaria);
+	color: var(--cor-secundaria);
+}
+
+.github {
+	background-color: transparent;
+	border: 1px solid var(--cor-secundaria);
+	color: var(--cor-secundaria);
+}
+
+@media (max-width: 1024px) {
+    .grid-equipe {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .carrossel {
+        flex-wrap: wrap;
+        height: auto;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .card {
+        width: 30%;
+    }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+	.main-img-area img,
+    .img-area-historia img {
+        max-height: 220px;
+    }
+
+    .main-content-area, .nossa-historia, .compromisso-conteudo{
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .main-text, .main-img-area, .text-area-historia, .img-area-historia, .compromisso-text {
+        width: 100%;
+        padding: 8% 5%;
+    }
+
+    .grid-equipe {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        width: 80%;
+    }
+
+    .img-area-compromisso {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        z-index: 1; 
+        order: -1;  
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        width: 100%;
+    }
+
+    .titulo-banner {
+        margin-bottom: 6%;
+    }
+
+    .desc-banner {
+        font-size: 1rem;
+    }
+
+    .btn-banner {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+}
