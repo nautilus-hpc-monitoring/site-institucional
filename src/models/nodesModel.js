@@ -2,7 +2,7 @@ var database = require("../database/config");
 
 function chamarHPC(fk_empresa){
      var instrucaoSql = `  SELECT 
-            id_ambiente_hpc,
+            id,
             nome,
             fk_empresa
         FROM ambiente_hpc
@@ -14,7 +14,7 @@ function chamarHPC(fk_empresa){
 
 function chamarCluster(fk_ambiente_hpc){
      var instrucaoSql = ` SELECT
-            id_cluster,
+            id,
             nome,
             fk_ambiente_hpc
         FROM cluster

@@ -1,51 +1,52 @@
 var nodesModel = require("../models/nodesModel");
 
-function chamarHPC(req, res){
+function chamarHPC(req, res) {
     var fk_empresa = req.body.fk_empresaServer;
 
-    if(fk_empresa == undefined){
+    if (fk_empresa == undefined) {
         res.status(400).send("empresa está undefined!");
 
-    }else{
+    } else {
         nodesModel.chamarHPC(
             fk_empresa
         )
-    
-    .then(function(resultado) {
 
-            res.json(resultado);
+            .then(function (resultado) {
 
-        })
+                res.json(resultado);
 
-        .catch(function(erro) {
-        res.status(500).json(erro.sqlMessage);
-        });
+            })
+
+            .catch(function (erro) {
+                res.status(500).json(erro.sqlMessage);
+            });
 
 
-}}
+    }
+}
 
-function chamarCluster(req, res){
-var fk_ambiente_hpc = req.body.fk_ambiente_hpcServer;
+function chamarCluster(req, res) {
+    var fk_ambiente_hpc = req.body.fk_ambiente_hpcServer;
 
-    if ( fk_ambiente_hpc== undefined) {
+    if (fk_ambiente_hpc == undefined) {
 
         res.status(400).send("Ambiente hpc está undefined!");
 
-    } else{
+    } else {
         nodesModel.chamarCluster(
-        fk_ambiente_hpc
+            fk_ambiente_hpc
 
         )
-    
-    .then(function(resultado) {
 
-            res.json(resultado);
+            .then(function (resultado) {
 
-        })
+                res.json(resultado);
 
-        .catch(function(erro) {
-        res.status(500).json(erro.sqlMessage);
-        });
+            })
+
+            .catch(function (erro) {
+                res.status(500).json(erro.sqlMessage);
+            });
 
     }
 
@@ -59,7 +60,7 @@ function cadastrar(req, res) {
     var sistemaOperacional = req.body.sistemaOperacionalServer;
     var clusterFk = req.body.clusterFkServer;
 
-     if (hostname == undefined) {
+    if (hostname == undefined) {
 
         res.status(400).send("Hostname está undefined!");
 
@@ -81,6 +82,14 @@ function cadastrar(req, res) {
 
     } else {
 
+        console.log({
+            hostname,
+            ip,
+            status,
+            sistemaOperacional,
+            clusterFk
+        });
+
         nodesModel.cadastrar(
             hostname,
             ip,
@@ -88,19 +97,19 @@ function cadastrar(req, res) {
             sistemaOperacional,
             clusterFk
         )
-        .then(function(resultado) {
+            .then(function (resultado) {
 
-            res.json(resultado);
+                res.json(resultado);
 
-        })
+            })
 
-        .catch(function(erro) {
-        res.status(500).json(erro.sqlMessage);
-        });
+            .catch(function (erro) {
+                res.status(500).json(erro.sqlMessage);
+            });
     }
-        
+
 }
-    
+
 module.exports = {
     cadastrar,
     chamarHPC,
