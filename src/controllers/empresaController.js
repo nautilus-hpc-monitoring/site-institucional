@@ -1,4 +1,5 @@
 const e = require("express");
+const crypto = require("crypto");
 var empresaModel = require("../models/empresaModel");
 
 
@@ -12,6 +13,7 @@ function cadastrar(req, res) {
     var cidade = req.body.cidadeServer;
     var estado = req.body.estadoServer;
 
+    const tokenInstalacao = crypto.randomBytes(32).toString("hex");
 
     // Faça as validações dos valores
     if (razaoSocial == undefined) {
@@ -31,7 +33,7 @@ function cadastrar(req, res) {
     } else {
 
         // Passe os valores como parâmetro e vá para o arquivo empresaModel.js
-        empresaModel.cadastrar(razaoSocial, cnpj, dataRegistro, numero, cidade, estado, logradouro)
+        empresaModel.cadastrar(razaoSocial, cnpj, dataRegistro, tokenInstalacao, numero, cidade, estado, logradouro)
             .then(
                 function (resultado) {
                     res.json(resultado);
