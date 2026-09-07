@@ -23,12 +23,12 @@ function chamarCluster(fk_ambiente_hpc){
 }
 
 
-function cadastrar(hostname, ip, status, sistemaOperacional, clusterFk){
+function cadastrar(hostname, ip, status, sistemaOperacional, clusterFk, tokenNode) {
      var instrucaoSql = `
         INSERT INTO node
-        (hostname, ip, status, sistema_operacional, fk_cluster)
+        (hostname, ip, status, sistema_operacional, fk_cluster, token_node)
         VALUES
-        ('${hostname}', '${ip}', '${status}', '${sistemaOperacional}', ${clusterFk});
+        ('${hostname}', '${ip}', '${status}', '${sistemaOperacional}', ${clusterFk}, '${tokenNode}');
     `;
 
     return database.executar(instrucaoSql);
