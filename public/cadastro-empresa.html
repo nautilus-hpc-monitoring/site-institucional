@@ -295,7 +295,7 @@
         dataRegistroTratadaVar = tratamento_validacao_data(dataRegistroVar)
         cnpjTratadoVar = tratamento_validacao_cnpj(cnpjVar)
 
-        fetch("/empresa/cadastrar", {
+        fetch("/empresas/cadastrar", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
