@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./css/global.css">
     <link rel="stylesheet" href="./css/pagina-solucao.css">
     <link rel="stylesheet" href="./css/navbar.css">
+    <link rel="stylesheet" href="./css/footer.css">
 
     <script src="./js/navbar.js" defer></script>
 </head>
@@ -136,7 +137,12 @@
                         visão clara da sua infraestrutura de alta performance
                     </p>
 
-                    <button class="conheca-nos" ><a class="escrita-sobre-nos-botao" href="./sobre-nos.html">Conheça-nos ⟶</a></button>
+                    <button class="conheca-nos" ><a class="escrita-sobre-nos-botao" href="./sobre-nos.html">
+                                    <span>Conheça nossa solução</span>
+                        <span class="setas" aria-hidden="true">
+                        <img src="./assets/icon/seta_direita_branca.svg" alt="">
+                        </span>
+                    </a></button>
 
                     <p class="sobre-projeto">
                         SOBRE O PROJETO<br>
@@ -233,7 +239,7 @@
 
 
                 <div class="card-nodes">
-                    <img src="assets/HPC3.png" alt="Nodes" style="display: flex; height: 200px;">
+                   <div class="imagem-nodes"><img src="assets/HPC3.png" alt="Nodes" style="display: flex; height: 200px;"></div>
                     <div class="texto-nodes card-nodes-container">
                         <strong>NODES</strong>
                         <p>Coleta de dados em tempo real de cada node do ambiente.</p>
@@ -242,9 +248,9 @@
 
 
                 <div class="card-plataforma">
-                    <div style="display: flex; flex-direction: column; width: 50%; padding-right: 3px;">
+                    <div style="display: flex; flex-direction: column; width: 50%; padding-right: 3px; font-size: 80%;">
                         <strong>PLATAFORMA</strong>
-                        <p style="font-size: 10px;">Centraliza e organiza os dados coletados de todo ambiente HPC.</p>
+                        <p>Centraliza e organiza os dados coletados de todo ambiente HPC.</p>
                     </div>
                     <div class="beneficios-plataforma">
                         <p>Coleta contínua</p>
@@ -367,11 +373,40 @@
         </div>
     </section>
 
-    <section class="secao-footer">
-
-        dsadasasd
-
-    </section>
+    <footer style="--container-padding: clamp(80px, 8.33vw, 160px); width: 100%; padding-inline: var(--container-padding); margin-inline: auto;">
+    <div class="left-side-footer">
+      <img src="./assets/icon/logotipo.png" alt="Nautilus">
+    </div>
+    <div class="right-side-footer">
+      <div class="links-pgs">
+        <p>Redirecionamento para o site</p>
+        <a href="./index.html"><p>home</p></a>
+        <a href="#"><p>solução</p></a>
+        <a href="./login.html"><p>login</p></a>
+        <a href="./cadastro.html"><p>cadastre-se</p></a>
+        <a href="./sobre-nos.html"><p>sobre-nos</p></a>
+      </div>
+      <div class="links-extras">
+        <div class="extras-top">
+          <p>Extra</p>
+          <a href="mailto:nautilus@email.com"><p>nautilus@email.com</p></a>
+          <a href="https://www.github.com/nautilus-hpc-monitoring"><p>https://www.github.com/nautilus-hpc-monitoring</p></a>
+          <a href="mailto:nautilus@email.com?subject=Solicitação%20da%20documentação"><p>solicitar documentação</p></a>
+        </div>
+        <div class="extras-bottom">
+          <p>Parceiros</p>
+          <div class="imgs-footer">
+            <img src="./assets/icon/logo-petrobras.png" alt="Petrobras">
+            <img src="./assets/icon/logo-sptech.png" alt="SPTech">
+          </div>
+        </div>
+      </div>
+      <div class="bottom-footer">
+        <p>Termos de uso</p>
+        <p>Acessibilidade</p>
+      </div>
+    </div>
+  </footer>
 
 </body>
 
