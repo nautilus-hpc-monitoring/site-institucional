@@ -99,7 +99,7 @@ function cadastrar(req, res) {
                     resultado: resultado,
                     tokenNode: tokenNode
                 });
-                
+
             })
 
             .catch(function (erro) {
@@ -110,32 +110,88 @@ function cadastrar(req, res) {
 }
 
 function ativarAgente(req, res) {
-    console.log("Entrou")
-    console.log("BODY:", req.body)
-
     const tokenInstalacao = req.body.tokenInstalacaoServer;
     const hostname = req.body.hostnameServer;
+    const enderecoMac = req.body.enderecoMacServer;
 
     if (tokenInstalacao == undefined) {
-        return res.status(400).send("Token de instalação está undefined");
+        return res.status(400).send(
+            "Token de instalação está undefined"
+        );
     }
 
     if (hostname == undefined) {
-        return res.status(400).send("Hostname está undefined");
+        return res.status(400).send(
+            "Hostname está undefined"
+        );
+    }
+
+    if (enderecoMac == undefined) {
+        return res.status(400).send(
+            "Endereço MAC está undefined"
+        );
     }
 
     nodesModel.ativarAgente(tokenInstalacao, hostname)
-        .then(function(resultado) {
+        .then(function (resultado) {
+
             if (resultado.length == 0) {
-                return res.status(404).send("Node não encontrado para essa empresa");
+                return res.status(404).send(
+                    "Node não encontrado para essa empresa"
+                );
             }
 
-            return res.json({
-                tokenNode: resultado[0].token_node
-            });
-        }).catch(function (erro) {
-            return res.status(500).json(erro.sqlMessage);
-        }) 
+            if (resultado.length > 1) {
+                return res.status(409).send(
+                    "Existe mais de um node com esse hostname"
+                );
+            }
+
+            const node = resultado[0];
+
+            if (node.endereco_mac == null) {
+
+                nodesModel.salvarMac(
+                    node.id,
+                    enderecoMac
+                )
+                    .then(function () {
+
+                        return res.json({
+                            mensagem: "Agente ativado com sucesso",
+                            tokenNode: node.token_node
+                        });
+
+                    })
+                    .catch(function (erro) {
+                        return res.status(500).json(
+                            erro.sqlMessage
+                        );
+                    });
+
+            } else if (
+                node.endereco_mac.toUpperCase() ===
+                enderecoMac.toUpperCase()
+            ) {
+
+                return res.json({
+                    mensagem: "Agente já estava ativado nesta máquina",
+                    tokenNode: node.token_node
+                });
+
+            } else {
+
+                return res.status(409).send(
+                    "Este node já está vinculado a outra máquina"
+                );
+            }
+
+        })
+        .catch(function (erro) {
+            return res.status(500).json(
+                erro.sqlMessage
+            );
+        });
 }
 
 module.exports = {
