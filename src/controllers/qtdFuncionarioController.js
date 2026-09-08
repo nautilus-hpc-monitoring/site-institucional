@@ -8,8 +8,6 @@ function buscarQuantidades(req, res) {
     } else {
         qtdFuncionarioModel.buscarQuantidades(fkEmpresa)
         .then(function(resultado) {
-            // Se o seu database.executar devolver [rows, fields] em vez de rows direto,
-            // troque a linha abaixo para: res.json(resultado[0][0]);
             res.json(resultado[0]);
         })
         .catch(function(erro) {
