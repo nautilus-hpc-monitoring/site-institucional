@@ -36,3 +36,11 @@ textarea {
 a {
     text-decoration: none;
 }
+
+.container {
+    --container-padding: clamp(80px, 8.33vw, 160px);
+
+    width: 100%;
+    padding-inline: var(--container-padding);
+    margin-inline: auto;
+}

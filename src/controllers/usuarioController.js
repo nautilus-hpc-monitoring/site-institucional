@@ -1,5 +1,4 @@
 var usuarioModel = require("../models/usuarioModel");
-var aquarioModel = require("../models/aquarioModel");
 
 function autenticar(req, res) {
     var email = req.body.emailServer;
@@ -20,13 +19,13 @@ function autenticar(req, res) {
                     if (resultadoAutenticar.length == 1) {
                         console.log(resultadoAutenticar);
 
-                                    res.json({
-                                        id_usuario: resultadoAutenticar[0].id,
-                                        email: resultadoAutenticar[0].email,
-                                        nome: resultadoAutenticar[0].nome,
-                                        senha: resultadoAutenticar[0].senha,
-                                        fkEmpresa: resultadoAutenticar[0].fkEmpresa
-                                    });
+                        res.json({
+                            id_usuario: resultadoAutenticar[0].id,
+                            email: resultadoAutenticar[0].email,
+                            nome: resultadoAutenticar[0].nome,
+                            fk_empresa: resultadoAutenticar[0].fk_empresa,
+                            fk_nivel_acesso: resultadoAutenticar[0].fk_nivel_acesso
+                        });
 
                     } else if (resultadoAutenticar.length == 0) {
                         res.status(403).send("Email e/ou senha inválido(s)");
@@ -65,7 +64,7 @@ function cadastrar(req, res) {
     } else {
 
         // Passe os valores como parâmetro e vá para o arquivo usuarioModel.js
-        usuarioModel.cadastrar(nome, email, senha, fkEmpresa,fkNivelAcesso)
+        usuarioModel.cadastrar(nome, email, senha, fkEmpresa, fkNivelAcesso)
             .then(
                 function (resultado) {
                     res.json(resultado);

@@ -1,0 +1,10 @@
+.endereco-grid {
+    grid-template-columns:
+        minmax(120px, 0.55fr) minmax(240px, 1.65fr) minmax(180px, 0.9fr);
+}
+
+@media (max-width: 850px) {
+    .endereco-grid {
+        grid-template-columns: 1fr;
+    }
+}

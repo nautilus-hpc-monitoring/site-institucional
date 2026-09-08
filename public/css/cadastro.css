@@ -19,7 +19,7 @@ body.body-formulario {
     min-height: calc(100vh - 72px);
 }
 
-.cadastro .container {
+.cadastro .container-cadastro {
     width: 100%;
     min-height: calc(100vh - 72px);
 
@@ -307,11 +307,11 @@ body.body-formulario {
     }
 
     .cadastro,
-    .cadastro .container {
+    .cadastro .container-cadastro {
         min-height: calc(100vh - 72px);
     }
 
-    .cadastro .container {
+    .cadastro .container-cadastro {
         flex-direction: column;
     }
 

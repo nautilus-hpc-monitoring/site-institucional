@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
+        integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="./css/node.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/formulario-cadastro.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
+
+    <script src="./js/sessao.js"></script>
+    <title>Nautilus - Cadastro Node</title>
 </head>
-<body>
-    
+
+<body onload="validarSessao()">
+
     <div class="mobile-header">
         <button id="open-sidebar-btn" aria-label="Abrir menu">
             <i class="fa-solid fa-bars"></i>
@@ -40,7 +49,10 @@
                 <a href="#"><i class="fa-solid fa-chart-line"></i> <span>Clusters</span></a>
             </li>
             <li class="nav-item active">
-                <a href="#"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a>
+                <a href="./cadastro-node.html"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="./cadastro-empresa.html"><i class="fa-solid fa-building"></i> <span>Empresas</span></a>
             </li>
         </ul>
 
@@ -49,225 +61,360 @@
                 <i class="fa-solid fa-sliders"></i>
                 <span>Configurações</span>
             </a>
+            <a href="#" class="nav-item" onclick="encerrarSessao()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Sair</span>
+            </a>
         </div>
     </aside>
 
-        <nav id="sidebar">
-            <div id="sidebar_content">
-                <div id="logo">
-                    <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
-                    <p id="logo_infos">
-                        <span class="item-description">NAUTILUS</span>
-                    </p>
-                </div>
-
-                <ul id="side_items">
-                    <li class="side-item">
-                        <a href="#">
-                            <i class="fa-solid fa-border-all"></i>
-                            <span class="item-description">Visão Geral</span>
-                        </a>
-                    </li>
-
-                    <li class="side-item">
-                        <a href="#">
-                            <i class="fa-solid fa-database"></i>
-                            <span class="item-description">Ambientes</span>
-                        </a>
-                    </li>
-
-                    <li class="side-item">
-                        <a href="#">
-                            <i class="fa-solid fa-chart-line"></i>
-                            <span class="item-description">Clusters</span>
-                        </a>
-                    </li>
-
-                    <li class="side-item active">
-                        <a href="#">
-                            <i class="fa-solid fa-memory"></i>
-                            <span class="item-description">Nodes</span>
-                        </a>
-                    </li>
-                </ul>
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <div id="logo">
+                <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
+                <p id="logo_infos">
+                    <span class="item-description">NAUTILUS</span>
+                </p>
             </div>
 
-            
-            <ul id="side_bottom">
+            <ul id="side_items">
                 <li class="side-item">
                     <a href="#">
-                        <i class="fa-solid fa-sliders"></i>
-                        <span class="item-description">Configurações</span>
+                        <i class="fa-solid fa-border-all"></i>
+                        <span class="item-description">Visão Geral</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-database"></i>
+                        <span class="item-description">Ambientes</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Clusters</span>
+                    </a>
+                </li>
+
+                <li class="side-item active">
+                    <a href="#">
+                        <i class="fa-solid fa-memory"></i>
+                        <span class="item-description">Nodes</span>
                     </a>
                 </li>
             </ul>
-        </nav>
-        <div id="main-container">
-            <header class="top-header">
-                <div class="user-profile">
-                    <div class="user-avatar">
-                        <i class="fa-regular fa-user"></i>
-                    </div>
-                    <span class="user-name">dsads</span>
+        </div>
+
+
+        <ul id="side_bottom">
+            <li class="side-item">
+                <a href="#">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="item-description">Configurações</span>
+                </a>
+            </li>
+            <li class="side-item">
+                <a href="#" onclick="encerrarSessao()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description">Sair</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div id="main-container">
+        <header class="top-header">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fa-regular fa-user"></i>
                 </div>
-            </header>
-            <main class="page-content">
-                <a href="#" class="back-link">&larr; Voltar para nodes</a>
-                <h1 class="page-title">
-                    Cadastrar novo node
-                </h1>
-                <p class="page-subtitle">
-                    Adicione um novo recurso de processamento à infraestrutura monitorada.
-                </p>
+                <span class="user-name" id="b_usuario"></span>
+            </div>
+        </header>
+        <main class="page-content">
+            <a href="#" class="back-link">&larr; Voltar para nodes</a>
+            <h1 class="page-title">
+                Cadastrar novo node
+            </h1>
+            <p class="page-subtitle">
+                Adicione um novo recurso de processamento à infraestrutura monitorada.
+            </p>
 
-                <form class="form-card">
-                    <div class="form-section">
-                        <div class="step-badge">
-                            01
-                        </div>
-                        <div class="section-body">
-                            <h2 class="section-title">
-                                Identificação
-                            </h2>
-                            <p class="section-subtitle">
-                                Informações utilizadas para identificar o node.
-                            </p>
+            <form class="form-card">
+                <div class="form-section">
+                    <div class="step-badge">
+                        01
+                    </div>
+                    <div class="section-body">
+                        <h2 class="section-title">
+                            Identificação
+                        </h2>
+                        <p class="section-subtitle">
+                            Informações utilizadas para identificar o node.
+                        </p>
 
-                            <div class="form-grid">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>
+                                    Hostname
+                                </label>
+                                <input id=input_hostname type="text" placeholder="Ex.: node-compute-01">
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    Endereço IP
+                                    <span class="required">
+                                        *
+                                    </span>
+                                </label>
+                                <input id="input_ip" type="text" placeholder="Ex.: 192.168.1.10">
+                            </div>
+
+                            <div id="questionario_hpc">
                                 <div class="form-group">
                                     <label>
-                                        Hostname
-                                    </label>
-                                    <input type="text" placeholder="Ex.: node-compute-01">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>
-                                        Endereço IP 
-                                        <span class="required">
-                                            *
-                                        </span>
-                                    </label>
-                                    <input type="text" placeholder="Ex.: 192.168.1.10">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>
-                                        Sistema Operacional 
+                                        Sistema Operacional
                                         <span class="required">
                                             *
                                         </span>
                                     </label>
                                     <div class="select-wrapper">
-                                        <select>
+                                        <select id="sistema_operacional">
                                             <option value="" disabled selected>Ex.: Linux</option>
                                             <option value="linux">Linux</option>
                                             <option value="windows">Windows</option>
                                         </select>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <label>
-                                        Cluster
-                                        <span class="required">
-                                            *
-                                        </span>
-                                    </label>
-                                    <div class="select-wrapper">
-                                        <select>
-                                            <option value="" disabled selected>Ex.: Login node</option>
-                                            <option value="node">Login node</option>
-                                            <option value="compute">Compute</option>
-                                            <option value="storage">Storage node</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>
-                                        Status
-                                        <span class="required">
-                                            *
-                                        </span>
-                                    </label>
-                                    <div class="select-wrapper">
-                                        <select>
-                                            <option value="" disabled selected>Ex.: Ativo, Inativo, Manutenção</option>
-                                            <option value="manutencao">Manutenção</option>
-                                            <option value="ativo">Ativo</option>
-                                            <option value="Inativo">Inativo</option>
-                                        </select>
-                                    </div>
+                            <div class="form-group">
+
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Status
+                                    <span class="required">
+                                        *
+                                    </span>
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="diferentes_status">
+                                        <option value="" disabled selected>Ex.: Ativo, Inativo, Manutenção</option>
+                                        <option value="manutencao">Manutenção</option>
+                                        <option value="ativo">Ativo</option>
+                                        <option value="Inativo">Inativo</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-section">
-                        <div class="step-badge">
-                            02
-                        </div>
-                            <div class="section-body">
-                                <h2 class="section-title">Localização na infraestrutura</h2>
-                                <p class="section-subtitle">Selecione o cluster onde o node está inserido.</p>
+                <div class="form-section">
+                    <div class="step-badge">
+                        02
+                    </div>
+                    <div class="section-body">
+                        <h2 class="section-title">Localização na infraestrutura</h2>
 
-                            <div class="form-grid align-center">
-                                <div class="form-group">
-                                    <label>Cluster <span class="required">*</span></label>
-                                    <div class="select-wrapper">
-                                        <select>
-                                            <option value="" disabled selected>Selecione um cluster</option>
-                                        </select>
+                        <p class="section-subtitle">Selecione o HPC, e seu cluster onde o node será inserido.</p>
+
+                        <div class="form-grid align-center">
+                            <div class="form-group">
+                                <label>HPC <span class="required">*</span></label>
+                                <div class="select-wrapper">
+                                    <select id="diferentes_hpc" onchange="chamarCluster()">
+                                        <option value="" disabled selected>Selecione um HPC
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Cluster <span class="required">*</span></label>
+                                <div class="select-wrapper">
+                                    <select id="diferentes_cluster">
+                                        <option value="" disabled selected>Selecione um cluster
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
 
                             <div class="info-alert">
                                 <span class="alert-icon">ⓘ</span>
                                 <span>O ambiente será definido automaticamente com base no cluster selecionado.</span>
-                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-section">
-                        <div class="step-badge">03</div>
-                        <div class="section-body">
-                            <h2 class="section-title">Observações (opcional)</h2>
-                            <p class="section-subtitle">Informações adicionais sobre o node.</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary">Cancelar</button>
+                    <button type="button" onclick="cadastrar()" class="btn btn-primary">Cadastrar node</button>
+                </div>
+            </form>
+        </main>
+    </div>
 
-                            <div class="form-group full-width">
-                                <label>Observações (opcional)</label>
-                                <textarea placeholder="Ex: Local físico, rack, posição, observações relevantes..."></textarea>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Cadastrar node</button>
-                    </div>
-                </form>
-            </main>
-        </div>
-       
-       
-    
+
 </body>
 <script>
-    document.getElementById('open-sidebar-btn').onclick = function() {
-    mobileSidebar.classList.add('active');
-    document.getElementById('sidebar-overlay').classList.add('active');
-};
+    document.getElementById('open-sidebar-btn').onclick = function () {
+        mobileSidebar.classList.add('active');
+        document.getElementById('sidebar-overlay').classList.add('active');
+    };
 
-document.getElementById('close-sidebar-btn').onclick = function() {
-    mobileSidebar.classList.remove('active');
-    document.getElementById('sidebar-overlay').classList.remove('active');
-};
+    document.getElementById('close-sidebar-btn').onclick = function () {
+        mobileSidebar.classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    };
 
-document.getElementById('sidebar-overlay').onclick = function() {
-    mobileSidebar.classList.remove('active');
-    document.getElementById('sidebar-overlay').classList.remove('active');
-};
+    document.getElementById('sidebar-overlay').onclick = function () {
+        mobileSidebar.classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    };
+
+    function cadastrarNode() {
+
+
+        var hostname = input_hostname.value;
+        var ip = input_ip.value;
+        var sistemaOperacional = sistema_operacional.value;
+        var status = diferentes_status.value;
+        var clusterFk = diferentes_cluster.value;
+
+
+        const node = {
+            hostnameServer: hostname,
+            ipServer: ip,
+            sistemaOperacionalServer: sistemaOperacional,
+            statusServer: status,
+            clusterFkServer: clusterFk
+        };
+
+
+
+    }
+
+    function exibirHPC() {
+        let fkEmpresa = 1;
+
+        const empresa = {
+            fk_empresaServer: 1
+        }
+
+        fetch("/nodes/chamarHPC", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(empresa)
+        }).then(response => response.json())
+
+            .then(data => {
+
+                console.log(data);
+
+                diferentes_hpc.innerHTML = `
+            <option value="" disabled selected>
+                Selecione um HPC
+            </option>
+        `;
+
+                for (let i = 0; i < data.length; i++) {
+                    diferentes_hpc.innerHTML += `
+                <option value="${data[i].id}">
+                    ${data[i].nome}
+                </option>
+            `;
+                }
+
+            })
+            .catch(error => {
+                console.error("Erro ao buscar HPC:", error);
+            });
+
+    }
+
+    exibirHPC();
+
+    function chamarCluster() {
+
+        let fkAmbienteHpc = diferentes_hpc.value;
+
+        const ambiente = {
+            fk_ambiente_hpcServer: fkAmbienteHpc
+        };
+
+        fetch("/nodes/chamarCluster", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(ambiente)
+        })
+            .then(response => response.json())
+            .then(data => {
+
+                console.log(data);
+
+                diferentes_cluster.innerHTML = `
+            <option value="" disabled selected>
+                Selecione um cluster
+            </option>
+        `;
+
+                for (let i = 0; i < data.length; i++) {
+
+                    diferentes_cluster.innerHTML += `
+                <option value="${data[i].id}">
+                    ${data[i].nome}
+                </option>
+            `;
+                }
+
+            })
+            .catch(error => {
+                console.error("Erro ao buscar clusters:", error);
+            });
+    }
+
+    function cadastrar() {
+
+        let hostname = document.getElementById("input_hostname").value;
+        let ip = document.getElementById("input_ip").value;
+        let sistemaOperacional = document.getElementById("sistema_operacional").value;
+        let status = document.getElementById("diferentes_status").value;
+        let clusterFk = document.getElementById("diferentes_cluster").value;
+
+        const node = {
+            hostnameServer: hostname,
+            ipServer: ip,
+            sistemaOperacionalServer: sistemaOperacional,
+            statusServer: status,
+            clusterFkServer: clusterFk
+        };
+
+        fetch("/nodes/cadastrar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(node)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert("Node cadastrado com sucesso!");
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar node:", error);
+            });
+    }
 </script>
-</html>
 
+</html>

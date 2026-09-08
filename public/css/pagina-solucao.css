@@ -1,0 +1,758 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Exo 2', sans-serif;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    height: auto;
+    max-width: 1920px;
+    width: 82vw;
+}
+
+.secao-solucao-nautilus {
+    width: 100%;
+    background-color: var(--cor-branco);
+}
+
+.secao-como-funciona {
+    display: flex;
+    width: 100%;
+    height: auto;
+    background-color: var(--cor-secundaria);
+    flex-direction: column;
+    padding: 80px 0;
+    align-items: center;
+    
+}
+
+.conteudo-como-funciona {
+    width: 100%;
+    margin: 0;
+}
+
+/* 
+   INTRODUÇÃO
+*/
+
+.introducao {
+    display: flex;
+    width: 100%;
+    height: auto;
+}
+
+.monitoramento-hpc {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+    height: 100%;
+    padding-top: 7%;
+    padding-right: 7%;
+}
+
+.titulo-solucao {
+    color: var(--cor-primaria);
+    font-weight: bold;
+    font-size: 120%;
+    padding-top: 5%;
+}
+
+.titulo-principal {
+    font-size: clamp(2rem, 2.7vw, 3.4rem);
+    color: var(--cor-secundaria);
+}
+
+.azul-claro {
+    color: var(--cor-primaria);
+}
+
+.descricao {
+    font-size: 100%;
+    padding-bottom: 4%;
+}
+
+.conheca-nos {
+    width: 42%;
+    min-height: 45px;
+    height: auto;
+    padding: 10px 15px;
+    background-color: var(--cor-secundaria);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.conheca-nos:active {
+    background-color: #183b45;
+}
+
+.escrita-sobre-nos-botao{
+    color: white;
+}
+
+.sobre-projeto {
+    color: var(--cor-primaria);
+    font-weight: bold;
+    font-size: 120%;
+    margin-top: 10vh;
+}
+
+.titulo-projeto {
+    font-size: clamp(2rem, 3.1vw, 3.8rem);
+}
+
+/* 
+   SEPARAÇÃO
+*/
+
+.separacao-solucao {
+    display: flex;
+    width: 7%;
+    height: 100%;
+}
+
+/* 
+   AMBIENTE HPC
+*/
+
+.ambiente-hpc {
+    margin-top: 6%;
+    display: flex;
+    flex-direction: column;
+    width: 48%;
+    height: auto;
+}
+
+.ambiente-hpc img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+}
+
+.ambiente-hpc p {
+    font-size: 140%;
+    padding-left: 35%;
+    padding-top: 5%;
+    margin: 0;
+}
+
+/* 
+   FLUXO
+*/
+
+.fluxo-nautilus {
+    display: flex;
+    width: 100%;
+    height: auto;
+    margin-top: 40px;
+}
+
+.fluxo {
+    display: flex;
+    width: 25%;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.fluxo img {
+    width: 40%;
+    height: auto;
+    max-height: 120px;
+    object-fit: contain;
+}
+
+.fluxo div {
+    font-weight: bold;
+    font-size: 140%;
+    text-align: center;
+}
+
+.fluxo p {
+    margin: 5px 0;
+    text-align: center;
+}
+
+/* Como-Funciona */
+
+.container-como-funciona {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    gap: 60px;
+    height: auto;
+    width: 82vw;    
+}
+
+.coluna-texto {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+.subtitulo-como-funciona {
+    color: var(--cor-primaria);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.linha-decorativa {
+    width: 30px;
+    height: 3px;
+    background-color: var(--cor-primaria);
+    margin: 10px 0 25px 0;
+}
+
+.coluna-texto h2 {
+    font-size: clamp(2.2rem, 2.7vw, 3.5rem);
+    font-weight: 300; 
+    color: var(--cor-branco);
+    line-height: 1.15;
+    margin: 0 0 50px 0;
+}
+
+.descricao-como-funciona {
+    color: var(--cor-branco);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+    letter-spacing: 0.05vh;
+    font-weight: 475;
+}
+
+.coluna-diagrama {
+    position: relative;
+    width: 50%;
+    min-height: 520px;
+}
+
+.img-principal {
+    width: 50%;
+    height: 50%;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1.5px solid var(--cor-primaria);
+}
+
+.card-nodes {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 49%;
+    border-radius: 16px;
+    padding-left: 12px;
+}
+
+.card-nodes-container {
+    position: absolute;
+    top: 20%;
+    right: -20%;
+    width: 44%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px;
+}
+
+.texto-nodes {
+    display: flex;
+    flex-direction: column;
+    
+}
+
+.texto-nodes strong {
+    color: var(--cor-primaria);
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.texto-nodes p {
+    color: #d1d5db;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.card-plataforma {
+    position: absolute;
+    bottom: 100px;
+    width: 45%;
+    height: 120px;
+    background-color: var(--cor-secundaria);
+    border: 1px solid var(--cor-primaria);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    top: 50%;
+    right: 15%;
+}
+
+.card-plataforma strong {
+    color: var(--cor-primaria);
+}
+
+.card-plataforma div {
+    color:#d1d5db;
+}
+/*
+.card-plataforma ul li {
+    margin: 5px;
+    padding-left: 15px;
+    color: #d1d5db;
+    font-size: 0.7rem;
+    gap: 5px;
+}
+    */
+
+.beneficios-plataforma{
+    border-left: 1px solid #8da5a9;
+    padding-left: 15px;
+    list-style: none;
+    color: #d1d5db;
+    font-size: 0.6rem;
+}    
+    
+.rodape-diagrama {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-top: 10px;
+    box-sizing: border-box;
+    transform: scale(0.8);
+}
+
+.rodape-diagrama img {
+    max-width: 50%;
+    height: auto;
+    object-fit: contain;
+}
+
+.texto-rodape {
+    color: var(--cor-branco);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    margin: 0;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+.info-infraestrutura {
+    position: absolute;
+    left: -25%;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-infraestrutura strong {
+    color: var(--cor-primaria);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.info-infraestrutura p {
+    color: #e5e7eb;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* SEÇÃO CONTATO */
+
+.secao-contato {
+    background-color: #f8fafc;
+    padding: 75px 0;
+    width: 100%;
+    color: #1e293b;
+}
+
+.container-contato {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 85vw;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 60px;
+}
+
+.contato-esquerda {
+    width: 48%;
+    display: flex;
+    flex-direction: column;
+}
+
+.subtitulo-contato {
+    color: #38bdf8;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+}
+
+.linha-decorativa-contato {
+    width: 35px;
+    height: 3px;
+    background-color: #38bdf8;
+    margin: 12px 0 30px 0;
+}
+
+.titulo-contato {
+    font-size: clamp(2.2rem, 3.2vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.25;
+    color: #0f172a;
+    margin: 0 0 24px 0;
+}
+
+.azul-destaque {
+    color: #38bdf8;
+}
+
+.descricao-contato {
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 50px;
+}
+
+.descricao-contato strong {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.cards-diferenciais {
+    display: flex;
+    gap: 30px;
+    margin-top: 5%;
+}
+
+.card-diferencial {
+    width: 33.33%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-diferencial img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 15px;
+}
+
+.card-diferencial h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+}
+
+.card-diferencial p {
+    font-size: 1rem;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.divisor-vertical {
+    width: 1px;
+    background-color: #e2e8f0;
+}
+
+.contato-direita {
+    width: 42%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+}
+
+.header-entre-contato {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.texto-header-contato h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.texto-header-contato p {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.espaco-extra {
+    margin-left: 25px 0;
+}
+
+.lista-contatos {
+    display: flex;
+    flex-direction: column;
+    margin-left: 3%;
+}
+
+.item-contato {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.item-contato:last-child {
+    border-bottom: none;
+}
+
+.item-contato span {
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.secao-footer {
+    display: flex;
+    background-color: #183b45;
+}
+
+/* 
+   TABLETS
+*/
+
+@media (max-width: 900px) {
+
+    .container {
+        width: 90vw;
+    }
+
+    .introducao {
+        height: auto;
+        min-height: auto;
+    }
+
+    .monitoramento-hpc {
+        padding-right: 4%;
+    }
+
+    .ambiente-hpc p {
+        padding-left: 0;
+    }
+
+    .conheca-a-plataforma {
+        width: 60%;
+    }
+
+    .container-como-funciona {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .coluna-texto,
+    .coluna-diagrama {
+        width: 100%;
+    }
+
+    /* Solução para não quebrar os cards do diagrama em tablets/mobile */
+    .coluna-diagrama {
+        min-height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .img-principal {
+        width: 100%;
+        height: auto;
+        max-height: 400px;
+    }
+
+    .card-nodes,
+    .card-nodes-container,
+    .card-plataforma,
+    .rodape-diagrama,
+    .info-infraestrutura {
+        position: relative;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        width: 100%;
+    }
+
+    .texto-nodes {
+        width: 100%;
+    }
+
+    .container-contato {
+        flex-direction: column;
+        gap: 50px;
+    }
+
+    .contato-esquerda,
+    .contato-direita {
+        width: 100%;
+    }
+
+    .divisor-vertical {
+        display: none;
+    }
+
+}
+
+/* 
+   CELULARES
+*/
+
+@media (max-width: 600px) {
+
+    .container {
+        width: 90%;
+        height: auto;
+    }
+
+    .introducao {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .monitoramento-hpc {
+        width: 100%;
+        height: auto;
+        padding-top: 5%;
+        padding-right: 0;
+    }
+
+    .titulo-solucao {
+        font-size: 100%;
+    }
+
+    .titulo-principal {
+        font-size: clamp(1.8rem, 8vw, 2.5rem);
+        line-height: 1.15;
+    }
+
+    .descricao {
+        font-size: 1rem;
+        line-height: 1.5;
+        padding-bottom: 4%;
+    }
+
+    .conheca-a-plataforma {
+        width: 100%;
+        min-height: 48px;
+        font-size: 0.95rem;
+    }
+
+    .sobre-projeto {
+        margin-top: 40px;
+    }
+
+    .titulo-projeto {
+        font-size: clamp(1.8rem, 8vw, 2.5rem);
+        line-height: 1.15;
+    }
+
+    .separacao-solucao {
+        display: none;
+    }
+
+    .ambiente-hpc {
+        width: 100%;
+        height: auto;
+        margin-top: 30px;
+    }
+
+    .ambiente-hpc img {
+        width: 100%;
+        height: auto;
+    }
+
+    .ambiente-hpc p {
+        padding: 15px 0 0 0;
+        line-height: 1.5;
+    }
+
+    .fluxo-nautilus {
+        flex-direction: column;
+        height: auto;
+        margin-top: 30px;
+        gap: 20px;
+    }
+
+    .fluxo {
+        width: 100%;
+        min-height: auto;
+    }
+
+    .fluxo img {
+        width: 50px;
+        height: auto;
+    }
+
+    .cards-diferenciais {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .card-diferencial {
+        width: 100%;
+    }
+
+    .secao-como-funciona,
+    .secao-contato {
+        padding: 40px 0;
+    }
+
+    .rodape-diagrama {
+        position: relative; /* Solta do posicionamento absoluto em telas pequenas */
+        left: 0;
+        bottom: 0;
+        flex-direction: column; /* Empilha a imagem e o texto no celular */
+        text-align: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+   .rodape-diagrama img {
+        max-width: 100%; /* Permite usar até toda a largura disponível no celular */
+    }
+
+    .texto-rodape {
+        width: 100%;
+    }
+
+}
