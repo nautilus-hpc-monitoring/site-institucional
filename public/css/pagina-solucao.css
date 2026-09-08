@@ -332,15 +332,6 @@ body {
 .card-plataforma div {
     color:#d1d5db;
 }
-/*
-.card-plataforma ul li {
-    margin: 5px;
-    padding-left: 15px;
-    color: #d1d5db;
-    font-size: 0.7rem;
-    gap: 5px;
-}
-    */
 
 .beneficios-plataforma{
     border-left: 1px solid #8da5a9;
@@ -566,10 +557,10 @@ body {
    TABLETS
 */
 
-@media (max-width: 900px) {
+@media (max-width: 1300px) {
 
     .container {
-        width: 90vw;
+        width: 95vw;
     }
 
     .introducao {
@@ -612,18 +603,53 @@ body {
         height: auto;
         max-height: 400px;
     }
-
-    .card-nodes,
-    .card-nodes-container,
     .card-plataforma,
-    .rodape-diagrama,
+     .card-nodes-container, 
+     .card-nodes,
     .info-infraestrutura {
+        align-items: center;
         position: relative;
         top: auto;
         bottom: auto;
         left: auto;
         right: auto;
         width: 100%;
+    }
+
+
+        .card-plataforma strong, 
+     .card-nodes strong,
+    .info-infraestrutura strong {
+        font-size: 20px;
+        margin-bottom: 7px;
+    }
+
+        .card-plataforma p,
+     .card-nodes p,
+    .info-infraestrutura  p {
+        font-size: 15px;
+    }
+
+
+
+    
+
+    .rodape-diagrama {
+        position: relative; /* Solta do posicionamento absoluto em telas pequenas */
+        left: 0;
+        bottom: 0;
+        flex-direction: column; /* Empilha a imagem e o texto no celular */
+        text-align: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .rodape-diagrama p {
+        font-size: 25px;
+    }
+
+    .imagem-nodes {
+        display: none;
     }
 
     .texto-nodes {
@@ -644,13 +670,30 @@ body {
         display: none;
     }
 
+        .fluxo-nautilus {
+        flex-direction: column;
+        height: auto;
+        margin-top: 30px;
+        gap: 20px;
+    }
+
+    .fluxo {
+        width: 100%;
+        min-height: auto;
+    }
+
+    .fluxo img {
+        width: 50px;
+        height: auto;
+    }
+
 }
 
 /* 
    CELULARES
 */
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
 
     .container {
         width: 90%;
