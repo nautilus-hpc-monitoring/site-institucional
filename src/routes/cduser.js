@@ -5,7 +5,7 @@ var router = express.Router();
 var cduserController = require("../controllers/cduserController");
 
 router.post("/cadastrarFuncionario", function (req,res) {
-    cduserController.cadastrar(req,res);
+    cduserController.cadastrarFuncionario(req,res);
 });
 
 
