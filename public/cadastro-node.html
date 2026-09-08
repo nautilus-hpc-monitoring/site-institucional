@@ -215,7 +215,7 @@
                             <div class="form-group">
                                 <label>HPC <span class="required">*</span></label>
                                 <div class="select-wrapper">
-                                    <select id ="diferentes_hpc" onchange="chamarCluster()">
+                                    <select id="diferentes_hpc" onchange="chamarCluster()">
                                         <option value="" disabled selected>Selecione um HPC
                                         </option>
                                     </select>
@@ -240,8 +240,8 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" onclick="cadastrar()" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Cadastrar node</button>
+                    <button type="button" class="btn btn-secondary">Cancelar</button>
+                    <button type="button" onclick="cadastrar()" class="btn btn-primary">Cadastrar node</button>
                 </div>
             </form>
         </main>
@@ -276,13 +276,13 @@
         var clusterFk = diferentes_cluster.value;
 
 
-    const node = {
-        hostnameServer: hostname,
-        ipServer: ip,
-        sistemaOperacionalServer: sistemaOperacional,
-        statusServer: status,
-        clusterFkServer: clusterFk
-    };
+        const node = {
+            hostnameServer: hostname,
+            ipServer: ip,
+            sistemaOperacionalServer: sistemaOperacional,
+            statusServer: status,
+            clusterFkServer: clusterFk
+        };
 
 
 
@@ -303,106 +303,106 @@
             body: JSON.stringify(empresa)
         }).then(response => response.json())
 
- .then(data => {
+            .then(data => {
 
-        console.log(data);
+                console.log(data);
 
-        diferentes_hpc.innerHTML = `
+                diferentes_hpc.innerHTML = `
             <option value="" disabled selected>
                 Selecione um HPC
             </option>
         `;
 
-        for (let i = 0; i < data.length; i++) {
-            diferentes_hpc.innerHTML += `
-                <option value="${data[i].id_ambiente_hpc}">
+                for (let i = 0; i < data.length; i++) {
+                    diferentes_hpc.innerHTML += `
+                <option value="${data[i].id}">
                     ${data[i].nome}
                 </option>
             `;
-        }
+                }
 
-    })
-    .catch(error => {
-        console.error("Erro ao buscar HPC:", error);
-    });
-            
+            })
+            .catch(error => {
+                console.error("Erro ao buscar HPC:", error);
+            });
+
     }
 
     exibirHPC();
 
     function chamarCluster() {
 
-    let fkAmbienteHpc = diferentes_hpc.value;
+        let fkAmbienteHpc = diferentes_hpc.value;
 
-    const ambiente = {
-        fk_ambiente_hpcServer: fkAmbienteHpc
-    };
+        const ambiente = {
+            fk_ambiente_hpcServer: fkAmbienteHpc
+        };
 
-    fetch("/nodes/chamarCluster", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(ambiente)
-    })
-    .then(response => response.json())
-    .then(data => {
+        fetch("/nodes/chamarCluster", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(ambiente)
+        })
+            .then(response => response.json())
+            .then(data => {
 
-        console.log(data);
+                console.log(data);
 
-        diferentes_cluster.innerHTML = `
+                diferentes_cluster.innerHTML = `
             <option value="" disabled selected>
                 Selecione um cluster
             </option>
         `;
 
-        for (let i = 0; i < data.length; i++) {
+                for (let i = 0; i < data.length; i++) {
 
-            diferentes_cluster.innerHTML += `
-                <option value="${data[i].id_cluster}">
+                    diferentes_cluster.innerHTML += `
+                <option value="${data[i].id}">
                     ${data[i].nome}
                 </option>
             `;
-        }
+                }
 
-    })
-    .catch(error => {
-        console.error("Erro ao buscar clusters:", error);
-    });
-}
+            })
+            .catch(error => {
+                console.error("Erro ao buscar clusters:", error);
+            });
+    }
 
-function cadastrar() {
+    function cadastrar() {
 
-    let hostname = input_hostname.value;
-    let ip = input_ip.value;
-    let sistemaOperacional = sistema_operacional.value;
-    let status = diferentes_status.value;
-    let clusterFk = diferentes_cluster.value;
+        let hostname = document.getElementById("input_hostname").value;
+        let ip = document.getElementById("input_ip").value;
+        let sistemaOperacional = document.getElementById("sistema_operacional").value;
+        let status = document.getElementById("diferentes_status").value;
+        let clusterFk = document.getElementById("diferentes_cluster").value;
 
-    const node = {
-        hostnameServer: hostname,
-        ipServer: ip,
-        sistemaOperacionalServer: sistemaOperacional,
-        statusServer: status,
-        clusterFkServer: clusterFk
-    };
+        const node = {
+            hostnameServer: hostname,
+            ipServer: ip,
+            sistemaOperacionalServer: sistemaOperacional,
+            statusServer: status,
+            clusterFkServer: clusterFk
+        };
 
-    fetch("/nodes/cadastrar", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(node)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        alert("Node cadastrado com sucesso!");
-    })
-    .catch(error => {
-        console.error("Erro ao cadastrar node:", error);
-    });
-}
+        fetch("/nodes/cadastrar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(node)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert("Node cadastrado com sucesso!");
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar node:", error);
+            });
+    }
 </script>
 
 </html>
