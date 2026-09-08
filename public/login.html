@@ -197,13 +197,13 @@
                 resposta.json().then(json => {
                     console.log(json);
                     console.log(JSON.stringify(json));
-                    sessionStorage.EMAIL_USUARIO = json.email;
-                    sessionStorage.NOME_USUARIO = json.nome;
-                    sessionStorage.ID_USUARIO = json.id_usuario;
-                    sessionStorage.ID_EMPRESA = json.fk_empresa;
-                    sessionStorage.ID_EMPRESA = json.fk_nivel_acesso;
+                    sessionStorage.setItem("EMAIL_USUARIO", json.email);
+                    sessionStorage.setItem("NOME_USUARIO", json.nome);
+                    sessionStorage.setItem("ID_USUARIO", json.id_usuario);
+                    sessionStorage.setItem("ID_EMPRESA", json.fk_empresa);
+                    sessionStorage.setItem("ID_NIVEL_ACESSO", json.fk_nivel_acesso);
                     setTimeout(function () {
-                        window.location = "./dashboard/cards.html";
+                        window.location = "./cadastro-empresa.html";
                     }, 1000); // apenas para exibir o loading
 
                 });

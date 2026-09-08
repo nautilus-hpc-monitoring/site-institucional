@@ -12,10 +12,12 @@
     <link rel="stylesheet" href="./css/formulario-cadastro.css">
     <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="./css/cadastro-empresa.css">
+
+    <script src="./js/sessao.js"></script>
     <title>Nautilus - Cadastro Empresa</title>
 </head>
 
-<body>
+<body onload="validarSessao()">
 
     <div class="mobile-header">
         <button id="open-sidebar-btn" aria-label="Abrir menu">
@@ -126,7 +128,7 @@
                 <div class="user-avatar">
                     <i class="fa-regular fa-user"></i>
                 </div>
-                <span class="user-name">dsads</span>
+                <span class="user-name" id="b_usuario"></span>
             </div>
         </header>
         <main class="page-content">
