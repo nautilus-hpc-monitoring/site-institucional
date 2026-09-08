@@ -34,7 +34,7 @@ body {
     flex-direction: column;
     padding: 80px 0;
     align-items: center;
-    
+
 }
 
 .conteudo-como-funciona {
@@ -94,7 +94,7 @@ body {
 }
 
 .conheca-nos a {
-        padding: clamp(13px, 1vw, 16px);
+    padding: clamp(13px, 1vw, 16px);
 
     display: flex;
     align-items: flex-end;
@@ -113,7 +113,7 @@ body {
     background-color: #183b45;
 }
 
-.escrita-sobre-nos-botao{
+.escrita-sobre-nos-botao {
     color: white;
 }
 
@@ -214,7 +214,7 @@ body {
     margin: 0 auto;
     gap: 60px;
     height: auto;
-    width: 82vw;    
+    width: 82vw;
 }
 
 .coluna-texto {
@@ -241,7 +241,7 @@ body {
 
 .coluna-texto h2 {
     font-size: clamp(2.2rem, 2.7vw, 3.5rem);
-    font-weight: 300; 
+    font-weight: 300;
     color: var(--cor-branco);
     line-height: 1.15;
     margin: 0 0 50px 0;
@@ -294,7 +294,7 @@ body {
 .texto-nodes {
     display: flex;
     flex-direction: column;
-    
+
 }
 
 .texto-nodes strong {
@@ -330,17 +330,17 @@ body {
 }
 
 .card-plataforma div {
-    color:#d1d5db;
+    color: #d1d5db;
 }
 
-.beneficios-plataforma{
+.beneficios-plataforma {
     border-left: 1px solid #8da5a9;
     padding-left: 15px;
     list-style: none;
     color: #d1d5db;
     font-size: 0.6rem;
-}    
-    
+}
+
 .rodape-diagrama {
     width: 100%;
     display: flex;
@@ -603,9 +603,10 @@ body {
         height: auto;
         max-height: 400px;
     }
+
     .card-plataforma,
-     .card-nodes-container, 
-     .card-nodes,
+    .card-nodes-container,
+    .card-nodes,
     .info-infraestrutura {
         align-items: center;
         position: relative;
@@ -617,28 +618,30 @@ body {
     }
 
 
-        .card-plataforma strong, 
-     .card-nodes strong,
+    .card-plataforma strong,
+    .card-nodes strong,
     .info-infraestrutura strong {
         font-size: 20px;
         margin-bottom: 7px;
     }
 
-        .card-plataforma p,
-     .card-nodes p,
-    .info-infraestrutura  p {
+    .card-plataforma p,
+    .card-nodes p,
+    .info-infraestrutura p {
         font-size: 15px;
     }
 
 
 
-    
+
 
     .rodape-diagrama {
-        position: relative; /* Solta do posicionamento absoluto em telas pequenas */
+        position: relative;
+        /* Solta do posicionamento absoluto em telas pequenas */
         left: 0;
         bottom: 0;
-        flex-direction: column; /* Empilha a imagem e o texto no celular */
+        flex-direction: column;
+        /* Empilha a imagem e o texto no celular */
         text-align: center;
         gap: 10px;
         margin-top: 20px;
@@ -670,7 +673,7 @@ body {
         display: none;
     }
 
-        .fluxo-nautilus {
+    .fluxo-nautilus {
         flex-direction: column;
         height: auto;
         margin-top: 30px;
@@ -794,21 +797,56 @@ body {
     }
 
     .rodape-diagrama {
-        position: relative; /* Solta do posicionamento absoluto em telas pequenas */
+        position: relative;
+        /* Solta do posicionamento absoluto em telas pequenas */
         left: 0;
         bottom: 0;
-        flex-direction: column; /* Empilha a imagem e o texto no celular */
+        flex-direction: column;
+        /* Empilha a imagem e o texto no celular */
         text-align: center;
         gap: 10px;
         margin-top: 20px;
     }
 
-   .rodape-diagrama img {
-        max-width: 100%; /* Permite usar até toda a largura disponível no celular */
+    .rodape-diagrama img {
+        max-width: 100%;
+        /* Permite usar até toda a largura disponível no celular */
     }
 
     .texto-rodape {
         width: 100%;
     }
+}
 
+@media (max-width: 1250px) {
+    .fluxo-nautilus {
+        flex-direction: column; 
+        justify-content: center; 
+        align-items: center;
+        height: auto;
+        margin-top: 30px;
+        gap: 20px;
+    }
+
+    .container-pag-solucao{
+        padding-top: 70px;
+    }
+}
+
+@media (max-width: 1390px){
+    .info-infraestrutura {
+        position: relative;
+        display: flex;
+        
+    }
+
+@media (max-width: 1000px){
+    .rodape-diagrama{
+        padding-top: 30px;
+    }
+
+    .container{
+        padding-top: 100px;
+    }
+}
 }
