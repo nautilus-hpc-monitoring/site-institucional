@@ -210,20 +210,24 @@ document.getElementById('sidebar-overlay').onclick = function() {
     document.getElementById('sidebar-overlay').classList.remove('active');
 };
 
-function chamarQuantidadeFuncionarios () {
-    
-    let total = qtdTotal.value;
-    let admin = qtdAdministradores.value;
-    let gestores = qtdGestores.value;
-    let operadores = qtdOperadores.value;
-    let inativos = qtdInativos.value;
+function carregarQuantidades() {
+    let fkEmpresa = 1; 
 
-    const FuncionariosEmpresa = {
-        fk_empresaServer: 1
-        
-    }
+    fetch(`/qtdFuncionario/buscarQuantidades/${fkEmpresa}`)
+    .then(response => response.json())
+    .then(data => {
+        qtdTotal.textContent = data.total ?? 0;
+        qtdAdministradores.textContent = data.administradores ?? 0;
+        qtdGestores.textContent = data.gestores ?? 0;
+        qtdOperadores.textContent = data.operadores ?? 0;
+        qtdInativos.textContent = 0;
+    })
+    .catch(error => {
+        console.log("Erro ao buscar quantidades:", error);
+    });
+}
 
-};
+window.onload = carregarQuantidades;
 
 
 function cadastrarFuncionario () {
