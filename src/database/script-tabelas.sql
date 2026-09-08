@@ -43,14 +43,16 @@ CREATE TABLE cluster(
     FOREIGN KEY (fk_ambiente_hpc) REFERENCES ambiente_hpc(id)
 );
 
-CREATE TABLE node(
+CREATE TABLE node (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    hostname VARCHAR(45),
+    hostname VARCHAR(255),
     ip VARCHAR(45),
+    sistema_operacional VARCHAR(100),
+    endereco_mac CHAR(17),
     status VARCHAR(45),
-    sistema_operacional VARCHAR(45),
-	token_node VARCHAR(100) UNIQUE,
-    fk_cluster INT NOT NULL,
+    token_node CHAR(64) UNIQUE,
+    fk_cluster INT,
+
     FOREIGN KEY (fk_cluster) REFERENCES cluster(id)
 );
 
