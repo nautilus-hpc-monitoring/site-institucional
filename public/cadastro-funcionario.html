@@ -99,23 +99,23 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome completo <span class="required">*</span></label>
-                                <input type="text" placeholder="Ex.: João da Silva">
+                                <input type="text" placeholder="Ex.: João da Silva" id="nome_ipt">
                             </div>
 
                             <div class="form-group">
                                 <label>E-mail corporativo <span class="required">*</span></label>
-                                <input type="email" placeholder="Ex: joao.silva@petrobras.com.br">
+                                <input type="email" placeholder="Ex: joao.silva@petrobras.com.br" id="email_ipt">
                             </div>
 
                             <div class="form-group">
                                 <label>Senha inicial <span class="required">*</span></label>
-                                <input type="password" placeholder="Mínimo 8 caracteres">
+                                <input type="password" placeholder="Mínimo 8 caracteres" id="senha_ipt">
                             </div>
 
                             <div class="form-group">
                                 <label>Confirmar senha <span class="required">*</span></label>
                                 <div class="input-password-wrapper">
-                                    <input type="password" placeholder="Confirme a senha inicial">
+                                    <input type="password" placeholder="Confirme a senha inicial" id="confirmacaosenha_ipt">
                                     <i class="fa-regular fa-eye password-icon"></i>
                                 </div>
                             </div>
@@ -123,7 +123,7 @@
                             <div class="form-group full-width">
                                 <label>Nível de acesso <span class="required">*</span></label>
                                 <div class="select-wrapper">
-                                    <select>
+                                    <select id="diferentesAcessos" onchange="">
                                         <option value="" disabled selected>Selecione um nível de acesso</option>
                                         <option value="admin">Administrador</option>
                                         <option value="gerente">Gestor</option>
@@ -147,30 +147,30 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar usuário</button>
+                    <button type="submit" class="btn btn-primary" onclick="cadastrarFuncionario()">Salvar usuário</button>
                 </div>
             </form>
 
             <div class="qtd-users">
                 <div class="card-users" id="card01">
                     <p>Total de usuários</p>
-                    <span>4</span>
+                    <span id="qtdTotal">4</span>
                 </div>
                 <div class="card-users" id="card02">
                     <p>Administradores</p>
-                    <span>1</span>
+                    <span id="qtdAdministradores">1</span>
                 </div>
                 <div class="card-users" id="card03">
                     <p>Gestores</p>
-                    <span>1</span>
+                    <span id="qtdGestores">1</span>
                 </div>
                 <div class="card-users" id="card04">
                     <p>Operadores</p>
-                    <span>2</span>
+                    <span id="qtdOperadores">2</span>
                 </div>
                 <div class="card-users" id="card05">
                     <p>Inativos</p>
-                    <span>0</span>
+                    <span id="qtdInativos">0</span>
                 </div>
             </div>
 
@@ -234,10 +234,77 @@
         document.getElementById('sidebar-overlay').classList.remove('active');
     };
 
-    document.getElementById('sidebar-overlay').onclick = function () {
-        mobileSidebar.classList.remove('active');
-        document.getElementById('sidebar-overlay').classList.remove('active');
-    };
+document.getElementById('sidebar-overlay').onclick = function() {
+    mobileSidebar.classList.remove('active');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+};
+
+function carregarQuantidades() {
+    let fkEmpresa = 1; 
+
+    fetch(`/qtdFuncionario/buscarQuantidades/${fkEmpresa}`)
+    .then(response => response.json())
+    .then(data => {
+        qtdTotal.textContent = data.total ?? 0;
+        qtdAdministradores.textContent = data.administradores ?? 0;
+        qtdGestores.textContent = data.gestores ?? 0;
+        qtdOperadores.textContent = data.operadores ?? 0;
+        qtdInativos.textContent = 0;
+    })
+    .catch(error => {
+        console.log("Erro ao buscar quantidades:", error);
+    });
+}
+
+window.onload = carregarQuantidades;
+
+
+function cadastrarFuncionario () {
+    
+    let nomeFuncionario = nome_ipt.value;
+    let emailFuncionario = email_ipt.value;
+    let senhaFuncionario = senha_ipt.value;
+    let confirmacaoFuncionario = confirmacaosenha_ipt.value;
+    let nivelAcessoFuncionario = diferentesAcessos.value;
+    let fkEmpresa = 1;
+
+    const Funcionario = {
+            nomeServer: nomeFuncionario,
+            emailServer: emailFuncionario,
+            senhaServer: senhaFuncionario,
+            NivelAcessoServer: nivelAcessoFuncionario,
+            empresaServer: fkEmpresa
+    }
+    if (
+        nomeFuncionario == "" || 
+        emailFuncionario == "" ||
+        senhaFuncionario == "" ||
+        confirmacaoFuncionario == "" ||
+        nivelAcessoFuncionario == "" 
+    ) {
+        alert("Há campos em branco")
+    } else if (senhaFuncionario != confirmacaoFuncionario) {
+        alert("As senhas não são as mesmas")
+    } else{
+            fetch("/cduser/cadastrarFuncionario", {
+                method:"POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(Funcionario),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert("Funcionario cadastrado com sucesso!");
+            })
+            .catch(error => {
+                console.log("Erro ao cadastrar Funcionário:", error);
+                
+            });
+        }
+        
+}
 </script>
 
 </html>
