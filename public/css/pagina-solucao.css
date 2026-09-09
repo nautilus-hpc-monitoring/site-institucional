@@ -83,7 +83,7 @@ body {
 }
 
 .conheca-nos {
-    width: 46%;
+    width: 60%;
     min-height: 45px;
     height: auto;
     padding: 10px 15px;
@@ -156,13 +156,17 @@ body {
     height: auto;
     max-height: 450px;
     object-fit: contain;
-    transform: scale(1.2);
+    transform: scale(1.105);
 }
 
 .texto-hpc {
     font-size: 140%;
-    padding-top: 20%;
+    padding-top: 15%;
     margin: 0;
+}
+
+.texto-hpc p {
+    padding-top: 5%;
 }
 
 /* 
