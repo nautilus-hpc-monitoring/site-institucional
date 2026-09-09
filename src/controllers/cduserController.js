@@ -28,7 +28,7 @@ function cadastrarFuncionario(req,res) {
 
     } else if (fkEmpresa == undefined) {
 
-        res.status(400).send("nivelAcessoFuncionario está undefined!");
+        res.status(400).send("fkEmpresa está undefined!");
 
     } else {
         cduserModel.cadastrarFuncionario(
