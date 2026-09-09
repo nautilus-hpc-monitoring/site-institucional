@@ -1,10 +1,13 @@
 var cduserModel = require("../models/cduserModel");
 
 function cadastrarFuncionario(req,res) {
+    console.log("BODY RECEBIDO:");
+    console.log(req.body);
+
     let nomeFuncionario = req.body.nomeServer;
     let emailFuncionario = req.body.emailServer;
     let senhaFuncionario = req.body.senhaServer;
-    let NivelAcessoFuncionario = req.body.NivelAcessoServer;
+    let nivelAcessoFuncionario = req.body.nivelAcessoServer;
     let fkEmpresa = req.body.empresaServer;
 
     if (nomeFuncionario == undefined) {
@@ -19,20 +22,20 @@ function cadastrarFuncionario(req,res) {
 
         res.status(400).send("senhaFuncionario está undefined!");
 
-    } else if (NivelAcessoFuncionario == undefined) {
+    } else if (nivelAcessoFuncionario == undefined) {
 
-        res.status(400).send("NivelAcessoFuncionario está undefined!");
+        res.status(400).send("nivelAcessoFuncionario está undefined!");
 
     } else if (fkEmpresa == undefined) {
 
-        res.status(400).send("NivelAcessoFuncionario está undefined!");
+        res.status(400).send("nivelAcessoFuncionario está undefined!");
 
     } else {
         cduserModel.cadastrarFuncionario(
             nomeFuncionario,
             emailFuncionario,
             senhaFuncionario,
-            NivelAcessoFuncionario,
+            nivelAcessoFuncionario,
             fkEmpresa
         )
         .then(function(resultado) {

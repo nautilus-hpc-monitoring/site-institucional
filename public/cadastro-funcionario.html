@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./css/funcionario.css">
 
     <script src="./js/sessao.js"></script>
-    <title>Document</title>
+    <title>Nautilus - Cadastro de Funcionários</title>
 </head>
 
 <body onload="protegerPagina()">
@@ -27,15 +27,32 @@
                 <img src="./assets/img/logo.png" alt="Nautilus Logo">
                 <span>NAUTILUS</span>
             </div>
-            <button id="close-sidebar-btn" aria-label="Fechar menu"><i class="fa-solid fa-xmark"></i></button>
+            <button id="close-sidebar-btn" aria-label="Fechar menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
+
         <ul class="mobile-sidebar-items">
-            <li class="nav-item"><a href="#"><i class="fa-solid fa-border-all"></i> <span>Visão Geral</span></a></li>
-            <li class="nav-item"><a href="#"><i class="fa-solid fa-database"></i> <span>Ambientes</span></a></li>
-            <li class="nav-item"><a href="#"><i class="fa-solid fa-chart-line"></i> <span>Clusters</span></a></li>
-            <li class="nav-item"><a href="#"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a></li>
-            <li class="nav-item active"><a href="#"><i class="fa-solid fa-users"></i> <span>Funcionários</span></a></li>
+            <li class="nav-item">
+                <a href="#"><i class="fa-solid fa-border-all"></i> <span>Visão Geral</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="#"><i class="fa-solid fa-database"></i> <span>Ambientes</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="#"><i class="fa-solid fa-chart-line"></i> <span>Clusters</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="./cadastro-node.html"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a>
+            </li>
+            <li class="nav-item active">
+                <a href="./cadastro-funcionario.html"><i class="fa-solid fa-users"></i> <span>Funcionários</span></a>
+            </li>
+            <li class="nav-item">
+                <a href="./cadastro-empresa.html"><i class="fa-solid fa-building"></i> <span>Empresas</span></a>
+            </li>
         </ul>
+
         <div class="mobile-sidebar-bottom">
             <a href="#" class="nav-item">
                 <i class="fa-solid fa-sliders"></i>
@@ -52,21 +69,56 @@
         <div id="sidebar_content">
             <div id="logo">
                 <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
-                <p id="logo_infos"><span class="item-description">NAUTILUS</span></p>
+                <p id="logo_infos">
+                    <span class="item-description">NAUTILUS</span>
+                </p>
             </div>
+
             <ul id="side_items">
-                <li class="side-item"><a href="#"><i class="fa-solid fa-border-all"></i> <span
-                            class="item-description">Visão Geral</span></a></li>
-                <li class="side-item"><a href="#"><i class="fa-solid fa-database"></i> <span
-                            class="item-description">Ambientes</span></a></li>
-                <li class="side-item"><a href="#"><i class="fa-solid fa-chart-line"></i> <span
-                            class="item-description">Clusters</span></a></li>
-                <li class="side-item"><a href="#"><i class="fa-solid fa-memory"></i> <span
-                            class="item-description">Nodes</span></a></li>
-                <li class="side-item active"><a href="#"><i class="fa-solid fa-users"></i> <span
-                            class="item-description">Funcionários</span></a></li>
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-border-all"></i>
+                        <span class="item-description">Visão Geral</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-database"></i>
+                        <span class="item-description">Ambientes</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Clusters</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-node.html">
+                        <i class="fa-solid fa-memory"></i>
+                        <span class="item-description">Nodes</span>
+                    </a>
+                </li>
+                <li class="side-item active">
+                    <a href="./cadastro-funcionario.html">
+                        <i class="fa-solid fa-users"></i>
+                        <span class="item-description">Funcionários</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-empresa.html">
+                        <i class="fa-solid fa-building"></i>
+                        <span class="item-description">Empresas</span>
+                    </a>
+                </li>
             </ul>
         </div>
+
+
         <ul id="side_bottom">
             <li class="side-item">
                 <a href="#">
@@ -85,7 +137,6 @@
 
     <div id="main-container">
         <main class="page-content">
-            <a href="#" class="back-link">&larr; Voltar para funcionários</a>
             <h1 class="page-title">Cadastrar Funcionário</h1>
             <p class="page-subtitle">Adicione um novo usuário à organização e defina o nível de acesso à plataforma.</p>
 
@@ -115,7 +166,8 @@
                             <div class="form-group">
                                 <label>Confirmar senha <span class="required">*</span></label>
                                 <div class="input-password-wrapper">
-                                    <input type="password" placeholder="Confirme a senha inicial" id="confirmacaosenha_ipt">
+                                    <input type="password" placeholder="Confirme a senha inicial"
+                                        id="confirmacaosenha_ipt">
                                     <i class="fa-regular fa-eye password-icon"></i>
                                 </div>
                             </div>
@@ -125,9 +177,9 @@
                                 <div class="select-wrapper">
                                     <select id="diferentesAcessos" onchange="">
                                         <option value="" disabled selected>Selecione um nível de acesso</option>
-                                        <option value="admin">Administrador</option>
-                                        <option value="gerente">Gestor</option>
-                                        <option value="operador">Operador</option>
+                                        <option value="Administrador">Administrador</option>
+                                        <option value="Gerente">Gerente</option>
+                                        <option value="Operador">Operador</option>
                                     </select>
                                 </div>
                             </div>
@@ -147,7 +199,8 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" onclick="cadastrarFuncionario()">Salvar usuário</button>
+                    <button type="button" class="btn btn-primary" onclick="cadastrarFuncionario()">Salvar
+                        usuário</button>
                 </div>
             </form>
 
@@ -234,77 +287,77 @@
         document.getElementById('sidebar-overlay').classList.remove('active');
     };
 
-document.getElementById('sidebar-overlay').onclick = function() {
-    mobileSidebar.classList.remove('active');
-    document.getElementById('sidebar-overlay').classList.remove('active');
-};
+    document.getElementById('sidebar-overlay').onclick = function () {
+        mobileSidebar.classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    };
 
-function carregarQuantidades() {
-    let fkEmpresa = 1; 
+    function carregarQuantidades() {
+        let fkEmpresa = 1;
 
-    fetch(`/qtdFuncionario/buscarQuantidades/${fkEmpresa}`)
-    .then(response => response.json())
-    .then(data => {
-        qtdTotal.textContent = data.total ?? 0;
-        qtdAdministradores.textContent = data.administradores ?? 0;
-        qtdGestores.textContent = data.gestores ?? 0;
-        qtdOperadores.textContent = data.operadores ?? 0;
-        qtdInativos.textContent = 0;
-    })
-    .catch(error => {
-        console.log("Erro ao buscar quantidades:", error);
-    });
-}
+        fetch(`/qtdFuncionario/buscarQuantidades/${fkEmpresa}`)
+            .then(response => response.json())
+            .then(data => {
+                qtdTotal.textContent = data.total ?? 0;
+                qtdAdministradores.textContent = data.administradores ?? 0;
+                qtdGestores.textContent = data.gestores ?? 0;
+                qtdOperadores.textContent = data.operadores ?? 0;
+                qtdInativos.textContent = 0;
+            })
+            .catch(error => {
+                console.log("Erro ao buscar quantidades:", error);
+            });
+    }
 
-window.onload = carregarQuantidades;
+    window.onload = carregarQuantidades;
 
 
-function cadastrarFuncionario () {
-    
-    let nomeFuncionario = nome_ipt.value;
-    let emailFuncionario = email_ipt.value;
-    let senhaFuncionario = senha_ipt.value;
-    let confirmacaoFuncionario = confirmacaosenha_ipt.value;
-    let nivelAcessoFuncionario = diferentesAcessos.value;
-    let fkEmpresa = 1;
+    function cadastrarFuncionario() {
 
-    const Funcionario = {
+        let nomeFuncionario = nome_ipt.value;
+        let emailFuncionario = email_ipt.value;
+        let senhaFuncionario = senha_ipt.value;
+        let confirmacaoFuncionario = confirmacaosenha_ipt.value;
+        let nivelAcessoFuncionario = diferentesAcessos.value;
+        let fkEmpresa = 1;
+
+        const Funcionario = {
             nomeServer: nomeFuncionario,
             emailServer: emailFuncionario,
             senhaServer: senhaFuncionario,
-            NivelAcessoServer: nivelAcessoFuncionario,
+            nivelAcessoServer: nivelAcessoFuncionario,
             empresaServer: fkEmpresa
-    }
-    if (
-        nomeFuncionario == "" || 
-        emailFuncionario == "" ||
-        senhaFuncionario == "" ||
-        confirmacaoFuncionario == "" ||
-        nivelAcessoFuncionario == "" 
-    ) {
-        alert("Há campos em branco")
-    } else if (senhaFuncionario != confirmacaoFuncionario) {
-        alert("As senhas não são as mesmas")
-    } else{
+        }
+        if (
+            nomeFuncionario == "" ||
+            emailFuncionario == "" ||
+            senhaFuncionario == "" ||
+            confirmacaoFuncionario == "" ||
+            nivelAcessoFuncionario == ""
+        ) {
+            alert("Há campos em branco")
+        } else if (senhaFuncionario != confirmacaoFuncionario) {
+            alert("As senhas não são as mesmas")
+        } else {
             fetch("/cduser/cadastrarFuncionario", {
-                method:"POST",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(Funcionario),
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                alert("Funcionario cadastrado com sucesso!");
-            })
-            .catch(error => {
-                console.log("Erro ao cadastrar Funcionário:", error);
-                
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    alert("Funcionario cadastrado com sucesso!");
+                })
+                .catch(error => {
+                    console.log("Erro ao cadastrar Funcionário:", error);
+
+                });
         }
-        
-}
+
+    }
 </script>
 
 </html>
