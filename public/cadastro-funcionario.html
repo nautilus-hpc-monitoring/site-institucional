@@ -319,7 +319,7 @@
         let senhaFuncionario = senha_ipt.value;
         let confirmacaoFuncionario = confirmacaosenha_ipt.value;
         let nivelAcessoFuncionario = diferentesAcessos.value;
-        let fkEmpresa = 1;
+        let fkEmpresa = sessionStorage.getItem("ID_EMPRESA");
 
         const Funcionario = {
             nomeServer: nomeFuncionario,
