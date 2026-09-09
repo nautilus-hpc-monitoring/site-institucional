@@ -12,10 +12,12 @@
     <link rel="stylesheet" href="./css/formulario-cadastro.css">
     <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="./css/cadastro-empresa.css">
+
+    <script src="./js/sessao.js"></script>
     <title>Nautilus - Cadastro Empresa</title>
 </head>
 
-<body>
+<body onload="validarSessao()">
 
     <div class="mobile-header">
         <button id="open-sidebar-btn" aria-label="Abrir menu">
@@ -50,6 +52,9 @@
             <li class="nav-item">
                 <a href="./cadastro-node.html"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a>
             </li>
+            <li class="nav-item">
+                <a href="./cadastro-funcionario.html"><i class="fa-solid fa-users"></i> <span>Funcionários</span></a>
+            </li>
             <li class="nav-item active">
                 <a href="./cadastro-empresa.html"><i class="fa-solid fa-building"></i> <span>Empresas</span></a>
             </li>
@@ -59,6 +64,10 @@
             <a href="#" class="nav-item">
                 <i class="fa-solid fa-sliders"></i>
                 <span>Configurações</span>
+            </a>
+            <a href="#" class="nav-item" onclick="encerrarSessao()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Sair</span>
             </a>
         </div>
     </aside>
@@ -100,6 +109,12 @@
                         <span class="item-description">Nodes</span>
                     </a>
                 </li>
+                <li class="side-item">
+                    <a href="./cadastro-funcionario.html">
+                        <i class="fa-solid fa-users"></i>
+                        <span class="item-description">Funcionários</span>
+                    </a>
+                </li>
 
                 <li class="side-item active">
                     <a href="./cadastro-empresa.html">
@@ -118,6 +133,12 @@
                     <span class="item-description">Configurações</span>
                 </a>
             </li>
+            <li class="side-item">
+                <a href="#" onclick="encerrarSessao()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description">Sair</span>
+                </a>
+            </li>
         </ul>
     </nav>
     <div id="main-container">
@@ -126,11 +147,10 @@
                 <div class="user-avatar">
                     <i class="fa-regular fa-user"></i>
                 </div>
-                <span class="user-name">dsads</span>
+                <span class="user-name" id="b_usuario"></span>
             </div>
         </header>
         <main class="page-content">
-            <a href="#" class="back-link">&larr; Voltar para empresas</a>
             <h1 class="page-title">Cadastrar nova empresa</h1>
             <p class="page-subtitle">Adicione uma nova empresa ao sistema de gerenciamento.</p>
 
@@ -328,9 +348,9 @@
             });
     }
 
-    function tratamento_validacao_data(data){
+    function tratamento_validacao_data(data) {
         console.log(data);
-        if(data[2] != "/" || data[5] != "/"){
+        if (data[2] != "/" || data[5] != "/") {
             alert("Digite corretamente: DD/MM/AAAA")
         } else {
             let partes = data.split("/");
@@ -338,9 +358,9 @@
         }
     }
 
-    function tratamento_validacao_cnpj(cnpj){
-        if(cnpj[2] != "." || cnpj[6] != "." || cnpj[10] != "/" || cnpj[15] != "-"){
-            alert ("Digite o CNPJ corretamente: XX.XXX.XXX/XXXX.XX")
+    function tratamento_validacao_cnpj(cnpj) {
+        if (cnpj[2] != "." || cnpj[6] != "." || cnpj[10] != "/" || cnpj[15] != "-") {
+            alert("Digite o CNPJ corretamente: XX.XXX.XXX/XXXX.XX")
         } else {
             return cnpj.replace(/\D/g, "");
         }

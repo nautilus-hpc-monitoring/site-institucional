@@ -1,20 +1,36 @@
 // sessão
-function validarSessao() {
-    var email = sessionStorage.EMAIL_USUARIO;
-    var nome = sessionStorage.NOME_USUARIO;
+function usuarioLogado() {
+    return sessionStorage.getItem("ID_USUARIO") !== null;
+}
 
-    var b_usuario = document.getElementById("b_usuario");
-
-    if (email != null && nome != null) {
-        b_usuario.innerHTML = nome;
-    } else {
-        window.location = "../login.html";
+function protegerPagina() {
+    if (!usuarioLogado()) {
+        window.location.href = "./login.html";
     }
 }
 
-function limparSessao() {
+// para páginas que também exibem o nome no elemento #b_usuario
+function validarSessao() {
+    if (!usuarioLogado()) {
+        window.location.href = "./login.html";
+        return;
+    }
+
+    var b_usuario = document.getElementById("b_usuario");
+    if (b_usuario) {
+        b_usuario.innerHTML = sessionStorage.getItem("NOME_USUARIO");
+    }
+}
+
+function encerrarSessao() {
     sessionStorage.clear();
-    window.location = "../login.html";
+    window.location.href = "./login.html";
+}
+
+function exibirNomeUsuario(idElemento = "nome-usuario") {
+    const nome = sessionStorage.getItem("NOME_USUARIO");
+    const el = document.getElementById(idElemento);
+    if (nome && el) el.textContent = nome;
 }
 
 // carregamento (loading)
@@ -33,4 +49,3 @@ function finalizarAguardar(texto) {
         divErrosLogin.innerHTML = texto;
     }
 }
-
