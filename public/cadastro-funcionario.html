@@ -11,6 +11,7 @@
 
     <script src="./js/sessao.js"></script>
     <title>Nautilus - Cadastro de Funcionários</title>
+    <link rel="icon" href="./assets/icon/logo.png">
 </head>
 
 <body onload="protegerPagina()">
@@ -136,6 +137,14 @@
     </nav>
 
     <div id="main-container">
+                <header class="top-header">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <span class="user-name" id="b_usuario"></span>
+            </div>
+        </header>
         <main class="page-content">
             <h1 class="page-title">Cadastrar Funcionário</h1>
             <p class="page-subtitle">Adicione um novo usuário à organização e defina o nível de acesso à plataforma.</p>
@@ -207,19 +216,19 @@
             <div class="qtd-users">
                 <div class="card-users" id="card01">
                     <p>Total de usuários</p>
-                    <span id="qtdTotal">4</span>
+                    <span id="qtdTotal">0</span>
                 </div>
                 <div class="card-users" id="card02">
                     <p>Administradores</p>
-                    <span id="qtdAdministradores">1</span>
+                    <span id="qtdAdministradores">0</span>
                 </div>
                 <div class="card-users" id="card03">
                     <p>Gestores</p>
-                    <span id="qtdGestores">1</span>
+                    <span id="qtdGestores">0</span>
                 </div>
                 <div class="card-users" id="card04">
                     <p>Operadores</p>
-                    <span id="qtdOperadores">2</span>
+                    <span id="qtdOperadores">0</span>
                 </div>
                 <div class="card-users" id="card05">
                     <p>Inativos</p>
@@ -293,15 +302,16 @@
     };
 
     function carregarQuantidades() {
-        let fkEmpresa = 1;
+        let fkEmpresa = sessionStorage.getItem("ID_EMPRESA");
+        
 
         fetch(`/qtdFuncionario/buscarQuantidades/${fkEmpresa}`)
             .then(response => response.json())
             .then(data => {
-                qtdTotal.textContent = data.total ?? 0;
-                qtdAdministradores.textContent = data.administradores ?? 0;
-                qtdGestores.textContent = data.gestores ?? 0;
-                qtdOperadores.textContent = data.operadores ?? 0;
+                qtdTotal.textContent = data[0].total ?? 0;
+                qtdAdministradores.textContent = data[0].administradores ?? 0;
+                qtdGestores.textContent = data[0].gestores ?? 0;
+                qtdOperadores.textContent = data[0].operadores ?? 0;
                 qtdInativos.textContent = 0;
             })
             .catch(error => {
@@ -319,7 +329,7 @@
         let senhaFuncionario = senha_ipt.value;
         let confirmacaoFuncionario = confirmacaosenha_ipt.value;
         let nivelAcessoFuncionario = diferentesAcessos.value;
-        let fkEmpresa = 1;
+        let fkEmpresa = sessionStorage.getItem("ID_EMPRESA");
 
         const Funcionario = {
             nomeServer: nomeFuncionario,
@@ -339,6 +349,8 @@
         } else if (senhaFuncionario != confirmacaoFuncionario) {
             alert("As senhas não são as mesmas")
         } else {
+            alert("Cadastro de Funcionário Realizado");
+
             fetch("/cduser/cadastrarFuncionario", {
                 method: "POST",
                 headers: {

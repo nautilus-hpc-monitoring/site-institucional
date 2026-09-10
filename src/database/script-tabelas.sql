@@ -184,9 +184,9 @@ INSERT INTO endereco (id, numero, cidade, estado, logradouro, fk_empresa) VALUES
 (3, '500', 'Rio de Janeiro', 'RJ', 'Rua Central', 3);
 
 INSERT INTO nivel_acesso (id, nome) VALUES
-(1, 'Administrador'),
-(2, 'Tecnico'),
-(3, 'Visualizador');
+(1, 'admin'),
+(2, 'gestores'),
+(3, 'operadores');
 
 INSERT INTO usuario (id, nome, email, senha, fk_nivel_acesso, fk_empresa) VALUES
 (1, 'Carlos', 'carlos@nautilus.com', 'senha123', 1, 1),
