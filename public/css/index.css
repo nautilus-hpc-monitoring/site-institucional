@@ -1,3 +1,37 @@
+@media (min-width: 1025px) {
+    body .hero_texto > p,
+    body .hero_banner p,
+    body .texto > p,
+    body .esquerda p,
+    body .vamos-texto p {
+        font-size: 1.5rem;
+        line-height: 1.5;
+    }
+
+    body .conteudo-card p,
+    body .beneficio p,
+    body .beneficio-controle p {
+        font-size: 1.25rem;
+        line-height: 1.5;
+    }
+
+    body .hero_botoes a,
+    body .card-infra a,
+    body .vamos-botoes button {
+        font-size: 1.125rem;
+        line-height: 1.4;
+    }
+
+    body .hero_texto {
+        gap: 24px;
+    }
+
+    body .controle-infra {
+        height: auto;
+        min-height: 75vh;
+    }
+}
+
 body {
     min-height: 200vh;
 }

@@ -1,3 +1,33 @@
+@media (min-width: 1025px) {
+    body .text-size {
+        font-size: 1.625rem;
+        line-height: 1.5;
+    }
+
+    body .text-card,
+    body .cargo-membro {
+        font-size: 1.25rem;
+        line-height: 1.5;
+    }
+
+    body .desc-banner {
+        font-size: 1.5rem;
+    }
+
+    body .btn-banner {
+        font-size: 1.25rem;
+    }
+
+    body .carrossel {
+        height: auto;
+        align-items: flex-start;
+    }
+
+    body .card {
+        gap: 16px;
+    }
+}
+
 .main-content-area{
 	margin-top: 8%;
 	display: flex;

@@ -1,3 +1,44 @@
+@media (min-width: 1025px) {
+    body .descricao,
+    body .descricao-como-funciona,
+    body .descricao-contato,
+    body .fluxo p,
+    body .card-diferencial p,
+    body .texto-header-contato p {
+        font-size: 1.25rem;
+        line-height: 1.5;
+    }
+
+    body .texto-hpc {
+        font-size: 1.5rem;
+        line-height: 1.5;
+    }
+
+    body .conheca-nos,
+    body .item-contato span {
+        font-size: 1.125rem;
+        line-height: 1.4;
+    }
+
+    body .texto-nodes p,
+    body .info-infraestrutura p,
+    body .card-plataforma p,
+    body .texto-rodape {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    body .card-plataforma {
+        height: auto;
+        bottom: auto;
+        min-height: 120px;
+    }
+
+    body .rodape-diagrama {
+        transform: none;
+    }
+}
+
 * {
     box-sizing: border-box;
 }
