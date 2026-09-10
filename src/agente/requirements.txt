@@ -1,3 +1,0 @@
-{
-    "token_instalacao": "SEU_TOKEN_AQUI",
-}

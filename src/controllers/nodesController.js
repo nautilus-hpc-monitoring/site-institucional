@@ -1,5 +1,4 @@
 var nodesModel = require("../models/nodesModel");
-const crypto = require("crypto");
 
 function chamarHPC(req, res) {
     var fk_empresa = req.body.fk_empresaServer;
@@ -83,21 +82,17 @@ function cadastrar(req, res) {
 
     } else {
 
-        var tokenNode = crypto.randomBytes(32).toString("hex");
-
         nodesModel.cadastrar(
             hostname,
             ip,
             status,
             sistemaOperacional,
-            clusterFk,
-            tokenNode
+            clusterFk
         )
             .then(function (resultado) {
 
                 res.json({
-                    resultado: resultado,
-                    tokenNode: tokenNode
+                    resultado: resultado
                 });
 
             })

@@ -23,12 +23,12 @@ function chamarCluster(fk_ambiente_hpc) {
 }
 
 
-function cadastrar(hostname, ip, status, sistemaOperacional, clusterFk, tokenNode) {
+function cadastrar(hostname, ip, status, sistemaOperacional, clusterFk) {
     var instrucaoSql = `
         INSERT INTO node
-        (hostname, ip, status, sistema_operacional, fk_cluster, token_node)
+        (hostname, ip, status, sistema_operacional, fk_cluster)
         VALUES
-        ('${hostname}', '${ip}', '${status}', '${sistemaOperacional}', ${clusterFk}, '${tokenNode}');
+        ('${hostname}', '${ip}', '${status}', '${sistemaOperacional}', ${clusterFk});
     `;
 
     return database.executar(instrucaoSql);
@@ -72,4 +72,3 @@ module.exports = {
     ativarAgente,
     salvarMac
 };
-
