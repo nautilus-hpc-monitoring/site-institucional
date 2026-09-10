@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./css/navbar.css">
 
   <script src="./js/navbar.js" defer></script>
+  <link rel="icon" href="./assets/icon/logo.png">
 </head>
 
 <body>
@@ -118,12 +119,12 @@
         </p>
 
         <div class="hero_botoes">
-          <a href="#" class="btn_destaque">
+          <a href="pagina-solucao.html" class="btn_destaque">
             <span>Entenda mais sobre o produto que oferecemos</span>
             <img src="./assets/icon/seta_direita_branca.svg" alt="Seta Branca">
           </a>
 
-          <a href="#" class="btn_secundario">
+          <a href="#impactos-container" class="btn_secundario">
             <span>Entenda o valor que esse tipo de serviço trás para o seu produto</span>
             <span class="setas">
               <img src="./assets/icon/seta_direita_azul.svg" alt="Seta Azul">
@@ -140,7 +141,7 @@
       <aside class="hero_servicos">
         <span class="servicos_titulo">Serviços</span>
 
-        <a href="#" class="servico_item">
+        <a href="pagina-solucao.html#secao-contato" class="servico_item">
           <p>
             Acompanhe continuamente o uso de CPU, memória RAM e armazenamento dos nodes do ambiente HPC.
           </p>
@@ -148,7 +149,7 @@
           <img src="./assets/icon/seta_direita_azul.svg" alt="Seta Azul">
         </a>
 
-        <a href="#" class="servico_item">
+        <a href="pagina-solucao.html#secao-contato" class="servico_item">
           <p>
             Identifique comportamentos anormais nos recursos monitorados e receba alertas para auxiliar na prevenção de
             incidentes.
@@ -179,8 +180,8 @@
           Cadastre-se para entrar em contato e configurar um sistema para o seu ambiente.
         </p>
 
-        <a href="#" class="banner_cta">
-          Cadastre-se
+        <a href="pagina-solucao.html#secao-contato" class="banner_cta">
+          Entre em contato
           <span class="setas">
             <img src="./assets/icon/seta_direita_azul.svg" alt="Seta Azul" class="seta_normal">
             <img src="./assets/icon/seta_direita_branca.svg" alt="Seta branca" class="seta_hover">
@@ -207,7 +208,7 @@
                 Conheça como funciona a infraestrutura da Petrobras
               </p>
 
-              <a href="#">
+              <a href="https://petrobras.com.br/inovacao-e-tecnologia">
                 Abrir infraestrutura ↗
               </a>
             </div>
@@ -222,7 +223,7 @@
                 Conheça o Harpia
               </p>
 
-              <a href="#">
+              <a href="https://agencia.petrobras.com.br/w/petrobras-coloca-em-opera%C3%A7%C3%A3o-o-supercomputador-harpia">
                 Conhecer ↗
               </a>
             </div>
@@ -237,7 +238,7 @@
                 Cenpes
               </p>
 
-              <a href="#">
+              <a href="https://petrobras.com.br/pt/inovacao-e-tecnologia/centro-de-pesquisa">
                 Conhecer ↗
               </a>
             </div>
@@ -247,7 +248,7 @@
       </div>
     </section>
     <section class="sobre-projeto container">
-      
+
       <div class="sobre-conteudo">
         <div class="texto">
           <span class="sobre-tag">SOBRE O PROJETO</span>
@@ -259,14 +260,14 @@
           <p>Da acompanhamento dos recursos à identificação de utilização e riscos, nossa solução conecta monitoramento
             eficiente à gestão em uma única plataforma.</p>
             
-          <button class="botao-sobre" type="button">
+          <button onclick="window.location.href='pagina-solucao.html'" class="botao-sobre" type="button">
             <span>Conheça nossa solução</span>
             <span class="setas" aria-hidden="true">
               <img src="./assets/icon/seta_direita_azul.svg" alt="" class="seta_normal">
               <img src="./assets/icon/seta_direita_branca.svg" alt="" class="seta_hover">
             </span>
           </button>
-          
+
           <div class="beneficios">
             <div class="beneficio">
               <div>
@@ -294,7 +295,7 @@
         </div>
       </div>
     </section>
-    <section class="impactos container">
+    <section class="impactos container" id="impactos-container">
 
       <div class="introducao">
         <h1>O que você não monitora<br>também gera custos.</h1>
@@ -315,39 +316,44 @@
         <div class="impacto-item impacto-energia">
           <div class="caixa-info">
             <h3>ENERGIA</h3>
-            <p>Sem controle da eficiência energética (PUE), a refrigeração trabalha no escuro, gastando muito mais do
-              que o necessário.</p>
+            <p>Sem otimização do PUE baseada em telemetria em tempo real, o ar-condicionado de precisão e os chillers
+              operam com sobrecarga, gerando desvios estimados em até 15% na fatura energética anual de grandes
+              clusters.</p>
           </div>
-          <span class="valor">+R$ 500 MIL/ano</span>
+          <span class="valor">Até 20% de desperdício no PUE</span>
         </div>
         <div class="impacto-item impacto-dados">
           <div class="caixa-info">
             <h3>DADOS</h3>
-            <p>Sem ter controle sobre o fluxo de dados, se paga por armazenamento inutilizado e taxas de egress que
-              podem ser evitadas.</p>
+            <p>A ausência de governança e visibilidade sobre o ciclo de vida dos dados de geociências resulta em
+              retenção desnecessária em storages de altíssimo custo e tráfego redundante de saída</p>
           </div>
-          <span class="valor">+R$ 1.750.000 MIL</span>
+          <span class="valor">Sobrecarga de storages de alta performance</span>
         </div>
         <div class="impacto-item impacto-ociosidade">
           <div class="caixa-info">
             <h3>OCIOSIDADE</h3>
-            <p>Os gastos são mais ou menos assim, nesse pique.</p>
+            <p>Nós de computação de alto desempenho ociosos ou mal dimensionados nas filas de execução representam
+              capacidade de processamento subaproveitada, drenando o retorno sobre o investimento (ROI) dos ativos de
+              hardware.</p>
           </div>
-          <span class="valor">R$ 24.000,00</span>
+          <span class="valor">Queda de eficiência</span>
         </div>
         <div class="impacto-item impacto-investimento">
           <div class="caixa-info">
             <h3>INVESTIMENTO</h3>
-            <p>Os gastos são mais ou menos assim, nesse pique.</p>
+            <p>Soma total dos contratos ativos para aquisição, operação e suporte contínuo dos supercomputadores e
+              serviços HPC</p>
           </div>
-          <span class="valor">R$ 24.000,00</span>
+          <span class="valor">R$ 525,6 Milhões</span>
         </div>
         <div class="impacto-item impacto-multas">
           <div class="caixa-info">
             <h3>MULTAS</h3>
-            <p>Os gastos são mais ou menos assim, nesse pique.</p>
+            <p>Exposição máxima a multas moratórias (limitadas a 10% do contrato de bens) em caso de falhas, atrasos e
+              descumprimento de SLAs.</p>
           </div>
-          <span class="valor">R$ 24.000,00</span>
+          <span class="valor">R$ 44,3 Milhões</span>
         </div>
       </div>
 
@@ -402,14 +408,14 @@
         <p>Descubra como a NAUTILUS pode transformar a forma como sua equipe acompanha ambientes de alta performance e
           impulsionar resultados com mais controle e eficiência.</p>
         <div class="vamos-botoes">
-          <button class="botao-principal" type="button">
+          <button onclick="window.location.href='pagina-solucao.html'" class="botao-principal" type="button">
             <span>Conheça nossa solução</span>
             <span class="setas" aria-hidden="true">
               <img src="./assets/icon/seta_direita_branca.svg" alt="">
             </span>
           </button>
-          <button class="botao-secundario" type="button">
-            <span>Cadastre-se</span>
+          <button onclick="window.location.href='pagina-solucao.html#secao-contato'" class="botao-secundario" type="button">
+            <span>Entre em contato</span>
             <span class="setas" aria-hidden="true">
               <img src="./assets/icon/seta_direita_azul.svg" alt="" class="seta_normal">
               <img src="./assets/icon/seta_direita_branca.svg" alt="" class="seta_hover">
@@ -430,17 +436,23 @@
     <div class="right-side-footer">
       <div class="links-pgs">
         <p>Redirecionamento para o site</p>
-        <a href="./index.html"><p>home</p></a>
-        <a href="./pagina-solucao.html"><p>solução</p></a>
-        <a href="./login.html"><p>login</p></a>
-        <a href="./sobre-nos.html"><p>sobre-nos</p></a>
+        <a href="./index.html"><p>Home</p></a>
+        <a href="./pagina-solucao.html"><p>Solução</p></a>
+        <a href="./login.html"><p>Login</p></a>
+        <a href="./sobre-nos.html"><p>Sobre nós</p></a>
       </div>
       <div class="links-extras">
         <div class="extras-top">
           <p>Extra</p>
-          <a href="mailto:nautilus@email.com"><p>nautilus@email.com</p></a>
-          <a href="https://www.github.com/nautilus-hpc-monitoring"><p>https://www.github.com/nautilus-hpc-monitoring</p></a>
-          <a href="mailto:nautilus@email.com?subject=Solicitação%20da%20documentação"><p>solicitar documentação</p></a>
+          <a href="mailto:nautilus@email.com">
+            <p>nautilus@email.com</p>
+          </a>
+          <a href="https://www.github.com/nautilus-hpc-monitoring">
+            <p>https://www.github.com/nautilus-hpc-monitoring</p>
+          </a>
+          <a href="mailto:nautilus@email.com?subject=Solicitação%20da%20documentação">
+            <p>solicitar documentação</p>
+          </a>
         </div>
         <div class="extras-bottom">
           <p>Parceiros</p>
