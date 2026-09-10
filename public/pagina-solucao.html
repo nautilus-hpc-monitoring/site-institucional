@@ -15,89 +15,89 @@
 </head>
 
 <body>
-  <header class="navbar">
-    <div class="navbar_container">
+    <header class="navbar">
+        <div class="navbar_container">
 
-      <div class="navbar_left">
+            <div class="navbar_left">
 
-        <button class="navbar_menu" id="btnMenu" aria-label="Abrir menu">
-          ☰
-        </button>
+                <button class="navbar_menu" id="btnMenu" aria-label="Abrir menu">
+                    ☰
+                </button>
 
-        <a href="./index.html" class="navbar_logo">
-          <img src="./assets/img/logo.png" alt="Nautilus Logo">
-          Nautilus
-        </a>
+                <a href="./index.html" class="navbar_logo">
+                    <img src="./assets/img/logo.png" alt="Nautilus Logo">
+                    Nautilus
+                </a>
 
-        <nav class="navbar_nav">
-          <a href="./pagina-solucao.html">
-            Serviço como solução
-            <span class="navbar_setas">
-              <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-              <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-            </span>
-          </a>
+                <nav class="navbar_nav">
+                    <a href="./pagina-solucao.html">
+                        Serviço como solução
+                        <span class="navbar_setas">
+                            <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+                            <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+                        </span>
+                    </a>
 
-          <a href="./sobre-nos.html">
-            Sobre nós
-            <span class="navbar_setas">
-              <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-              <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-            </span>
-          </a>
+                    <a href="./sobre-nos.html">
+                        Sobre nós
+                        <span class="navbar_setas">
+                            <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+                            <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+                        </span>
+                    </a>
+
+                </nav>
+
+            </div>
+
+            <div class="navbar_actions">
+                <button><a href="./login.html">Login</a></button>
+            </div>
+
+        </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar_topo">
+            <a href="./index.html" class="sidebar_logo">
+                <img src="./assets/img/logo.png" alt="Nautilus Logo">
+                Nautilus
+            </a>
+
+            <button class="sidebar_fechar" id="btnFechar">
+                ✕
+            </button>
+        </div>
+
+        <nav class="sidebar_nav">
+
+            <a href="./pagina-solucao.html">
+                <span>Serviço como solução</span>
+
+                <span class="sidebar_setas">
+                    <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+                    <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+                </span>
+            </a>
+
+            <a href="./sobre-nos.html">
+                <span>Sobre nós</span>
+
+                <span class="sidebar_setas">
+                    <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
+                    <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
+                </span>
+            </a>
+
 
         </nav>
 
-      </div>
+        <div class="sidebar_actions">
+            <button><a href="./login.html">Login</a></button>
+        </div>
 
-      <div class="navbar_actions">
-        <button><a href="./login.html">Login</a></button>
-      </div>
-
-    </div>
-  </header>
-
-  <aside class="sidebar" id="sidebar">
-
-    <div class="sidebar_topo">
-      <a href="./index.html" class="sidebar_logo">
-        <img src="./assets/img/logo.png" alt="Nautilus Logo">
-        Nautilus
-      </a>
-
-      <button class="sidebar_fechar" id="btnFechar">
-        ✕
-      </button>
-    </div>
-
-    <nav class="sidebar_nav">
-
-      <a href="./pagina-solucao.html">
-        <span>Serviço como solução</span>
-
-        <span class="sidebar_setas">
-          <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-          <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-        </span>
-      </a>
-
-      <a href="./sobre-nos.html">
-        <span>Sobre nós</span>
-
-        <span class="sidebar_setas">
-          <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-          <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-        </span>
-      </a>
-
-
-    </nav>
-
-    <div class="sidebar_actions">
-      <button><a href="./login.html">Login</a></button>
-    </div>
-
-  </aside>
+    </aside>
 
     <section class="secao-solucao-nautilus">
         <div class="container">
@@ -120,12 +120,12 @@
                         visão clara da sua infraestrutura de alta performance
                     </p>
 
-                    <button class="conheca-nos" ><a class="escrita-sobre-nos-botao" href="./sobre-nos.html">
-                                    <span>Conheça nossa solução</span>
+                    <a class="conheca-nos escrita-sobre-nos-botao" href="./sobre-nos.html">
+                        <span>Conheça nossa solução</span>
                         <span class="setas" aria-hidden="true">
-                        <img src="./assets/icon/seta_direita_branca.svg" alt="">
+                            <img src="./assets/icon/seta_direita_branca.svg" alt="">
                         </span>
-                    </a></button>
+                    </a>
 
                     <p class="sobre-projeto">
                         SOBRE O PROJETO<br>
@@ -222,7 +222,8 @@
 
 
                 <div class="card-nodes">
-                   <div class="imagem-nodes"><img src="assets/HPC3.png" alt="Nodes" style="display: flex; height: 200px;"></div>
+                    <div class="imagem-nodes"><img src="assets/HPC3.png" alt="Nodes"
+                            style="display: flex; height: 200px;"></div>
                     <div class="texto-nodes card-nodes-container">
                         <strong>NODES</strong>
                         <p>Coleta de dados em tempo real de cada node do ambiente.</p>
@@ -261,7 +262,7 @@
         </div>
     </section>
 
-    <section class="secao-contato">
+    <section class="secao-contato" id="secao-contato">
         <div class="container container-contato">
 
 
@@ -319,7 +320,8 @@
                     </div>
                 </div>
 
-                <div class="linha-decorativa-contato espaco-extra" style="margin-left: 5%; width: 10%; background-color: #42B8C4;"></div>
+                <div class="linha-decorativa-contato espaco-extra"
+                    style="margin-left: 5%; width: 10%; background-color: #42B8C4;"></div>
 
                 <div class="lista-contatos">
                     <div class="item-contato">
@@ -356,39 +358,54 @@
         </div>
     </section>
 
-    <footer style="--container-padding: clamp(80px, 8.33vw, 160px); width: 100%; padding-inline: var(--container-padding); margin-inline: auto;">
-    <div class="left-side-footer">
-      <img src="./assets/icon/logotipo.png" alt="Nautilus">
-    </div>
-    <div class="right-side-footer">
-      <div class="links-pgs">
-        <p>Redirecionamento para o site</p>
-        <a href="./index.html"><p>home</p></a>
-        <a href="./pagina-solucao.html"><p>solução</p></a>
-        <a href="./login.html"><p>login</p></a>
-        <a href="./sobre-nos.html"><p>sobre-nos</p></a>
-      </div>
-      <div class="links-extras">
-        <div class="extras-top">
-          <p>Extra</p>
-          <a href="mailto:nautilus@email.com"><p>nautilus@email.com</p></a>
-          <a href="https://www.github.com/nautilus-hpc-monitoring"><p>https://www.github.com/nautilus-hpc-monitoring</p></a>
-          <a href="mailto:nautilus@email.com?subject=Solicitação%20da%20documentação"><p>solicitar documentação</p></a>
+    <footer
+        style="--container-padding: clamp(80px, 8.33vw, 160px); width: 100%; padding-inline: var(--container-padding); margin-inline: auto;">
+        <div class="left-side-footer">
+            <img src="./assets/icon/logotipo.png" alt="Nautilus">
         </div>
-        <div class="extras-bottom">
-          <p>Parceiros</p>
-          <div class="imgs-footer">
-            <img src="./assets/icon/logo-petrobras.png" alt="Petrobras">
-            <img src="./assets/icon/logo-sptech.png" alt="SPTech">
-          </div>
+        <div class="right-side-footer">
+            <div class="links-pgs">
+                <p>Redirecionamento para o site</p>
+                <a href="./index.html">
+                    <p>Home</p>
+                </a>
+                <a href="./pagina-solucao.html">
+                    <p>Solução</p>
+                </a>
+                <a href="./login.html">
+                    <p>Login</p>
+                </a>
+                <a href="./sobre-nos.html">
+                    <p>Sobre nós</p>
+                </a>
+            </div>
+            <div class="links-extras">
+                <div class="extras-top">
+                    <p>Extra</p>
+                    <a href="mailto:nautilus@email.com">
+                        <p>nautilus@email.com</p>
+                    </a>
+                    <a href="https://www.github.com/nautilus-hpc-monitoring">
+                        <p>https://www.github.com/nautilus-hpc-monitoring</p>
+                    </a>
+                    <a href="mailto:nautilus@email.com?subject=Solicitação%20da%20documentação">
+                        <p>solicitar documentação</p>
+                    </a>
+                </div>
+                <div class="extras-bottom">
+                    <p>Parceiros</p>
+                    <div class="imgs-footer">
+                        <img src="./assets/icon/logo-petrobras.png" alt="Petrobras">
+                        <img src="./assets/icon/logo-sptech.png" alt="SPTech">
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-footer">
+                <p>Termos de uso</p>
+                <p>Acessibilidade</p>
+            </div>
         </div>
-      </div>
-      <div class="bottom-footer">
-        <p>Termos de uso</p>
-        <p>Acessibilidade</p>
-      </div>
-    </div>
-  </footer>
+    </footer>
 
 </body>
 
