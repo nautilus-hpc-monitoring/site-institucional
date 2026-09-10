@@ -188,7 +188,7 @@
                                         <option value="" disabled selected>Selecione um nível de acesso</option>
                                         <option value="admin">Administrador</option>
                                         <option value="gestores">Gestor</option>
-                                        <option value="operador">Operador</option>
+                                        <option value="operadores">Operador</option>
                                     </select>
                                 </div>
                             </div>
@@ -347,7 +347,6 @@
         } else if (senhaFuncionario != confirmacaoFuncionario) {
             alert("As senhas não são as mesmas")
         } else {
-            alert("Cadastro de Funcionário Realizado");
 
             fetch("/cduser/cadastrarFuncionario", {
                 method: "POST",
@@ -360,6 +359,7 @@
                 .then(data => {
                     console.log(data);
                     alert("Funcionario cadastrado com sucesso!");
+                    window.location.reload();
                 })
                 .catch(error => {
                     console.log("Erro ao cadastrar Funcionário:", error);
