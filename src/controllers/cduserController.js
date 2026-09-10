@@ -1,6 +1,6 @@
 var cduserModel = require("../models/cduserModel");
 
-function cadastrarFuncionario(req,res) {
+function cadastrarFuncionario(req, res) {
     console.log("BODY RECEBIDO:");
     console.log(req.body);
 
@@ -38,12 +38,17 @@ function cadastrarFuncionario(req,res) {
             nivelAcessoFuncionario,
             fkEmpresa
         )
-        .then(function(resultado) {
-            res.json(resultado);
-        })
-        .catch(function(erro) {
-            res.status(500).json(erro.sqlMessage);
-        });
+            .then(function (resultado) {
+                res.json(resultado);
+            })
+            .catch(function (erro) {
+                console.log("ERRO COMPLETO:");
+                console.log(erro);
+
+                res.status(500).json({
+                    erro: erro.sqlMessage || erro.message
+                });
+            });
     }
 }
 

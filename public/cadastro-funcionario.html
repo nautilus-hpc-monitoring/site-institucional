@@ -185,9 +185,9 @@
                                 <div class="select-wrapper">
                                     <select id="diferentesAcessos" onchange="">
                                         <option value="" disabled selected>Selecione um nível de acesso</option>
-                                        <option value="Administrador">Administrador</option>
-                                        <option value="Gerente">Gerente</option>
-                                        <option value="Operador">Operador</option>
+                                        <option value="admin">Administrador</option>
+                                        <option value="gestores">Gestor</option>
+                                        <option value="operador">Operador</option>
                                     </select>
                                 </div>
                             </div>
@@ -207,7 +207,7 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="cadastrarFuncionario()">Salvar
+                    <button type="submit" class="btn btn-primary" onclick="cadastrarFuncionario()">Salvar
                         usuário</button>
                 </div>
             </form>
@@ -302,7 +302,6 @@
 
     function carregarQuantidades() {
         let fkEmpresa = sessionStorage.getItem("ID_EMPRESA");
-        
 
         fetch(`/qtdFuncionario/buscarQuantidades/${fkEmpresa}`)
             .then(response => response.json())
@@ -319,7 +318,6 @@
     }
 
     window.onload = carregarQuantidades;
-
 
     function cadastrarFuncionario() {
 
