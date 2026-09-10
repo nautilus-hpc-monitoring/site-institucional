@@ -358,10 +358,25 @@
         if (data.length < 10) {
             alert("Digite corretamente no formato: DD/MM/AAAA");
             return null;
-        } else {
-            let partes = data.split("/");
-            return `${partes[2]}-${partes[1]}-${partes[0]}`;
         }
+
+        let partes = data.split("/");
+        let dia = parseInt(partes[0], 10);
+        let mes = parseInt(partes[1], 10);
+        let ano = parseInt(partes[2], 10);
+
+        let objetoData = new Date(ano, mes - 1, dia);
+
+        let diaValido = objetoData.getDate() == dia;
+        let mesValido = objetoData.getMonth() == (mes - 1);
+        let anoValido = objetoData.getFullYear() == ano;
+
+        if (!diaValido || !mesValido || !anoValido) {
+            alert("Digite uma data válida no calendário!");
+            return null;
+        }
+
+        return `${partes[2]}-${partes[1]}-${partes[0]}`; // Pro backend
     }
 
     function tratamento_validacao_cnpj(cnpj) {
