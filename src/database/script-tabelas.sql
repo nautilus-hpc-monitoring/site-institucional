@@ -31,7 +31,6 @@ CREATE TABLE endereco(
 CREATE TABLE ambiente_hpc(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(45),
-    descricao VARCHAR(100),
     status VARCHAR(45),
     fk_empresa INT NOT NULL,
 
@@ -42,7 +41,6 @@ CREATE TABLE ambiente_hpc(
 CREATE TABLE cluster(
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(45),
-    descricao VARCHAR(100),
     status VARCHAR(45),
     fk_ambiente_hpc INT NOT NULL,
 
