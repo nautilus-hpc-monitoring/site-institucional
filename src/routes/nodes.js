@@ -22,8 +22,4 @@ router.post("/chamarCluster", function(req, res) {
 
 });
 
-router.post("/ativarAgente", function(req, res) {
-    nodesController.ativarAgente(req, res);
-});
-
 module.exports = router;

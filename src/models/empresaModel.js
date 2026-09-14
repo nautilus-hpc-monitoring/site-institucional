@@ -20,17 +20,6 @@ async function cadastrar(razaoSocial, cnpj, dataRegistro, numero, cidade, estado
     return
 }
 
-function buscarTokenInstalacao(idEmpresa) {
-    const instrucaoSql = `
-        SELECT token_instalacao
-        FROM empresa
-        WHERE id = ${idEmpresa};
-    `;
-
-    return database.executar(instrucaoSql);
-}
-
 module.exports = {
-    cadastrar,
-    buscarTokenInstalacao
+    cadastrar
 };
