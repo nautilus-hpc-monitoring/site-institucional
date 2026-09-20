@@ -7,328 +7,228 @@ DROP DATABASE IF EXISTS nautilus;
 CREATE DATABASE nautilus;
 USE nautilus;
 
-
-CREATE TABLE empresa(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    razao_social VARCHAR(45),
-    cnpj CHAR(14),
-    dt_registro DATE
+CREATE TABLE empresa (
+    id_empresa INT PRIMARY KEY AUTO_INCREMENT,
+    razao_social VARCHAR(60) NOT NULL,
+    cnpj CHAR(14) NOT NULL UNIQUE,
+    dt_registro DATE,
+    dominio VARCHAR(60) NOT NULL UNIQUE
 );
 
-
-CREATE TABLE endereco(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    numero VARCHAR(10),
-    cidade VARCHAR(45),
-    estado CHAR(2),
-    logradouro VARCHAR(100),
+CREATE TABLE endereco (
+    id_endereco INT PRIMARY KEY AUTO_INCREMENT,
+    logradouro VARCHAR(100) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    cidade VARCHAR(45) NOT NULL,
+    estado CHAR(2) NOT NULL,
     fk_empresa INT NOT NULL,
-
-    FOREIGN KEY (fk_empresa) REFERENCES empresa(id)
+    CONSTRAINT cFkEnderecoEmpresa
+        FOREIGN KEY (fk_empresa)
+        REFERENCES empresa(id_empresa)
 );
 
-
-CREATE TABLE ambiente_hpc(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(45),
-    status VARCHAR(45),
-    fk_empresa INT NOT NULL,
-
-    FOREIGN KEY (fk_empresa) REFERENCES empresa(id)
-);
-
-
-CREATE TABLE cluster(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(45),
-    status VARCHAR(45),
-    fk_ambiente_hpc INT NOT NULL,
-
-    FOREIGN KEY (fk_ambiente_hpc) REFERENCES ambiente_hpc(id)
-);
-
-
-CREATE TABLE node (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    hostname VARCHAR(255),
-    ip VARCHAR(45),
-    sistema_operacional VARCHAR(100),
-    status VARCHAR(45),
-    fk_cluster INT,
-
-    FOREIGN KEY (fk_cluster) REFERENCES cluster(id)
-);
-
-
-CREATE TABLE componente(
-    id INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE localizacao (
+    id_localizacao INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
-    unidade VARCHAR(45),
-    parametro VARCHAR(100) NOT NULL UNIQUE
+    pais VARCHAR(100) NOT NULL,
+    estado VARCHAR(100) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    cod_regiao VARCHAR(20) NOT NULL
 );
 
-
-CREATE TABLE nivel_acesso(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(45)
+CREATE TABLE nivel_acesso (
+    id_nivel_acesso INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(45) NOT NULL
 );
 
-
-CREATE TABLE permissao(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(45),
+CREATE TABLE permissao (
+    id_permissao INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(45) NOT NULL,
     descricao VARCHAR(100)
 );
 
-
-CREATE TABLE permissao_nivel_acesso(
+CREATE TABLE permissao_nivel_acesso (
     fk_permissao INT NOT NULL,
     fk_nivel_acesso INT NOT NULL,
-
     PRIMARY KEY (fk_permissao, fk_nivel_acesso),
-
-    FOREIGN KEY (fk_permissao)
-        REFERENCES permissao(id),
-
-    FOREIGN KEY (fk_nivel_acesso)
-        REFERENCES nivel_acesso(id)
+    CONSTRAINT cFkPnaPermissao
+        FOREIGN KEY (fk_permissao)
+        REFERENCES permissao(id_permissao),
+    CONSTRAINT cFkPnaNivelAcesso
+        FOREIGN KEY (fk_nivel_acesso)
+        REFERENCES nivel_acesso(id_nivel_acesso)
 );
 
-
-CREATE TABLE usuario(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(45),
-    email VARCHAR(100),
-    senha VARCHAR(100),
+CREATE TABLE usuario (
+    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    email_institucional VARCHAR(60) NOT NULL UNIQUE,
+    cpf CHAR(11) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    verificado TINYINT DEFAULT 0,
     fk_nivel_acesso INT NOT NULL,
     fk_empresa INT NOT NULL,
-
-    FOREIGN KEY (fk_nivel_acesso)
-        REFERENCES nivel_acesso(id),
-
-    FOREIGN KEY (fk_empresa)
-        REFERENCES empresa(id)
+    CONSTRAINT cFkUsuarioNivelAcesso
+        FOREIGN KEY (fk_nivel_acesso)
+        REFERENCES nivel_acesso(id_nivel_acesso),
+    CONSTRAINT cFkUsuarioEmpresa
+        FOREIGN KEY (fk_empresa)
+        REFERENCES empresa(id_empresa)
 );
 
-CREATE TABLE componente_node(
+CREATE TABLE verificacao_email (
+    id_verificacao INT PRIMARY KEY AUTO_INCREMENT,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    dt_expiracao DATETIME NOT NULL,
+    fk_usuario INT NOT NULL,
+    CONSTRAINT cFkVerificacaoUsuario
+        FOREIGN KEY (fk_usuario)
+        REFERENCES usuario(id_usuario)
+);
+
+CREATE TABLE ambiente_hpc (
+    id_ambiente_hpc INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(45) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    fk_empresa INT NOT NULL,
+    fk_localizacao INT NOT NULL,
+    CONSTRAINT ckAmbienteHpcStatus
+        CHECK (status IN ('ativo', 'inativo', 'manut.')),
+    CONSTRAINT cFkAmbienteEmpresa
+        FOREIGN KEY (fk_empresa)
+        REFERENCES empresa(id_empresa),
+    CONSTRAINT cFkAmbienteLocalizacao
+        FOREIGN KEY (fk_localizacao)
+        REFERENCES localizacao(id_localizacao)
+);
+
+CREATE TABLE cluster (
+    id_cluster INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(45) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    fk_ambiente_hpc INT NOT NULL,
+    CONSTRAINT ckClusterStatus
+        CHECK (status IN ('ativo', 'inativo', 'manut.')),
+    CONSTRAINT cFkClusterAmbiente
+        FOREIGN KEY (fk_ambiente_hpc)
+        REFERENCES ambiente_hpc(id_ambiente_hpc)
+);
+
+CREATE TABLE node (
+    id_node INT PRIMARY KEY AUTO_INCREMENT,
+    hostname VARCHAR(255) NOT NULL UNIQUE,
+    ip VARCHAR(45) NOT NULL,
+    sistema_operacional VARCHAR(100) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    fk_cluster INT NOT NULL,
+    CONSTRAINT ckNodeStatus
+        CHECK (status IN ('ativo', 'inativo', 'manut.')),
+    CONSTRAINT cFkNodeCluster
+        FOREIGN KEY (fk_cluster)
+        REFERENCES cluster(id_cluster)
+);
+
+CREATE TABLE componente (
+    id_componente INT PRIMARY KEY AUTO_INCREMENT,
+    tipo VARCHAR(50) NOT NULL, 
+    fabricante VARCHAR(100) NOT NULL, 
+    modelo VARCHAR(100) NOT NULL,
+    unidade_medida VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE componente_node (
+    id_componente_node INT PRIMARY KEY AUTO_INCREMENT,
+    num_serie VARCHAR(50),
     fk_componente INT NOT NULL,
     fk_node INT NOT NULL,
-    limite_atencao DECIMAL(10,2),
-    limite_critico DECIMAL(10,2),
-
-    PRIMARY KEY (fk_componente, fk_node),
-
-    FOREIGN KEY (fk_componente)
-        REFERENCES componente(id),
-
-    FOREIGN KEY (fk_node)
-        REFERENCES node(id)
+    CONSTRAINT unqComponenteNode UNIQUE (fk_componente, fk_node, num_serie),
+    CONSTRAINT cFkCnComponente
+        FOREIGN KEY (fk_componente)
+        REFERENCES componente(id_componente),
+    CONSTRAINT cFkCnNode
+        FOREIGN KEY (fk_node)
+        REFERENCES node(id_node)
 );
 
-INSERT INTO empresa
-(razao_social, cnpj, dt_registro)
-VALUES
-('Petrobras', '12345678000101', '2025-01-10'),
-('Tech Solutions LTDA', '98765432000199', '2025-02-15'),
-('Data Center Brasil', '45678912000155', '2025-03-20');
+CREATE TABLE parametro (
+    id_parametro INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    pico_max DECIMAL(10,2),
+    pico_min DECIMAL(10,2),
+    percentual DECIMAL(5,2),
+    limite_atencao DECIMAL(10,2),
+    limite_critico DECIMAL(10,2),
+    fk_componente_node INT NOT NULL,
+    CONSTRAINT cFkParametroCompNode
+        FOREIGN KEY (fk_componente_node)
+        REFERENCES componente_node(id_componente_node)
+);
 
-INSERT INTO endereco
-(numero, cidade, estado, logradouro, fk_empresa)
-VALUES
-('100', 'Sao Paulo', 'SP', 'Rua das Flores', 1),
-('250', 'Campinas', 'SP', 'Avenida Brasil', 2),
-('500', 'Rio de Janeiro', 'RJ', 'Rua Central', 3);
+INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
+('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
+('DataData HPC Solutions', '98765432000110', '2024-03-20', 'datadata.io'),
+('SPTECH', '18765432000110', '2022-08-20', 'sptech.school');
 
-INSERT INTO nivel_acesso
-(nome)
-VALUES
-('admin'),
-('gestores'),
-('operadores');
+INSERT INTO endereco (logradouro, numero, cidade, estado, fk_empresa) VALUES
+('Av. Paulista', '1000', 'Sao Paulo', 'SP', 1),
+('Rua da Assembleia', '50', 'Rio de Janeiro', 'RJ', 2);
 
-INSERT INTO usuario
-(nome, email, senha, fk_nivel_acesso, fk_empresa)
-VALUES
-('Carlos', 'carlos@petrobras.com', 'senha123', 1, 1),
-('Joao', 'joao@nautilus.com', 'senha456', 2, 1),
-('Mariana', 'mariana@techsolutions.com', 'senha789', 1, 2),
-('Lucas', 'lucas@datacenter.com', 'senha321', 3, 3);
+INSERT INTO localizacao (nome, pais, estado, cidade, cod_regiao) VALUES
+('Data Center SP1 - Tambore', 'Brasil', 'Sao Paulo', 'Barueri', 'BR-SE-01'),
+('Data Center RJ1 - Centro', 'Brasil', 'Rio de Janeiro', 'Rio de Janeiro', 'BR-SE-02');
 
+INSERT INTO nivel_acesso (nome) VALUES
+('Administrador'),
+('Analista de Infraestrutura'),
+('Operador');
 
-INSERT INTO permissao
-(nome, descricao)
-VALUES
-('Gerenciar usuarios', 'Gerenciar usuarios do sistema'),
-('Visualizar dados', 'Visualizar dados dos servidores'),
-('Gerenciar componentes', 'Gerenciar componentes dos nodes'),
-('Gerenciar alertas', 'Gerenciar alertas do sistema');
+INSERT INTO permissao (nome, descricao) VALUES
+('LEITURA_METRICAS', 'Permite visualizar dashboards e graficos de desempenho'),
+('CONFIGURAR_ALERTAS', 'Permite alterar limites de parametros e notificacoes'),
+('GESTAO_DISPOSITIVOS', 'Permite cadastrar e remover nodes, clusters e componentes');
 
+INSERT INTO permissao_nivel_acesso (fk_permissao, fk_nivel_acesso) VALUES
+(1, 1), (2, 1), (3, 1),
+(1, 2), (2, 2),
+(1, 3);
 
-INSERT INTO permissao_nivel_acesso
-(fk_permissao, fk_nivel_acesso)
-VALUES
-(1, 1),
-(2, 1),
-(3, 1),
-(4, 1),
+INSERT INTO usuario (nome, email_institucional, cpf, senha, verificado, fk_nivel_acesso, fk_empresa) VALUES
+('Carlos Eduardo Silva', 'carlos.silva@techcorp.com.br', '11122233344', '$2a$12$eImiTXuWVxfM37uY4JANjO5E/S8f5S/5iG', 1, 1, 1),
+('Mariana Souza', 'mariana.souza@techcorp.com.br', '55566677788', '$2a$12$eImiTXuWVxfM37uY4JANjO5E/S8f5S/5iG', 1, 2, 1),
+('Lucas Oliveira', 'lucas.oliveira@datadata.io', '99988877766', '$2a$12$eImiTXuWVxfM37uY4JANjO5E/S8f5S/5iG', 0, 1, 2);
 
-(2, 2),
-(3, 2),
-(4, 2),
+INSERT INTO verificacao_email (token, dt_expiracao, fk_usuario) VALUES
+('a1b2c3d4e5f678901234567890abcdef', '2026-09-21 20:00:00', 3);
 
-(2, 3);
+INSERT INTO ambiente_hpc (nome, status, fk_empresa, fk_localizacao) VALUES
+('Ambiente IA & Analytics', 'ativo', 1, 1),
+('Ambiente Processamento Pesado', 'manut.', 2, 2);
 
-INSERT INTO ambiente_hpc
-(nome, descricao, status, fk_empresa)
-VALUES
-('HPC Nautilus', 'Ambiente principal de processamento', 'ATIVO', 1),
-('HPC Tech', 'Ambiente de processamento cientifico', 'ATIVO', 2),
-('HPC Data Center', 'Ambiente para processamento de dados', 'MANUTENCAO', 3);
+INSERT INTO cluster (nome, status, fk_ambiente_hpc) VALUES
+('Cluster-Alpha-GPU', 'ativo', 1),
+('Cluster-Beta-CPU', 'ativo', 1),
+('Cluster-Gamma-Render', 'manut.', 2);
 
-INSERT INTO cluster
-(nome, descricao, status, fk_ambiente_hpc)
-VALUES
-('Cluster Alpha', 'Cluster principal da Nautilus', 'ATIVO', 1),
-('Cluster Beta', 'Cluster secundario da Nautilus', 'ATIVO', 1),
-('Cluster Gamma', 'Cluster principal da Tech Solutions', 'ATIVO', 2),
-('Cluster Delta', 'Cluster do Data Center', 'MANUTENCAO', 3);
+INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster) VALUES
+('node-gpu-01.techcorp.internal', '10.0.1.10', 'Ubuntu Server 22.04 LTS', 'ativo', 1),
+('node-gpu-02.techcorp.internal', '10.0.1.11', 'Ubuntu Server 22.04 LTS', 'ativo', 1),
+('node-cpu-01.techcorp.internal', '10.0.2.10', 'Red Hat Enterprise Linux 9', 'ativo', 2);
 
-INSERT INTO node
-(hostname, ip, status, sistema_operacional, fk_cluster)
-VALUES
-('node-alpha-01', '192.168.1.10', 'ONLINE', 'Ubuntu 22.04', 1),
-('node-alpha-02', '192.168.1.11', 'ONLINE', 'Ubuntu 22.04', 1),
-('node-alpha-03', '192.168.1.12', 'OFFLINE', 'Ubuntu 22.04', 1),
+INSERT INTO componente (tipo, fabricante, modelo, unidade_medida) VALUES
+('CPU', 'Intel', 'Xeon Platinum 8380', '%'),
+('GPU', 'NVIDIA', 'H100 PCIe 80GB', '°C'),
+('RAM', 'Samsung', '64GB DDR5 4800MHz', 'GB'),
+('Disco', 'Kingston', 'NVMe DC1500M 3.84TB', '%');
 
-('node-beta-01', '192.168.2.10', 'ONLINE', 'Ubuntu 22.04', 2),
-('node-beta-02', '192.168.2.11', 'ONLINE', 'Ubuntu 22.04', 2),
+INSERT INTO componente_node (num_serie, fk_componente, fk_node) VALUES
+('CPU-INT-8380-001', 1, 1),
+('GPU-NVD-H100-001', 2, 1),
+('RAM-SAM-64GB-001', 3, 1),
+('CPU-INT-8380-002', 1, 2),
+('GPU-NVD-H100-002', 2, 2);
 
-('node-gamma-01', '192.168.3.10', 'ONLINE', 'Ubuntu 24.04', 3),
-('node-gamma-02', '192.168.3.11', 'ONLINE', 'Ubuntu 24.04', 3),
-
-('node-delta-01', '192.168.4.10', 'OFFLINE', 'Rocky Linux 9', 4);
-
-INSERT INTO componente
-(nome, unidade, parametro)
-VALUES
-
-('Uso da CPU', '%', 'CPU_PERCENT'),
-('CPU User', '%', 'CPU_USER_PERCENT'),
-('CPU Nice', '%', 'CPU_NICE_PERCENT'),
-('CPU System', '%', 'CPU_SYSTEM_PERCENT'),
-('CPU Idle', '%', 'CPU_IDLE_PERCENT'),
-('CPU IOWait', '%', 'CPU_IOWAIT_PERCENT'),
-('CPU IRQ', '%', 'CPU_IRQ_PERCENT'),
-('CPU Soft IRQ', '%', 'CPU_SOFTIRQ_PERCENT'),
-('CPU Steal', '%', 'CPU_STEAL_PERCENT'),
-('CPU Guest', '%', 'CPU_GUEST_PERCENT'),
-('CPU Guest Nice', '%', 'CPU_GUEST_NICE_PERCENT'),
-
-('Frequência atual da CPU', 'MHz', 'CPU_FREQ_ATUAL'),
-('Frequência mínima da CPU', 'MHz', 'CPU_FREQ_MIN'),
-('Frequência máxima da CPU', 'MHz', 'CPU_FREQ_MAX'),
-
-('Quantidade de CPUs lógicas', 'núcleos', 'CPU_COUNT_LOGICA'),
-('Quantidade de CPUs físicas', 'núcleos', 'CPU_COUNT_FISICA'),
-
-('Trocas de contexto', 'eventos', 'CPU_CTX_SWITCHES'),
-('Interrupções', 'eventos', 'CPU_INTERRUPTS'),
-('Interrupções de software', 'eventos', 'CPU_SOFT_INTERRUPTS'),
-('Chamadas de sistema', 'eventos', 'CPU_SYSCALLS'),
-
-('Load Average 1 minuto', NULL, 'LOAD_AVG_1'),
-('Load Average 5 minutos', NULL, 'LOAD_AVG_5'),
-('Load Average 15 minutos', NULL, 'LOAD_AVG_15'),
-
-('RAM Total', 'bytes', 'RAM_TOTAL'),
-('RAM Disponível', 'bytes', 'RAM_AVAILABLE'),
-('Uso da RAM', '%', 'RAM_PERCENT'),
-('RAM Utilizada', 'bytes', 'RAM_USED'),
-('RAM Livre', 'bytes', 'RAM_FREE'),
-('RAM Ativa', 'bytes', 'RAM_ACTIVE'),
-('RAM Inativa', 'bytes', 'RAM_INACTIVE'),
-('Buffers da RAM', 'bytes', 'RAM_BUFFERS'),
-('Cache da RAM', 'bytes', 'RAM_CACHED'),
-('RAM Compartilhada', 'bytes', 'RAM_SHARED'),
-('Slab da RAM', 'bytes', 'RAM_SLAB'),
-
-('SWAP Total', 'bytes', 'SWAP_TOTAL'),
-('SWAP Utilizada', 'bytes', 'SWAP_USED'),
-('SWAP Livre', 'bytes', 'SWAP_FREE'),
-('Uso da SWAP', '%', 'SWAP_PERCENT'),
-('SWAP IN', 'bytes', 'SWAP_IN'),
-('SWAP OUT', 'bytes', 'SWAP_OUT'),
-
-
-('Disco Total', 'bytes', 'DISCO_TOTAL'),
-('Disco Utilizado', 'bytes', 'DISCO_USED'),
-('Disco Livre', 'bytes', 'DISCO_FREE'),
-('Uso do Disco', '%', 'DISCO_PERCENT'),
-
-('Quantidade de Leituras', 'operações', 'DISCO_READ_COUNT'),
-('Quantidade de Escritas', 'operações', 'DISCO_WRITE_COUNT'),
-('Bytes Lidos', 'bytes', 'DISCO_READ_BYTES'),
-('Bytes Escritos', 'bytes', 'DISCO_WRITE_BYTES'),
-('Tempo de Leitura', 'ms', 'DISCO_READ_TIME'),
-('Tempo de Escrita', 'ms', 'DISCO_WRITE_TIME'),
-('Leituras Agrupadas', 'operações', 'DISCO_READ_MERGED_COUNT'),
-('Escritas Agrupadas', 'operações', 'DISCO_WRITE_MERGED_COUNT'),
-('Tempo Ocupado do Disco', 'ms', 'DISCO_BUSY_TIME');
-
-INSERT INTO componente_node
-(fk_componente, fk_node, limite_atencao, limite_critico)
-VALUES
-
--- CPU
-(1, 1, 70, 90),
-(2, 1, NULL, NULL),
-(4, 1, NULL, NULL),
-(5, 1, NULL, NULL),
-(6, 1, NULL, NULL),
-(12, 1, NULL, NULL),
-(18, 1, NULL, NULL),
-
--- Load Average
-(21, 1, NULL, NULL),
-(22, 1, NULL, NULL),
-(23, 1, NULL, NULL),
-
--- RAM
-(24, 1, NULL, NULL),
-(25, 1, NULL, NULL),
-(26, 1, 80, 95),
-(27, 1, NULL, NULL),
-(28, 1, NULL, NULL),
-
--- SWAP
-(36, 1, NULL, NULL),
-(37, 1, NULL, NULL),
-(38, 1, 70, 90),
-(39, 1, NULL, NULL),
-(40, 1, NULL, NULL),
-
--- DISCO
-(42, 1, NULL, NULL),
-(43, 1, NULL, NULL),
-(44, 1, 80, 95);
-
-SELECT DISTINCT
-    c.id,
-    c.nome,
-    c.unidade,
-    c.parametro,
-    cn.limite_atencao,
-    cn.limite_critico
-FROM empresa e
-JOIN ambiente_hpc a
-    ON a.fk_empresa = e.id
-JOIN cluster cl
-    ON cl.fk_ambiente_hpc = a.id
-JOIN node n
-    ON n.fk_cluster = cl.id
-JOIN componente_node cn
-    ON cn.fk_node = n.id
-JOIN componente c
-    ON c.id = cn.fk_componente
-WHERE e.id = 1;
-
+INSERT INTO parametro (nome, pico_max, pico_min, percentual, limite_atencao, limite_critico, fk_componente_node) VALUES
+('Uso de Processamento CPU-01', 100.00, 0.00, 85.00, 80.00, 95.00, 1),
+('Temperatura GPU-01', 110.00, 20.00, NULL, 75.00, 88.00, 2),
+('Consumo de Memoria RAM-01', 64.00, 0.00, 90.00, 50.00, 60.00, 3),
+('Temperatura GPU-02', 110.00, 20.00, NULL, 75.00, 88.00, 5);
