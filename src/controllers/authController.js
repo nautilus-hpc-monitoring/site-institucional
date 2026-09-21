@@ -45,11 +45,27 @@ async function autenticar(req, res) {
 
         // Fim da consulta da empresa
 
+        // Consulta de ambiente HPC
+        const ambientesHpc = await authModel.buscarAmbienteHpc(empresa.id_empresa);
+
+        // Fim da consulta de ambiente HPC
+
+        // Consulta dos clusters
+        const clusters = [];
+        for (let i = 0; i < ambientesHpc.length; i++) {
+            const resultClusters = await authModel.buscarCluster(ambientesHpc[i].id_ambiente_hpc);
+            clusters.push(resultClusters);
+        }
+
+        // Fim da consulta dos clusters
+
 
         return res.status(200).json({
             autenticado: true,
             usuario: usuario,
-            empresa: empresa
+            empresa: empresa,
+            ambientesHpc: ambientesHpc,
+            clusters: clusters
         });
 
     } catch (erro) {
