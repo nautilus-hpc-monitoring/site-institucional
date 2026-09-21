@@ -48,7 +48,7 @@ async function buscarAmbienteHpc(id_empresa) {
             fk_empresa as id_empresa,
             fk_localizacao as id_localizacao
         FROM ambiente_hpc
-        WHERe fk_empresa = '${id_empresa}'
+        WHERE fk_empresa = '${id_empresa}'
     `;
 
     return database.executar(sql);
@@ -64,7 +64,25 @@ async function buscarCluster(id_ambiente_hpc) {
             status,
             fk_ambiente_hpc as id_ambiente_hpc
         FROM cluster
-        WHERe fk_ambiente_hpc = '${id_ambiente_hpc}'
+        WHERE fk_ambiente_hpc = '${id_ambiente_hpc}'
+    `;
+
+    return database.executar(sql);
+}
+
+async function buscarNode(hostname, id_cluster) {
+    console.log("Entrou em buscar node");
+    
+    const sql = `
+        SELECT
+            id_node,
+            hostname,
+            ip,
+            sistema_operacional,
+            status,
+            fk_cluster as id_cluster
+        FROM node
+        WHERE fk_cluster = '${id_cluster}' AND hostname = '${hostname}';
     `;
 
     return database.executar(sql);
@@ -74,5 +92,6 @@ module.exports = {
     buscarUsuario,
     buscarEmpresa,
     buscarAmbienteHpc,
-    buscarCluster
+    buscarCluster,
+    buscarNode
 }
