@@ -104,11 +104,29 @@ async function buscarComponenteNode(id_node) {
     return database.executar(sql);
 }
 
+async function buscarComponente(id_componente) {
+    console.log("Entrou em buscar componente");
+    
+    const sql = `
+        SELECT
+            id_componente,
+            tipo,
+            fabricante,
+            modelo,
+            unidade_medida
+        FROM componente
+        WHERE id_componente = '${id_componente}';
+    `;
+
+    return database.executar(sql);
+}
+
 module.exports = {
     buscarUsuario,
     buscarEmpresa,
     buscarAmbienteHpc,
     buscarCluster,
     buscarNode,
-    buscarComponenteNode
+    buscarComponenteNode,
+    buscarComponente
 }
