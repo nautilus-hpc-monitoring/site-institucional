@@ -17,7 +17,7 @@ async function autenticar(req, res) {
         const usuario = resultUsuario[0];
 
         if (!usuario) {
-            return res.status(401).json({
+            return res.status(404).json({
                 mensagem: 'Usuário não encontrado'
             });
         }
@@ -34,11 +34,22 @@ async function autenticar(req, res) {
         // Fim da validação do usuario
 
         // Consulta da empresa
+        const resultEmpresa = await authModel.buscarEmpresa(usuario.id_empresa);
+        const empresa = resultEmpresa[0];
+
+        if (!empresa) {
+            return res.status(404).json({
+                mensagem: 'Empresa não encontrada'
+            });
+        }
+
+        // Fim da consulta da empresa
 
 
         return res.status(200).json({
             autenticado: true,
-            usuario: usuario
+            usuario: usuario,
+            empresa: empresa
         });
 
     } catch (erro) {
