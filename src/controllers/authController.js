@@ -84,6 +84,13 @@ async function autenticar(req, res) {
         }
         // Fim da consulta dos componentes
 
+        // Consulta dos parametros
+        for (let i = 0; i < componentesnode.length; i++) {
+            const parametro = await authModel.buscarParametro(componentesnode[i].id_componente);
+            componentesnode[i]["parametro"] = parametro[0];
+        }
+        // Fim da consulta dos parametros
+
         return res.status(200).json({
             autenticado: true,
             usuario: usuario,
@@ -92,7 +99,6 @@ async function autenticar(req, res) {
         });
 
     } catch (erro) {
-
         console.error('Erro na autenticação:', erro);
 
         return res.status(500).json({
