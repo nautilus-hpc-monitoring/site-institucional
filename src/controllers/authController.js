@@ -1,13 +1,56 @@
 const authModel = require("../models/authModel");
+const bcrypt = require("bcrypt");
 
-async function buscarUsuario(req, res) {
-    const { email } = req.body;
+async function autenticar(req, res) {
+    try {
 
-    const result = await authModel.buscarUsuario(email);
+        // Validação do usuario
+        const { email, senha, hostname } = req.body;
 
-    return res.status(200).json(result[0]);
+        if (!email || !senha || !hostname) {
+            return res.status(400).json({
+                mensagem: 'Email, senha e hostname são obrigatórios'
+            });
+        }
+
+        const resultUsuario = await authModel.buscarUsuario(email);
+        const usuario = resultUsuario[0];
+
+        if (!usuario) {
+            return res.status(401).json({
+                mensagem: 'Usuário não encontrado'
+            });
+        }
+
+        // const senhaValida = await bcrypt.compare(senha, usuario.senha);
+        const senhaValida = true;
+
+        if (!senhaValida) {
+            return res.status(401).json({
+                mensagem: 'Senha inválida'
+            });
+        }
+
+        // Fim da validação do usuario
+
+        // Consulta da empresa
+
+
+        return res.status(200).json({
+            autenticado: true,
+            usuario: usuario
+        });
+
+    } catch (erro) {
+
+        console.error('Erro na autenticação:', erro);
+
+        return res.status(500).json({
+            mensagem: 'Erro interno do servidor'
+        });
+    }
 }
 
 module.exports = {
-    buscarUsuario
+    autenticar
 }

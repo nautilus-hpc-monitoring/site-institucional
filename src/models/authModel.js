@@ -88,10 +88,27 @@ async function buscarNode(hostname, id_cluster) {
     return database.executar(sql);
 }
 
+async function buscarComponenteNode(id_node) {
+    console.log("Entrou em buscar componente_node");
+    
+    const sql = `
+        SELECT
+            id_componente_node,
+            num_serie,
+            fk_componente as id_componente,
+            fk_node as id_node
+        FROM componente_node
+        WHERE fk_node = '${id_node}';
+    `;
+
+    return database.executar(sql);
+}
+
 module.exports = {
     buscarUsuario,
     buscarEmpresa,
     buscarAmbienteHpc,
     buscarCluster,
-    buscarNode
+    buscarNode,
+    buscarComponenteNode
 }
