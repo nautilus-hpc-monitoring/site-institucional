@@ -14,7 +14,16 @@ body.body-formulario {
 .navbar {
     background-color: var(--cor-branco);
 }
+.navbar_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
+.navbar_actions {
+    display: flex;
+    flex-shrink: 0; /* Impede o botão de encolher ou sumir em telas menores */
+}
 .cadastro {
     min-height: calc(100vh - 72px);
 }

@@ -25,38 +25,17 @@
 
             <div class="navbar_left">
 
-                <button class="navbar_menu" id="btnMenu" aria-label="Abrir menu">
-                    ☰
-                </button>
-
                 <a href="./index.html" class="navbar_logo">
                     <img src="./assets/img/logo.png" alt="Nautilus Logo">
                     Nautilus
                 </a>
 
-                <nav class="navbar_nav">
-                    <a href="./pagina-solucao.html">
-                        Serviço como solução
-                        <span class="navbar_setas">
-                            <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-                            <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-                        </span>
-                    </a>
-
-                    <a href="./sobre-nos.html">
-                        Sobre nós
-                        <span class="navbar_setas">
-                            <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-                            <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-                        </span>
-                    </a>
-
-                </nav>
-
             </div>
 
             <div class="navbar_actions">
-                <button><a href="./login.html">Login</a></button>
+                <a href="./cadastro.html">
+                <button>Cadastre-se</button>
+                </a>
             </div>
 
         </div>
@@ -131,6 +110,7 @@
                     <div id="div_aguardar">
                     </div>
                 </div>
+                <div id="div_erros_login"></div>
             </div>
             <div class="imagem-login">
                 <img src="assets/imgs/img.png" class="img-grade" alt="">
@@ -150,15 +130,13 @@
             </div>
         </div>
     </div>
-    <div id="div_erros_login"></div>
+    
 
 </body>
 
 </html>
 
 <script>
-
-
     function entrar() {
         aguardar();
 
@@ -166,13 +144,11 @@
         var senhaVar = senha_input.value;
 
         if (emailVar == "" || senhaVar == "") {
-            cardErro.style.display = "block"
-            mensagem_erro.innerHTML = "(Mensagem de erro para todos os campos em branco)";
+            div_erros_login.style.color = "red";
+            div_erros_login.innerHTML = "Preencha todos os campos para prosseguir.";
             finalizarAguardar();
+            setTimeout(sumirMensagem, 5000);
             return false;
-        }
-        else {
-            setInterval(sumirMensagem, 5000)
         }
 
         console.log("FORM LOGIN: ", emailVar);
@@ -188,10 +164,12 @@
                 senhaServer: senhaVar
             })
         }).then(function (resposta) {
-            console.log("ESTOU NO THEN DO entrar()!")
+            console.log("ESTOU NO THEN DO entrar()!");
 
             if (resposta.ok) {
-                console.log(resposta);
+        
+                div_erros_login.style.color = "green";
+                div_erros_login.innerHTML = "Login realizado com sucesso! Redirecionando...";
 
                 resposta.json().then(json => {
                     console.log(json);
@@ -201,31 +179,38 @@
                     sessionStorage.setItem("ID_USUARIO", json.id_usuario);
                     sessionStorage.setItem("ID_EMPRESA", json.fk_empresa);
                     sessionStorage.setItem("ID_NIVEL_ACESSO", json.fk_nivel_acesso);
+                    
                     setTimeout(function () {
                         window.location = "./cadastro-funcionario.html";
-                    }, 1000); // apenas para exibir o loading
-
+                    }, 1000);
                 });
 
             } else {
-
                 console.log("Houve um erro ao tentar realizar o login!");
 
                 resposta.text().then(texto => {
                     console.error(texto);
+        
+                    div_erros_login.style.color = "red";
+                    div_erros_login.innerHTML = texto || "E-mail ou senha incorretos.";
                     finalizarAguardar(texto);
+                    setTimeout(sumirMensagem, 5000);
                 });
             }
 
         }).catch(function (erro) {
             console.log(erro);
-        })
+            
+            div_erros_login.style.color = "red";
+            div_erros_login.innerHTML = "Erro ao conectar com o servidor.";
+            finalizarAguardar();
+            setTimeout(sumirMensagem, 5000);
+        });
 
         return false;
     }
 
     function sumirMensagem() {
-        cardErro.style.display = "none"
+        div_erros_login.innerHTML = "";
     }
-
 </script>

@@ -14,7 +14,53 @@ body.body-formulario {
 .navbar {
     background-color: var(--cor-branco);
 }
+.navbar_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
+.navbar_actions {
+    display: flex;
+    flex-shrink: 0; /* Impede o botão de encolher ou sumir em telas menores */
+}
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background: var(--cor-branco, #fff);
+    padding: 24px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h3 {
+    margin-top: 0;
+    color: var(--cor-secundaria, #333);
+}
+
+.modal-card p {
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.modal-card .botao {
+    height: 44px;
+    margin-top: 12px;
+}
 .cadastro {
     min-height: calc(100vh - 72px);
 }
@@ -95,6 +141,7 @@ body.body-formulario {
     gap: clamp(18px, 3vh, 30px);
 
     margin-top: clamp(30px, 5vh, 58px);
+    margin-bottom: 0;
 }
 
 .campo {
