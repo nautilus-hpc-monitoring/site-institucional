@@ -59,25 +59,36 @@ async function autenticar(req, res) {
 
         // Fim da consulta dos clusters
 
-        // Consulta dos nodes
-        const nodes = []
+        // Consulta dos node
+        let node;
         for (let i = 0; i < clusters.length; i++) {
             for (let j = 0; j < clusters[i].length; j++) {
-                const resultNodes = await authModel.buscarNode(hostname, clusters[i][j].id_cluster)
+                const resultnode = await authModel.buscarNode(hostname, clusters[i][j].id_cluster)
                 
-                if (resultNodes.length > 0) {
-                    nodes.push(resultNodes[0]);
+                if (resultnode.length > 0) {
+                    node = resultnode[0];
                 }
             }
         }
 
-        // Fim da consulta dos nodes
+        // Fim da consulta dos node
+
+        // Consulta dos componente_node
+        const componentesnode = await authModel.buscarComponenteNode(node.id_node);
+        // Fim da consulta dos componentes_node
+
+        // Consulta dos componentes
+        for (let i = 0; i < componentesnode.length; i++) {
+            const componente = await authModel.buscarComponente(componentesnode[i].id_componente);
+            componentesnode[i]["componente"] = componente[0];
+        }
+        // Fim da consulta dos componentes
 
         return res.status(200).json({
             autenticado: true,
             usuario: usuario,
-            node: nodes[0],
-            
+            node: node,
+            componentesnode: componentesnode
         });
 
     } catch (erro) {
