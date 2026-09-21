@@ -37,7 +37,25 @@ async function buscarEmpresa(id_empresa) {
     return database.executar(sql);
 }
 
+async function buscarAmbienteHpc(id_empresa) {
+    console.log("Entrou em buscar ambiente HPC");
+    
+    const sql = `
+        SELECT
+            id_ambiente_hpc,
+            nome,
+            status,
+            fk_empresa as id_empresa,
+            fk_localizacao as id_localizacao
+        FROM ambiente_hpc
+        WHERe fk_empresa = '${id_empresa}'
+    `;
+
+    return database.executar(sql);
+}
+
 module.exports = {
     buscarUsuario,
-    buscarEmpresa
+    buscarEmpresa,
+    buscarAmbienteHpc
 }
