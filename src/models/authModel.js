@@ -16,10 +16,28 @@ async function buscarUsuario(email) {
         FROM usuario
         WHERE email_institucional = '${email}'
     `;
+
+    return database.executar(sql);
+}
+
+async function buscarEmpresa(id_empresa) {
+    console.log("Entrou em buscar empresa");
     
+    const sql = `
+        SELECT
+            id_empresa,
+            razao_social,
+            cnpj,
+            dt_registro,
+            dominio
+        FROM empresa
+        WHERE id_empresa = '${id_empresa}'
+    `;
+
     return database.executar(sql);
 }
 
 module.exports = {
-    buscarUsuario
+    buscarUsuario,
+    buscarEmpresa
 }
