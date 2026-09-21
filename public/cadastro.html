@@ -25,38 +25,16 @@
 
             <div class="navbar_left">
 
-                <button class="navbar_menu" id="btnMenu" aria-label="Abrir menu">
-                    ☰
-                </button>
-
                 <a href="./index.html" class="navbar_logo">
                     <img src="./assets/img/logo.png" alt="Nautilus Logo">
                     Nautilus
                 </a>
-
-                <nav class="navbar_nav">
-                    <a href="./pagina-solucao.html">
-                        Serviço como solução
-                        <span class="navbar_setas">
-                            <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-                            <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-                        </span>
-                    </a>
-
-                    <a href="./sobre-nos.html">
-                        Sobre nós
-                        <span class="navbar_setas">
-                            <img src="./assets/icon/seta_direita_azul_qd.svg" alt="" class="seta_normal">
-                            <img src="./assets/icon/seta_direita_azul_claro_qd.svg" alt="" class="seta_hover">
-                        </span>
-                    </a>
-
-                </nav>
-
             </div>
 
             <div class="navbar_actions">
-                <button><a href="./login.html">Login</a></button>
+                <a href="./login.html">
+                    <button>Login</button>
+                </a>
             </div>
 
         </div>
@@ -135,9 +113,8 @@
                         <input id="confirmacao_senha_input" type="password" placeholder="Confirmar Senha" />
                     </div>
                     <button class="botao" onclick="cadastrar()">Cadastrar</button>
-                    <div id="div_aguardar">
-                    </div>
                 </div>
+                <div id="div_erros_login"></div>
             </div>
             <div class="imagem-login">
                 <img src="assets/imgs/img.png" class="img-grade" alt="">
@@ -156,14 +133,20 @@
                 <img src="assets/imgs/Group 30.png" class="img-circulo" alt="">
             </div>
         </div>
+        <div id="modal_email" class="modal-overlay">
+            <div class="modal-card">
+                <h3>Cadastro efetuado!</h3>
+                <p>Por favor, verifique a caixa de entrada do seu e-mail para prosseguir.</p>
+                <button onclick="fecharModalERedirecionar()" class="botao">Entendi</button>
+            </div>
+        </div>
     </div>
-    <div id="div_erros_login"></div>
-
 </body>
 
 </html>
 
 <script>
+
     function cadastrar() {
         var nomeVar = nome_input.value;
         var cpfVar = cpf_input.value;
@@ -172,17 +155,17 @@
         var confirmacaoSenhaVar = confirmacao_senha_input.value;
 
         if (nomeVar == "" || cpfVar == "" || emailVar == "" || senhaVar == "" || confirmacaoSenhaVar == "") {
-            cardErro.style.display = "block";
-            mensagem_erro.innerHTML = "Preencha todos os campos para prosseguir.";
+            div_erros_login.style.color = "red";
+            div_erros_login.innerHTML = "Preencha todos os campos para prosseguir.";
+            setTimeout(sumirMensagem, 5000);
             return false;
         }
 
         if (senhaVar != confirmacaoSenhaVar) {
-            cardErro.style.display = "block";
-            mensagem_erro.innerHTML = "As senhas inseridas não coincidem.";
+            div_erros_login.style.color = "red";
+            div_erros_login.innerHTML = "As senhas inseridas não coincidem.";
+            setTimeout(sumirMensagem, 5000);
             return false;
-        } else {
-            setInterval(sumirMensagem, 5000);
         }
 
         fetch("/usuarios/cadastrar", {
@@ -198,24 +181,36 @@
         }).then(function (resposta) {
 
             if (resposta.ok) {
-                setTimeout(function () {
-                    window.location = "./login.html";
-                }, 1000);
+                div_erros_login.style.color = "green";
+                div_erros_login.innerHTML = "Cadastro efetuado com sucesso!";
+
+                modal_email.style.display = "flex";
 
             } else {
                 resposta.text().then(texto => {
+                    div_erros_login.style.color = "red";
+                    div_erros_login.innerHTML = texto || "Erro ao realizar o cadastro.";
+                    setTimeout(sumirMensagem, 5000);
                     console.error(texto);
                 });
             }
 
         }).catch(function (erro) {
+            div_erros_login.style.color = "red";
+            div_erros_login.innerHTML = "Erro de conexão com o servidor.";
+            setTimeout(sumirMensagem, 5000);
             console.log(erro);
-        })
+        });
 
         return false;
     }
 
+    function fecharModalERedirecionar() {
+        modal_email.style.display = "none";
+        window.location = "./login.html";
+    }
+
     function sumirMensagem() {
-        cardErro.style.display = "none"
+        div_erros_login.innerHTML = "";
     }
 </script>
