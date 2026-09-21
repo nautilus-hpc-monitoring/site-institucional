@@ -121,6 +121,26 @@ async function buscarComponente(id_componente) {
     return database.executar(sql);
 }
 
+async function buscarParametro(id_componente_node) {
+    console.log("Entrou em buscar parametro");
+    
+    const sql = `
+        SELECT
+            id_parametro,
+            nome,
+            pico_max,
+            pico_min,
+            percentual,
+            limite_atencao,
+            limite_critico,
+            fk_componente_node as id_componente_node
+        FROM parametro
+        WHERE fk_componente_node = '${id_componente_node}';
+    `;
+
+    return database.executar(sql);
+}
+
 module.exports = {
     buscarUsuario,
     buscarEmpresa,
@@ -128,5 +148,6 @@ module.exports = {
     buscarCluster,
     buscarNode,
     buscarComponenteNode,
-    buscarComponente
+    buscarComponente,
+    buscarParametro
 }
