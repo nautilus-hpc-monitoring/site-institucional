@@ -59,13 +59,25 @@ async function autenticar(req, res) {
 
         // Fim da consulta dos clusters
 
+        // Consulta dos nodes
+        const nodes = []
+        for (let i = 0; i < clusters.length; i++) {
+            for (let j = 0; j < clusters[i].length; j++) {
+                const resultNodes = await authModel.buscarNode(hostname, clusters[i][j].id_cluster)
+                
+                if (resultNodes.length > 0) {
+                    nodes.push(resultNodes[0]);
+                }
+            }
+        }
+
+        // Fim da consulta dos nodes
 
         return res.status(200).json({
             autenticado: true,
             usuario: usuario,
-            empresa: empresa,
-            ambientesHpc: ambientesHpc,
-            clusters: clusters
+            node: nodes[0],
+            
         });
 
     } catch (erro) {
