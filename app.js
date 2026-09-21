@@ -1,7 +1,7 @@
 // var ambiente_processo = 'producao';
 var ambiente_processo = 'desenvolvimento';
 
-var caminho_env = ambiente_processo === 'producao' ? '.env' : '.env.dev';
+var caminho_env = ambiente_processo === 'producao' ? './.env' : './.env.dev';
 // Acima, temos o uso do operador ternário para definir o caminho do arquivo .env
 // A sintaxe do operador ternário é: condição ? valor_se_verdadeiro : valor_se_falso
 
@@ -21,6 +21,7 @@ var empresasRouter = require("./src/routes/empresa");
 var nodesRouter = require("./src/routes/nodes");
 var cdUserRouter = require("./src/routes/cduser");
 var qtdFuncionarioRouter = require("./src/routes/qtdFuncionario")
+const authRouter = require("./src/routes/auth");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -34,6 +35,7 @@ app.use("/empresas", empresasRouter);
 app.use("/nodes", nodesRouter);
 app.use("/cduser", cdUserRouter);
 app.use("/qtdFuncionario", qtdFuncionarioRouter);
+app.use("/autentificacao", authRouter);
 
 app.listen(PORTA_APP, function () {
     console.log(`
