@@ -54,8 +54,25 @@ async function buscarAmbienteHpc(id_empresa) {
     return database.executar(sql);
 }
 
+async function buscarCluster(id_ambiente_hpc) {
+    console.log("Entrou em buscar cluster");
+    
+    const sql = `
+        SELECT
+            id_cluster,
+            nome,
+            status,
+            fk_ambiente_hpc as id_ambiente_hpc
+        FROM cluster
+        WHERe fk_ambiente_hpc = '${id_ambiente_hpc}'
+    `;
+
+    return database.executar(sql);
+}
+
 module.exports = {
     buscarUsuario,
     buscarEmpresa,
-    buscarAmbienteHpc
+    buscarAmbienteHpc,
+    buscarCluster
 }
