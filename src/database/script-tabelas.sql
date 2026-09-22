@@ -66,8 +66,8 @@ CREATE TABLE usuario (
     cpf CHAR(11) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     verificado TINYINT DEFAULT 0,
-    fk_nivel_acesso INT NOT NULL,
-    fk_empresa INT NOT NULL,
+    fk_nivel_acesso INT,
+    fk_empresa INT,
     CONSTRAINT cFkUsuarioNivelAcesso
         FOREIGN KEY (fk_nivel_acesso)
         REFERENCES nivel_acesso(id_nivel_acesso),
@@ -165,6 +165,7 @@ CREATE TABLE parametro (
 );
 
 INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
+('Sem empresa associada', '12345678000195', '2024-01-15', 'email.com'),
 ('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
 ('DataData HPC Solutions', '98765432000110', '2024-03-20', 'datadata.io'),
 ('SPTECH', '18765432000110', '2022-08-20', 'sptech.school');
