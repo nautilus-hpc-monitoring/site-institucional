@@ -20,6 +20,16 @@ async function cadastrar(razaoSocial, cnpj, dataRegistro, numero, cidade, estado
     return
 }
 
+async function buscarDominio(dominio) {
+
+    var instrucaoSql = `
+        SELECT id_empresa FROM empresa WHERE dominio = '${dominio}';
+    `;
+
+    return database.executar(instrucaoSql);
+}
+
 module.exports = {
-    cadastrar
+    cadastrar,
+    buscarDominio
 };
