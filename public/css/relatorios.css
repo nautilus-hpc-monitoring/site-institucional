@@ -104,7 +104,7 @@
 .mural {
     margin-top: 20px;
     width: 100%;
-    max-height: 65vh;
+    
     border: 1px solid var(--cor-cinza);
     border-radius: 5px;
     background-color: var(--cor-branco);
@@ -188,7 +188,8 @@
 .mural .mural-posts{
     display: flex;
     flex-direction: column;
-    padding: 30px;
+    padding: 30px 30px 0px 30px;
+    overflow-y: auto;
 }
 
 .mural .mural-posts .post{
@@ -202,7 +203,8 @@
     border-radius: 20px;
     background-color: var(--cor-cinza);
     align-self: center;
-    margin-top: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
 }
 
 .mural .mural-posts .post .estrutura{
@@ -303,6 +305,7 @@
     font-size: 2em;
     color: #585858;
     cursor: pointer;
+    position: relative;
 }
 
 
@@ -451,5 +454,327 @@
 
     .botao {
         font-size: 1rem;
+    }
+}
+
+/* ==========================================================================
+   Dropdown do botão de ações (...) dos posts do mural
+   ========================================================================== */
+
+.mural .mural-posts .post .actions-dropdown {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    min-width: 170px;
+    background-color: var(--cor-branco);
+    border: 1px solid var(--cor-cinza);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+    z-index: 30;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.mural .mural-posts .post .actions-dropdown.active {
+    display: block;
+}
+
+.mural .mural-posts .post .actions-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #3d3d3d;
+}
+
+.mural .mural-posts .post .actions-dropdown .dropdown-item i {
+    width: 16px;
+    text-align: center;
+    color: #585858;
+}
+
+.mural .mural-posts .post .actions-dropdown .dropdown-item:hover {
+    background-color: #f4f4f4;
+}
+
+.mural .mural-posts .post .actions-dropdown .dropdown-item.delete {
+    color: #d9483a;
+}
+
+.mural .mural-posts .post .actions-dropdown .dropdown-item.delete i {
+    color: #d9483a;
+}
+
+.mural .mural-posts .post .actions-dropdown .dropdown-item.delete:hover {
+    background-color: #fceeed;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    width: min(800px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: var(--cor-branco);
+    border-radius: 10px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.modal-header-texts h2 {
+    font-size: 1.4em;
+    font-weight: 700;
+}
+
+.modal-header-texts p {
+    margin-top: 6px;
+    font-size: 1em;
+    font-weight: 500;
+    color: #585858;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #585858;
+    line-height: 1;
+}
+
+.modal-divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--cor-cinza);
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.form-group .required {
+    color: #d9483a;
+}
+
+.form-group .form-hint {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #858585;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--cor-cinza);
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 1em;
+    color: #333;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-group .input-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 1px solid var(--cor-cinza);
+    border-radius: 5px;
+}
+
+.form-group .input-icon i {
+    color: #858585;
+}
+
+.form-group .input-icon input {
+    border: none;
+    padding: 12px 0;
+    width: 100%;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+.nodes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.node-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--cor-cinza);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.node-option-texts {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.node-option-texts .node-name {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: #333;
+}
+
+.node-option-texts .node-cluster {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: #858585;
+}
+
+.node-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.node-status i {
+    font-size: 0.5em;
+}
+
+.node-status.operacional {
+    color: #1f9d55;
+}
+
+.node-status.atencao {
+    color: #c98a12;
+}
+
+.responsavel-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    background-color: #fafafa;
+    border: 1px solid var(--cor-cinza);
+    border-radius: 6px;
+}
+
+.responsavel-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.responsavel-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    background-color: #276a722d;
+    color: var(--cor-secundaria);
+    font-weight: 800;
+    font-size: 0.9em;
+}
+
+.responsavel-texts {
+    display: flex;
+    flex-direction: column;
+}
+
+.responsavel-label {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: #858585;
+}
+
+.responsavel-nome {
+    font-size: 1em;
+    font-weight: 700;
+    color: #333;
+}
+
+.responsavel-sistema {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: #858585;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-footer .btn-cancelar,
+.modal-footer .btn-publicar {
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+.modal-footer .btn-cancelar {
+    background-color: var(--cor-branco);
+    border: 1px solid var(--cor-cinza);
+    color: #333;
+}
+
+.modal-footer .btn-publicar {
+    background-color: var(--cor-secundaria);
+    color: var(--cor-branco);
+}
+
+@media (max-width: 600px) {
+    .nodes-grid {
+        grid-template-columns: 1fr;
     }
 }

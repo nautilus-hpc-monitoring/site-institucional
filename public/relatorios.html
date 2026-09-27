@@ -161,7 +161,7 @@
                         Crie, acompanhe e gerencie as análises técnicas da sua equipe.
                     </p>
                 </div>
-                <div class="btn-criar">
+                <div class="btn-criar" id="btn-create">
                     <p>+</p>
                     <button>Novo relatório</button>
                 </div>
@@ -251,7 +251,135 @@
 
                             </div>
                             <div class="actions">
-                                <span>...</span>
+                                <span class="actions-trigger">...</span>
+                                <div class="actions-dropdown">
+                                    <div class="dropdown-item" data-action="visualizar">
+                                        <i class="fa-regular fa-eye"></i>
+                                        <span>Visualizar</span>
+                                    </div>
+                                    <div class="dropdown-item" data-action="editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span>Editar</span>
+                                    </div>
+                                    <div class="dropdown-item delete" data-action="deletar">
+                                        <i class="fa-solid fa-trash"></i>
+                                        <span>Deletar</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="line"></div>
+                    </div>
+                    <div class="post">
+                        <div class="estrutura">
+                            <div class="date">
+                                <span class="dia">24</span>
+                                <span class="mes">JUL</span>
+                            </div>
+
+                            <div class="infos">
+                                <div class="tags">
+                                    <div class="tag">
+                                        <span>node-01</span>
+                                    </div>
+                                    <div class="tag">
+                                        <span>node-05</span>
+                                    </div>
+                                </div>
+
+                                <div class="post-texts">
+                                    <div class="title">
+                                        <span>Aumento do uso de CPU</span>
+                                    </div>
+                                    <div class="desc">
+                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam excepturi quaerat laboriosam sed adipisci corrupti cum officia quae consequatur!</span>
+                                    </div>
+                                </div>
+
+                                <div class="user">
+                                    <div class="icon">
+                                        <span>IC</span>
+                                    </div>
+                                    <div class="name">
+                                        <span>Isabella Cardoso</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="actions">
+                                <span class="actions-trigger">...</span>
+                                <div class="actions-dropdown">
+                                    <div class="dropdown-item" data-action="visualizar">
+                                        <i class="fa-regular fa-eye"></i>
+                                        <span>Visualizar</span>
+                                    </div>
+                                    <div class="dropdown-item" data-action="editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span>Editar</span>
+                                    </div>
+                                    <div class="dropdown-item delete" data-action="deletar">
+                                        <i class="fa-solid fa-trash"></i>
+                                        <span>Deletar</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="line"></div>
+                    </div>
+                    <div class="post">
+                        <div class="estrutura">
+                            <div class="date">
+                                <span class="dia">24</span>
+                                <span class="mes">JUL</span>
+                            </div>
+
+                            <div class="infos">
+                                <div class="tags">
+                                    <div class="tag">
+                                        <span>node-01</span>
+                                    </div>
+                                    <div class="tag">
+                                        <span>node-05</span>
+                                    </div>
+                                </div>
+
+                                <div class="post-texts">
+                                    <div class="title">
+                                        <span>Aumento do uso de CPU</span>
+                                    </div>
+                                    <div class="desc">
+                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam excepturi quaerat laboriosam sed adipisci corrupti cum officia quae consequatur!</span>
+                                    </div>
+                                </div>
+
+                                <div class="user">
+                                    <div class="icon">
+                                        <span>IC</span>
+                                    </div>
+                                    <div class="name">
+                                        <span>Isabella Cardoso</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="actions">
+                                <span class="actions-trigger">...</span>
+                                <div class="actions-dropdown">
+                                    <div class="dropdown-item" data-action="visualizar">
+                                        <i class="fa-regular fa-eye"></i>
+                                        <span>Visualizar</span>
+                                    </div>
+                                    <div class="dropdown-item" data-action="editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span>Editar</span>
+                                    </div>
+                                    <div class="dropdown-item delete" data-action="deletar">
+                                        <i class="fa-solid fa-trash"></i>
+                                        <span>Deletar</span>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -262,9 +390,157 @@
 
         </main>
     </div>
+    <div class="modal-overlay" id="modal-novo-relatorio">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-header-texts">
+                    <h2>Criar novo relatório</h2>
+                    <p>Registre uma nova análise técnica dos ambientes monitorados.</p>
+                </div>
+                <button class="modal-close" id="close-modal" aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-divider"></div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="titulo-relatorio">Título do relatório <span class="required">*</span></label>
+                    <input type="text" id="titulo-relatorio" placeholder="Ex: Atualização semanal do ambiente">
+                </div>
+
+                <div class="form-group">
+                    <label for="data-emissao">Data de emissão <span class="required">*</span></label>
+                    <div class="input-icon">
+                        <i class="fa-regular fa-calendar"></i>
+                        <input type="date" id="data-emissao">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nodes monitorados <span class="required">*</span></label>
+                    <p class="form-hint">Selecione um ou mais nodes. O cluster será identificado automaticamente.</p>
+
+                    <div class="nodes-grid">
+                        <label class="node-option">
+                            <input type="checkbox">
+                            <div class="node-option-texts">
+                                <span class="node-name">node-compute-01</span>
+                                <span class="node-cluster">Cluster Alpha</span>
+                            </div>
+                            <span class="node-status operacional"><i class="fa-solid fa-circle"></i> Operacional</span>
+                        </label>
+
+                        <label class="node-option">
+                            <input type="checkbox">
+                            <div class="node-option-texts">
+                                <span class="node-name">node-compute-02</span>
+                                <span class="node-cluster">Cluster Alpha</span>
+                            </div>
+                            <span class="node-status operacional"><i class="fa-solid fa-circle"></i> Operacional</span>
+                        </label>
+
+                        <label class="node-option">
+                            <input type="checkbox">
+                            <div class="node-option-texts">
+                                <span class="node-name">node-storage-01</span>
+                                <span class="node-cluster">Cluster Beta</span>
+                            </div>
+                            <span class="node-status operacional"><i class="fa-solid fa-circle"></i> Operacional</span>
+                        </label>
+
+                        <label class="node-option">
+                            <input type="checkbox">
+                            <div class="node-option-texts">
+                                <span class="node-name">node-storage-02</span>
+                                <span class="node-cluster">Cluster Beta</span>
+                            </div>
+                            <span class="node-status atencao"><i class="fa-solid fa-circle"></i> Atenção</span>
+                        </label>
+
+                        <label class="node-option">
+                            <input type="checkbox">
+                            <div class="node-option-texts">
+                                <span class="node-name">node-edge-01</span>
+                                <span class="node-cluster">Cluster Gamma</span>
+                            </div>
+                            <span class="node-status operacional"><i class="fa-solid fa-circle"></i> Operacional</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="descricao-relatorio">Descrição <span class="required">*</span></label>
+                    <textarea id="descricao-relatorio" rows="4" placeholder="Descreva as observações, causas, impactos e informações relevantes identificadas durante a análise..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="acao-recomendada">Ação recomendada</label>
+                    <textarea id="acao-recomendada" rows="3" placeholder="Descreva as ações recomendadas ou realizadas para tratar a situação identificada..."></textarea>
+                </div>
+
+                <div class="responsavel-box">
+                    <div class="responsavel-info">
+                        <div class="responsavel-icon">IC</div>
+                        <div class="responsavel-texts">
+                            <span class="responsavel-label">Responsável pelo relatório</span>
+                            <span class="responsavel-nome">Isabella Cardoso</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancelar" id="cancelar-relatorio">Cancelar</button>
+                <button class="btn-publicar" id="publicar-relatorio">Publicar relatório</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 <script>
+    const modalNovoRelatorio = document.getElementById('modal-novo-relatorio');
+
+    document.getElementById('btn-create').addEventListener('click', () => {
+        modalNovoRelatorio.classList.add('active');
+    });
+
+    document.getElementById('close-modal').addEventListener('click', () => {
+        modalNovoRelatorio.classList.remove('active');
+    });
+
+    document.getElementById('cancelar-relatorio').addEventListener('click', () => {
+        modalNovoRelatorio.classList.remove('active');
+    });
+
+    modalNovoRelatorio.addEventListener('click', (event) => {
+        if (event.target === modalNovoRelatorio) {
+            modalNovoRelatorio.classList.remove('active');
+        }
+    });
+
+    document.querySelectorAll('.actions-trigger').forEach((trigger) => {
+        trigger.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const dropdown = trigger.nextElementSibling;
+            const jaAberto = dropdown.classList.contains('active');
+
+            document.querySelectorAll('.actions-dropdown').forEach((item) => {
+                item.classList.remove('active');
+            });
+
+            if (!jaAberto) {
+                dropdown.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.actions-dropdown').forEach((item) => {
+            item.classList.remove('active');
+        });
+    });
+
     document.getElementById('open-sidebar-btn').onclick = function () {
         mobileSidebar.classList.add('active');
         document.getElementById('sidebar-overlay').classList.add('active');
