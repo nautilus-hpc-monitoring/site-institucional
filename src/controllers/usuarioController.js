@@ -39,8 +39,8 @@ async function autenticar(req, res) {
         }
 
         res.json({
-            id_usuario: usuario.id,
-            email: usuario.email,
+            id_usuario: usuario.id_usuario,
+            email: usuario.email_institucional,
             nome: usuario.nome,
             fk_empresa: usuario.fk_empresa
         });
@@ -54,138 +54,90 @@ async function autenticar(req, res) {
 }
 
 function cadastrar(req, res) {
-
     var nome = req.body.nomeServer;
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
     var cpf = req.body.cpfServer;
     var fk_nivel_acesso = 1;
 
-
     if (nome == undefined) {
-
         return res.status(400).send("Seu nome está undefined!");
-
     } else if (email == undefined) {
-
         return res.status(400).send("Seu email está undefined!");
-
     } else if (senha == undefined) {
-
         return res.status(400).send("Sua senha está undefined!");
-
     } else if (cpf == undefined) {
-
         return res.status(400).send("Seu CPF está undefined!");
-
     }
 
     var regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!regexEmail.test(email)) {
-
         return res.status(400).send("Digite um email válido!");
-
     }
 
+    var cpfRegex = /^\d{11}$/;
+    if (!cpfRegex.test(cpf)) {
+        return res.status(400).send("Digite um CPF válido!");
+    }
+
+    var senhaRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+    if (!senhaRegex.test(senha)) {
+        return res.status(400).send(
+            "A senha deve conter ao menos 8 caracteres, uma letra maiúscula, um número e um caractere especial!"
+        );
+    }
 
     var dominio = email.split("@")[1];
 
-
+    // Busca a empresa pelo domínio para obter o id_empresa
     empresaModel.buscarDominio(dominio)
-
         .then(function (empresa) {
-
-            if (!empresa) {
-
+            if (!empresa || empresa.length == 0) {
                 return res.status(404).send("Domínio de empresa não encontrado!");
-
             }
 
-
-            var cpfRegex = /^\d{11}$/;
-
-            if (!cpfRegex.test(cpf)) {
-
-                return res.status(400).send("Digite um CPF válido!");
-
-            }
-
-
-            var senhaRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-
-            if (!senhaRegex.test(senha)) {
-
-                return res.status(400).send(
-                    "A senha deve conter ao menos 8 caracteres, uma letra maiúscula, um número e um caractere especial!"
-                );
-
-            }
-
+            var fk_empresa = empresa[0] ? empresa[0].id_empresa : empresa.id_empresa;
 
             return bcrypt.hash(senha, 10)
-
                 .then(function (senhaHash) {
-
                     return usuarioModel.cadastrar(
                         nome,
                         email,
                         senhaHash,
                         cpf,
+                        fk_empresa,
                         fk_nivel_acesso
                     );
-
-                })
-
-                .then(function (resultado) {
-
-                    var token = crypto.randomBytes(32).toString("hex");
-
-                    var dtExpiracao = new Date(
-                        Date.now() + 15 * 60 * 1000
-                    );
-
-
-                    return verificacaoModel.criarToken(
-                        token,
-                        dtExpiracao,
-                        resultado.insertId
-                    )
-
-                        .then(function () {
-
-                            return emailService.enviarEmail(
-                                email,
-                                token
-                            );
-
-                        });
-
-                })
-
-                .then(function () {
-
-                    res.status(201).json({
-                        mensagem: "Usuário cadastrado com sucesso!"
-                    });
-
                 });
-
         })
+        .then(function (resultado) {
+            var token = crypto.randomBytes(32).toString("hex");
+            var dtExpiracao = new Date(Date.now() + 15 * 60 * 1000)
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
 
+            return verificacaoModel.criarToken(
+                token,
+                dtExpiracao,
+                resultado.insertId
+            )
+            .then(function () {
+                return emailService.enviarEmail(
+                    email,
+                    token
+                );
+            });
+        })
+        .then(function () {
+            res.status(201).json({
+                mensagem: "Usuário cadastrado com sucesso!"
+            });
+        })
         .catch(function (erro) {
-
             console.log(erro);
-
-            console.log(
-                "\nHouve um erro ao realizar o cadastro! Erro: ",
-                erro.sqlMessage
-            );
-
             res.status(500).json(erro.sqlMessage);
-
         });
-
 }
 
 module.exports = {
