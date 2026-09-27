@@ -66,7 +66,8 @@
 }
 
 .page-content {
-    padding: 50px;
+    padding: 40px;
+    padding-bottom: 5px;
     background-color: #f4f4f4;
 }
 
@@ -101,10 +102,9 @@
 }
 
 .mural {
-    margin-top: 5dvh;
-    flex-grow: 1;
+    margin-top: 20px;
     width: 100%;
-    max-height: 45vh;
+    max-height: 65vh;
     border: 1px solid var(--cor-cinza);
     border-radius: 5px;
     background-color: var(--cor-branco);
@@ -183,6 +183,126 @@
 .mural .mural-busca .busca-data input{
     width: 100%;
     border: none;
+}
+
+.mural .mural-posts{
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+}
+
+.mural .mural-posts .post{
+    display: flex;
+    flex-direction: column;
+}
+
+.mural .mural-posts .post .line{
+    width: 100%;
+    height: 1px;
+    border-radius: 20px;
+    background-color: var(--cor-cinza);
+    align-self: center;
+    margin-top: 20px;
+}
+
+.mural .mural-posts .post .estrutura{
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.mural .mural-posts .post .date{
+    padding: 8px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background-color: #f4f4f49e;
+    border: 1px solid var(--cor-cinza);
+}
+
+.mural .mural-posts .post .date .dia{
+    color: var(--cor-secundaria);
+    font-size: 1.6em;
+    font-weight: 700;
+}
+.mural .mural-posts .post .date .mes{
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.mural .mural-posts .post .infos{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mural .mural-posts .post .infos .tags{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.mural .mural-posts .post .infos .tags .tag{
+    padding: 8px 18px;
+    border-radius: 9999px;
+    background-color: #42b7c415;
+    color: #276a72;
+    cursor: pointer;
+}
+
+.mural .mural-posts .post .infos .post-texts{
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    gap: 10px;
+}
+
+.mural .mural-posts .post .infos .post-texts .title{
+    font-size: 1.5em;
+    font-weight: 700;
+}
+
+.mural .mural-posts .post .infos .post-texts .desc{
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #585858;
+}
+
+.mural .mural-posts .post .infos .user{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.mural .mural-posts .post .infos .user .icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #276a722d;
+    color: var(--cor-secundaria);
+    padding: 8px 12px;
+    border-radius: 9999px;
+    font-size: 1em;
+    font-weight: 800;
+}
+
+.mural .mural-posts .post .infos .user .name{
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #585858;
+}
+
+.mural .mural-posts .post .actions{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: flex-start;
+    font-size: 2em;
+    color: #585858;
+    cursor: pointer;
 }
 
 
