@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Nautilus - Login</title>
+    <title>Nautilus - Cadastro</title>
 
     <script src="./js/sessao.js"></script>
 
     <link rel="stylesheet" href="./css/navbar.css">
-    <link rel="stylesheet" href="./css/login.css">
+    <link rel="stylesheet" href="./css/cadastro.css">
     <link rel="stylesheet" href="./css/global.css">
 
     <script src="./js/navbar.js" defer></script>
@@ -29,12 +29,11 @@
                     <img src="./assets/img/logo.png" alt="Nautilus Logo">
                     Nautilus
                 </a>
-
             </div>
 
             <div class="navbar_actions">
-                <a href="./cadastro.html">
-                <button>Cadastre-se</button>
+                <a href="./login.html">
+                    <button>Login</button>
                 </a>
             </div>
 
@@ -74,7 +73,6 @@
                 </span>
             </a>
 
-
         </nav>
 
         <div class="sidebar_actions">
@@ -93,22 +91,28 @@
             <div class="card">
                 <div class="inicio-cadastro">
                     <img src="assets/imgs/Group 36.png" alt="">
-                    <h2>Bem-vindo à NAUTILUS</h2>
-                    <h3>Acesse sua plataforma de monitoramento de
+                    <h2>Crie sua conta na NAUTILUS</h2>
+                    <h3>Cadastre-se para acessar a plataforma de monitoramento de
                         alta performance.</h3>
                 </div>
 
                 <div class="formulario">
-
+                    <div class="campo">
+                        <input id="nome_input" type="text" placeholder="Nome Completo" />
+                    </div>
+                    <div class="campo">
+                        <input id="cpf_input" type="text" placeholder="CPF" />
+                    </div>
                     <div class="campo">
                         <input id="email_input" type="text" placeholder="Email" />
                     </div>
                     <div class="campo">
                         <input id="senha_input" type="password" placeholder="Senha" />
                     </div>
-                    <button class="botao" onclick="entrar()">Login</button>
-                    <div id="div_aguardar">
+                    <div class="campo">
+                        <input id="confirmacao_senha_input" type="password" placeholder="Confirmar Senha" />
                     </div>
+                    <button class="botao" onclick="cadastrar()">Cadastrar</button>
                 </div>
                 <div id="div_erros_login"></div>
             </div>
@@ -129,85 +133,82 @@
                 <img src="assets/imgs/Group 30.png" class="img-circulo" alt="">
             </div>
         </div>
+        <div id="modal_email" class="modal-overlay">
+            <div class="modal-card">
+                <h3>Cadastro efetuado!</h3>
+                <p>Por favor, verifique a caixa de entrada do seu e-mail para prosseguir.</p>
+                <button onclick="fecharModalERedirecionar()" class="botao">Entendi</button>
+            </div>
+        </div>
     </div>
-    
-
 </body>
 
 </html>
 
 <script>
-    function entrar() {
-        aguardar();
 
+    function cadastrar() {
+        var nomeVar = nome_input.value;
+        var cpfVar = cpf_input.value;
         var emailVar = email_input.value;
         var senhaVar = senha_input.value;
+        var confirmacaoSenhaVar = confirmacao_senha_input.value;
 
-        if (emailVar == "" || senhaVar == "") {
+        if (nomeVar == "" || cpfVar == "" || emailVar == "" || senhaVar == "" || confirmacaoSenhaVar == "") {
             div_erros_login.style.color = "red";
             div_erros_login.innerHTML = "Preencha todos os campos para prosseguir.";
-            finalizarAguardar();
             setTimeout(sumirMensagem, 5000);
             return false;
         }
 
-        console.log("FORM LOGIN: ", emailVar);
-        console.log("FORM SENHA: ", senhaVar);
+        if (senhaVar != confirmacaoSenhaVar) {
+            div_erros_login.style.color = "red";
+            div_erros_login.innerHTML = "As senhas inseridas não coincidem.";
+            setTimeout(sumirMensagem, 5000);
+            return false;
+        }
 
-        fetch("/usuarios/autenticar", {
+        fetch("/usuarios/cadastrar", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
+                nomeServer: nomeVar,
                 emailServer: emailVar,
-                senhaServer: senhaVar
+                senhaServer: senhaVar,
+                cpfServer: cpfVar
             })
         }).then(function (resposta) {
-            console.log("ESTOU NO THEN DO entrar()!");
 
             if (resposta.ok) {
-        
                 div_erros_login.style.color = "green";
-                div_erros_login.innerHTML = "Login realizado com sucesso! Redirecionando...";
+                div_erros_login.innerHTML = "Cadastro efetuado com sucesso!";
 
-                resposta.json().then(json => {
-                    console.log(json);
-                    console.log(JSON.stringify(json));
-                    sessionStorage.setItem("EMAIL_USUARIO", json.email);
-                    sessionStorage.setItem("NOME_USUARIO", json.nome);
-                    sessionStorage.setItem("ID_USUARIO", json.id_usuario);
-                    sessionStorage.setItem("ID_EMPRESA", json.fk_empresa);
-                    sessionStorage.setItem("ID_NIVEL_ACESSO", json.fk_nivel_acesso);
-                    
-                    setTimeout(function () {
-                        window.location = "./cadastro-funcionario.html";
-                    }, 1000);
-                });
+                modal_email.style.display = "flex";
 
             } else {
-                console.log("Houve um erro ao tentar realizar o login!");
-
                 resposta.text().then(texto => {
-                    console.error(texto);
-        
                     div_erros_login.style.color = "red";
-                    div_erros_login.innerHTML = texto || "E-mail ou senha incorretos.";
-                    finalizarAguardar(texto);
+                    div_erros_login.innerHTML = texto || "Erro ao realizar o cadastro.";
                     setTimeout(sumirMensagem, 5000);
+                    console.error(texto);
                 });
             }
 
         }).catch(function (erro) {
-            console.log(erro);
-            
             div_erros_login.style.color = "red";
-            div_erros_login.innerHTML = "Erro ao conectar com o servidor.";
-            finalizarAguardar();
+            div_erros_login.innerHTML = "Erro de conexão com o servidor.";
             setTimeout(sumirMensagem, 5000);
+            console.log(erro);
         });
 
         return false;
+    }
+
+    function fecharModalERedirecionar() {
+        modal_email.style.display = "none";
+        window.location = "./login.html";
     }
 
     function sumirMensagem() {

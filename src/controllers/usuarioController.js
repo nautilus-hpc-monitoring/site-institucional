@@ -1,85 +1,191 @@
 var usuarioModel = require("../models/usuarioModel");
+var empresaModel = require("../models/empresaModel");
+var verificacaoModel = require("../models/verificacaoModel");
+var emailService = require("../services/emailService");
+var bcrypt = require("bcrypt");
+var crypto = require("crypto");
 
-function autenticar(req, res) {
+async function autenticar(req, res) {
+
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
 
     if (email == undefined) {
-        res.status(400).send("Seu email está undefined!");
+        return res.status(400).send("Seu email está indefinido!");
+
     } else if (senha == undefined) {
-        res.status(400).send("Sua senha está indefinida!");
-    } else {
-
-        usuarioModel.autenticar(email, senha)
-            .then(
-                function (resultadoAutenticar) {
-                    console.log(`\nResultados encontrados: ${resultadoAutenticar.length}`);
-                    console.log(`Resultados: ${JSON.stringify(resultadoAutenticar)}`); // transforma JSON em String
-
-                    if (resultadoAutenticar.length == 1) {
-                        console.log(resultadoAutenticar);
-
-                        res.json({
-                            id_usuario: resultadoAutenticar[0].id,
-                            email: resultadoAutenticar[0].email,
-                            nome: resultadoAutenticar[0].nome,
-                            fk_empresa: resultadoAutenticar[0].fk_empresa,
-                            fk_nivel_acesso: resultadoAutenticar[0].fk_nivel_acesso
-                        });
-
-                    } else if (resultadoAutenticar.length == 0) {
-                        res.status(403).send("Email e/ou senha inválido(s)");
-                    } else {
-                        res.status(403).send("Mais de um usuário com o mesmo login e senha!");
-                    }
-                }
-            ).catch(
-                function (erro) {
-                    console.log(erro);
-                    console.log("\nHouve um erro ao realizar o login! Erro: ", erro.sqlMessage);
-                    res.status(500).json(erro.sqlMessage);
-                }
-            );
+        return res.status(400).send("Sua senha está indefinida!");
     }
 
+    try {
+
+        const resposta = await usuarioModel.buscarPorEmail(email);
+        
+        const usuario = resposta[0];
+
+        if (!usuario) {
+            return res.status(401).send("Email inválido");
+        }
+
+        //if (!usuario.verificado) {
+          //  return res.status(403).send("Email não verificado");
+        //}
+
+
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
+
+        if (!senhaValida) {
+            return res.status(401).send("Senha inválida");
+        }
+
+        res.json({
+            id_usuario: usuario.id,
+            email: usuario.email,
+            nome: usuario.nome,
+            fk_empresa: usuario.fk_empresa
+        });
+
+    } catch (erro) {
+
+        console.log(erro);
+
+        res.status(500).json(erro.sqlMessage);
+    }
 }
 
 function cadastrar(req, res) {
-    // Crie uma variável que vá recuperar os valores do arquivo cadastro.html
+
     var nome = req.body.nomeServer;
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
-    var fkEmpresa = req.body.idEmpresaVincularServer;
-    var fkNivelAcesso = req.body.idNivelAcessoServer;
+    var cpf = req.body.cpfServer;
+    var fk_nivel_acesso = 1;
 
-    // Faça as validações dos valores
+
     if (nome == undefined) {
-        res.status(400).send("Seu nome está undefined!");
-    } else if (email == undefined) {
-        res.status(400).send("Seu email está undefined!");
-    } else if (senha == undefined) {
-        res.status(400).send("Sua senha está undefined!");
-    } else if (fkEmpresa == undefined) {
-        res.status(400).send("Sua empresa a vincular está undefined!");
-    } else {
 
-        // Passe os valores como parâmetro e vá para o arquivo usuarioModel.js
-        usuarioModel.cadastrar(nome, email, senha, fkEmpresa, fkNivelAcesso)
-            .then(
-                function (resultado) {
-                    res.json(resultado);
-                }
-            ).catch(
-                function (erro) {
-                    console.log(erro);
-                    console.log(
-                        "\nHouve um erro ao realizar o cadastro! Erro: ",
-                        erro.sqlMessage
-                    );
-                    res.status(500).json(erro.sqlMessage);
-                }
-            );
+        return res.status(400).send("Seu nome está undefined!");
+
+    } else if (email == undefined) {
+
+        return res.status(400).send("Seu email está undefined!");
+
+    } else if (senha == undefined) {
+
+        return res.status(400).send("Sua senha está undefined!");
+
+    } else if (cpf == undefined) {
+
+        return res.status(400).send("Seu CPF está undefined!");
+
     }
+
+    var regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!regexEmail.test(email)) {
+
+        return res.status(400).send("Digite um email válido!");
+
+    }
+
+
+    var dominio = email.split("@")[1];
+
+
+    empresaModel.buscarDominio(dominio)
+
+        .then(function (empresa) {
+
+            if (!empresa) {
+
+                return res.status(404).send("Domínio de empresa não encontrado!");
+
+            }
+
+
+            var cpfRegex = /^\d{11}$/;
+
+            if (!cpfRegex.test(cpf)) {
+
+                return res.status(400).send("Digite um CPF válido!");
+
+            }
+
+
+            var senhaRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+
+            if (!senhaRegex.test(senha)) {
+
+                return res.status(400).send(
+                    "A senha deve conter ao menos 8 caracteres, uma letra maiúscula, um número e um caractere especial!"
+                );
+
+            }
+
+
+            return bcrypt.hash(senha, 10)
+
+                .then(function (senhaHash) {
+
+                    return usuarioModel.cadastrar(
+                        nome,
+                        email,
+                        senhaHash,
+                        cpf,
+                        fk_nivel_acesso
+                    );
+
+                })
+
+                .then(function (resultado) {
+
+                    var token = crypto.randomBytes(32).toString("hex");
+
+                    var dtExpiracao = new Date(
+                        Date.now() + 15 * 60 * 1000
+                    );
+
+
+                    return verificacaoModel.criarToken(
+                        token,
+                        dtExpiracao,
+                        resultado.insertId
+                    )
+
+                        .then(function () {
+
+                            return emailService.enviarEmail(
+                                email,
+                                token
+                            );
+
+                        });
+
+                })
+
+                .then(function () {
+
+                    res.status(201).json({
+                        mensagem: "Usuário cadastrado com sucesso!"
+                    });
+
+                });
+
+        })
+
+        .catch(function (erro) {
+
+            console.log(erro);
+
+            console.log(
+                "\nHouve um erro ao realizar o cadastro! Erro: ",
+                erro.sqlMessage
+            );
+
+            res.status(500).json(erro.sqlMessage);
+
+        });
+
 }
 
 module.exports = {
