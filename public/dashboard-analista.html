@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Nautilus - Dashboard Analista</title>
+    <link rel="icon" href="./assets/icon/logo.png">
+
+    <link rel="stylesheet" href="./css/dashboard-analista.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
+
+    <script src="./js/sessao.js"></script>
+</head>
+
+<body>
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <div id="logo">
+                <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
+                <p id="logo_infos">
+                    <span class="item-description">NAUTILUS</span>
+                </p>
+            </div>
+
+            <ul id="side_items">
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-border-all"></i>
+                        <span class="item-description">Visão Geral</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-database"></i>
+                        <span class="item-description">Ambientes</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Clusters</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-node.html">
+                        <i class="fa-solid fa-memory"></i>
+                        <span class="item-description">Nodes</span>
+                    </a>
+                </li>
+                <li class="side-item">
+                    <a href="./cadastro-funcionario.html">
+                        <i class="fa-solid fa-users"></i>
+                        <span class="item-description">Funcionários</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-empresa.html">
+                        <i class="fa-solid fa-building"></i>
+                        <span class="item-description">Empresas</span>
+                    </a>
+                </li>
+
+                <li class="side-item active">
+                    <a href="./cadastro-empresa.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+        <ul id="side_bottom">
+            <li class="side-item">
+                <a href="#">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="item-description">Configurações</span>
+                </a>
+            </li>
+            <li class="side-item">
+                <a href="#" onclick="encerrarSessao()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description">Sair</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+
+
+        <div class="dashboard-header">
+            <div class="title-area">
+                <div class="eyebrow">VISÃO HISTÓRICA</div>
+                <h1>Dashboard do Analista</h1>
+                <p>Análise histórica do comportamento dos componentes</p>
+            </div>
+
+            <div id="seletores-grafico">
+                <div class="seletor">
+                    <span>Node</span>
+                    <select>
+                        <option>Node 01</option>
+                    </select>
+                </div>
+                <div class="seletor">
+                    <span>Período</span>
+                    <select>
+                        <option>Últimos 6 meses</option>
+                    </select>
+                </div>
+                <div class="seletor">
+                    <span>Granularidade</span>
+                    <select>
+                        <option>Semanal</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="espaco-grafico">
+            <div class="grafico-header">
+                <div>
+                    <h2>Evolução do uso dos componentes por semana</h2>
+                    <p>Média semanal de utilização • 07 abr — 15 set 2026</p>
+                </div>
+                <div class="custom-legend">
+                    <div class="legend-item"><span class="legend-color" style="background:#3b82f6;"></span> Média CPU
+                    </div>
+                    <div class="legend-item"><span class="legend-color" style="background:#8b5cf6;"></span> Média RAM
+                    </div>
+                    <div class="legend-item"><span class="legend-color" style="background:#f97316;"></span> Média Disco
+                    </div>
+                    <div class="legend-item"><span class="legend-dot"></span> Fora do padrão</div>
+                </div>
+            </div>
+
+            <div class="grafico-conteudo">
+                <canvas id="line-chart"></canvas>
+            </div>
+        </div>
+
+
+        <div class="kpi-grid">
+            <div class="kpi-card highlight">
+                <div class="kpi-icon icon-red"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-title">Maior pico</span>
+                    <span class="kpi-value value-red">97,8%</span>
+                    <span class="kpi-desc">CPU - 15/09/2026 - 14:32</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon icon-blue"><i class="fa-regular fa-clock"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-title">Maior duração fora do padrão</span>
+                    <span class="kpi-value">2h 18min</span>
+                    <span class="kpi-desc">Maior período contínuo fora do padrão</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon icon-blue"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-title">Eventos fora do padrão</span>
+                    <span class="kpi-value">14 eventos</span>
+                    <span class="kpi-desc">2h 37min acumulados no período</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon icon-blue"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="kpi-info">
+                    <span class="kpi-title">Componente mais instável</span>
+                    <span class="kpi-value">CPU</span>
+                    <span class="kpi-desc">18,4% de variação no período</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="bottom-grid">
+            <div class="bottom-card">
+                <div class="distrib-info">
+                    <h3>Distribuição do uso</h3>
+                    <p>Percentis mostram o comportamento típico e a faixa dos valores mais elevados.</p>
+                </div>
+                <div class="percentis">
+                    <div class="percentil-item"><span class="p-label">P50</span><span class="p-value">51%</span><span
+                            class="p-desc">Típico</span></div>
+                    <div class="percentil-item"><span class="p-label">P90</span><span class="p-value">73%</span><span
+                            class="p-desc">Elevado</span></div>
+                    <div class="percentil-item"><span class="p-label">P95</span><span class="p-value">81%</span><span
+                            class="p-desc">Alto</span></div>
+                    <div class="percentil-item"><span class="p-label">P99</span><span class="p-value">94%</span><span
+                            class="p-desc">Extremo</span></div>
+                </div>
+            </div>
+
+            <div class="bottom-card" style="justify-content: flex-start; gap: 20px;">
+                <div class="icon-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div>
+                    <div class="variation-title">Variação em relação ao período anterior <span
+                            class="variation-value">+13%</span></div>
+                    <p class="variation-info">Média geral de utilização aumentou em relação aos 6 meses anteriores.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('line-chart').getContext('2d');
+
+        const labels = ['07 abr', '', '', '', '05 mai', '', '', '02 jun', '', '', '30 jun', '', '', '28 jul', '', '', '25 ago', '', '15 set'];
+        const dataCPU = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30];
+        const dataRAM = [50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50];
+        const dataDisco = [70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70];
+
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Média CPU',
+                        data: dataCPU,
+                        borderColor: '#3b82f6',
+                        backgroundColor: '#3b82f6',
+                        borderWidth: 2,
+                        tension: 0.4,
+                    },
+                    {
+                        label: 'Média RAM',
+                        data: dataRAM,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: '#8b5cf6',
+                        borderWidth: 2,
+                        tension: 0.4,
+                    },
+                    {
+                        label: 'Média Disco',
+                        data: dataDisco,
+                        borderColor: '#f97316',
+                        backgroundColor: '#f97316',
+                        borderWidth: 2,
+                        tension: 0.4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            stepSize: 25,
+                            callback: function (value) { return value + '%'; },
+                            color: '#9ca3af',
+                            font: { size: 12 }
+                        },
+                        grid: {
+                            color: '#f3f4f6',
+                            borderDash: [5, 5],
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { size: 12 },
+                            maxRotation: 0
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
