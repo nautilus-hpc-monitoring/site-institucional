@@ -3,12 +3,61 @@
 }
 
 .area-filtro {
+    width: 100%;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     gap: 10px;
 }
 
 .area-filtro input {
     border: 1px solid rgba(0, 0, 0, 0.3);
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    max-width: 45%;
+}
+
+.ambientes_hpc {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.ambiente {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(220, 220, 220, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 15px 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    transition: 0.3s all ease-in-out;
+}
+
+.ambiente:hover {
+    transform: scale(1.02);
+}
+
+.status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 15px;
+    border-radius: 50px;
+}
+
+.status p {
+    font-weight: bold;
+}
+
+.ativo {
+    background-color: #68ff68;
+}
+
+.manut {
+    background-color: #ffff00;
+}
+
+.desativado {
+    background-color: #ff4848;
 }
