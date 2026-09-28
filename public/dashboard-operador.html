@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./css/global.css">
     <link rel="stylesheet" href="./css/formulario-cadastro.css">
     <link rel="stylesheet" href="./css/sidebar.css">
-    <link rel="stylesheet" href="./dashboard-operador.html">
+    <link rel="stylesheet" href="./css/dashboard-operador.css">
 
     <script src="./js/sessao.js"></script>
     <title>Nautilus - Cadastro Node</title>
@@ -163,15 +163,19 @@
                 <span class="user-name" id="b_usuario"></span>
             </div>
         </header>
-        <main class="page-content">
-            <h1 class="page-title">
-                Dashboard Operador
-            </h1>
 
+        <main class="page-content">
+            <!-- Ambientes HPC -->
+            <div class="ambientes">
+                <div class="area-filtro">
+                    <h1>Buscar ambiente HPC</h1>
+                    <input type="text" placeholder="Ambiente">
+                </div>
+            </div>
         </main>
     </div>
-
 </body>
+
 <script>
     document.getElementById('open-sidebar-btn').onclick = function () {
         mobileSidebar.classList.add('active');

@@ -1,0 +1,14 @@
+.page-content {
+    max-width: 90% !important;
+}
+
+.area-filtro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.area-filtro input {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
