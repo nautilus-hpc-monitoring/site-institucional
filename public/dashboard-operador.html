@@ -172,62 +172,52 @@
                     <input type="text" placeholder="Ambiente">
                 </div>
 
-                <div class="ambientes_hpc">
+                <div class="ambientes_hpc" id="ambientes_hpc">
                     <!-- Ambiente -->
-                    <div class="ambiente">
-                        <h2>Petrobrás g1</h2>
-
-                        <div class="status ativo">
-                            <p>Ativo</p>
-                        </div>
-                    </div>
-
-                    <div class="ambiente">
-                        <h2>Petrobrás g2</h2>
-
-                        <div class="status manut">
-                            <p>Manutenção</p>
-                        </div>
-                    </div>
-
-                    <div class="ambiente">
-                        <h2>Petrobrás g3</h2>
-
-                        <div class="status desativado">
-                            <p>Desativado</p>
-                        </div>
-                    </div>
-
-                    <div class="ambiente">
-                        <h2>Petrobrás g4</h2>
-
-                        <div class="status ativo">
-                            <p>Ativo</p>
-                        </div>
-                    </div>
-
-                    <div class="ambiente">
-                        <h2>Petrobrás g5</h2>
-
-                        <div class="status ativo">
-                            <p>Ativo</p>
-                        </div>
-                    </div>
-
-                    <div class="ambiente">
-                        <h2>Petrobrás g6</h2>
-
-                        <div class="status ativo">
-                            <p>Ativo</p>
-                        </div>
-                    </div>
                 </div>
+            </div>
+
+            <!-- Clusters -->
+            <div class="clusters none" id="clusters">
+
             </div>
         </main>
     </div>
 </body>
 
 <script>
+    const htmlAmbientesHpc = document.getElementById("ambientes_hpc");
+    const ambientes = [
+        {
+            id_ambiente_hpc: 1,
+            nome: "Petrobrás 1",
+            status: "ativo"
+        },
+        {
+            id_ambiente_hpc: 2,
+            nome: "Petrobrás 2",
+            status: "manut"
+        },
+        {
+            id_ambiente_hpc: 3,
+            nome: "Petrobrás 3",
+            status: "desativado"
+        }
+    ]
+
+    ambientes.forEach(ambiente => {
+        const statusExibir = (ambiente.status == "manut") ? "manutenção" : ambiente.status;
+        htmlAmbientesHpc.innerHTML += `
+            <div class="ambiente" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
+                <h2>${ambiente.nome}</h2>
+
+                <div class="status ${ambiente.status}">
+                    <p>${statusExibir}</p>
+                </div>
+            </div>
+        `;
+    });
+
     document.getElementById('open-sidebar-btn').onclick = function () {
         mobileSidebar.classList.add('active');
         document.getElementById('sidebar-overlay').classList.add('active');

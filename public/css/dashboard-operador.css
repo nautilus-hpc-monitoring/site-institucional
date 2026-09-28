@@ -61,3 +61,7 @@
 .desativado {
     background-color: #ff4848;
 }
+
+.none {
+    display: none;
+}
