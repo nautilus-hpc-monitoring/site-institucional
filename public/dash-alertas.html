@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/dash-style.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
+    <link rel="icon" href="./assets/icon/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div id="sidebar_content">
+            <div id="logo">
+                <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
+                <p id="logo_infos">
+                    <span class="item-description">NAUTILUS</span>
+                </p>
+            </div>
+
+            <ul id="side_items">
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-border-all"></i>
+                        <span class="item-description">Visão Geral</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-database"></i>
+                        <span class="item-description">Ambientes</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Clusters</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-node.html">
+                        <i class="fa-solid fa-memory"></i>
+                        <span class="item-description">Nodes</span>
+                    </a>
+                </li>
+                <li class="side-item">
+                    <a href="./cadastro-funcionario.html">
+                        <i class="fa-solid fa-users"></i>
+                        <span class="item-description">Funcionários</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-empresa.html">
+                        <i class="fa-solid fa-building"></i>
+                        <span class="item-description">Empresas</span>
+                    </a>
+                </li>
+
+                <li class="side-item">
+                    <a href="./cadastro-empresa.html">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="item-description">Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="side-item active">
+                    <a href="./dash-alertas.html">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span class="item-description">Alertas</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+        <ul id="side_bottom">
+            <li class="side-item">
+                <a href="#">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="item-description">Configurações</span>
+                </a>
+            </li>
+            <li class="side-item">
+                <a href="#" onclick="encerrarSessao()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="item-description">Sair</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- wrapper rolagem -->
+    <div class="main-wrapper">
+
+
+        <main class="content">
+            <p class="titulo">Alertas</p>
+            <section class="metrics-grid">
+                <div class="card-red">
+                    <span class="card-title">Alertas Ativos</span>
+                    <span class="card-value">2</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Componente Mais Ofensor</span>
+                    <span class="card-value">RAM</span>
+                    <span class="card-title">58% dos alertas</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Reincidência de Alertas</span>
+                    <span class="card-value">14%</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Tempo Médio Até Resolução</span>
+                    <span class="card-value">18min</span>
+                </div>
+
+            </section>
+
+            <section class="table-card">
+                <div class="table-card-header">
+                    <h3>Histórico de Alertas</h3>
+                    <div class="table-filters">
+                        <div class="input-container">
+                            <input type="text" class="filter-select" placeholder="Buscar Servidor">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        </div>
+                        <select class="filter-select">
+                            <option value="">Status Alerta</option>
+                            <option value="aberto">Em Aberto</option>
+                            <option value="investigacao">Em Investigação</option>
+                            <option value="resolvido">Resolvido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabela com Rolagem Interna -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Servidor</th>
+                                <th>Componente</th>
+                                <th>Mensagem do Alerta</th>
+                                <th>Data / Hora</th>
+                                <th>Status Alerta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>db-primary</strong></td>
+                                <td>RAM</td>
+                                <td>Uso de memória atingiu 96% da capacidade.</td>
+                                <td>27/08/2026 - 10:42</td>
+                                <td><span class="badge-status-alert">Aberto</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>srv-prod-01</strong></td>
+                                <td>Disco</td>
+                                <td>Partição principal /var acima de 91%.</td>
+                                <td>27/08/2026 - 09:15</td>
+                                <td><span class="badge-status-attention">Em Investigação</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>srv-prod-02</strong></td>
+                                <td>RAM</td>
+                                <td>Consumo constante acima de 85%.</td>
+                                <td>27/08/2026 - 08:30</td>
+                                <td><span class="badge-status-attention">Em Investigação</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>srv-web-03</strong></td>
+                                <td>CPU</td>
+                                <td>Pico pontual de processamento (88%).</td>
+                                <td>26/08/2026 - 22:10</td>
+                                <td><span class="badge-status">Resolvido</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>db-secondary</strong></td>
+                                <td>CPU</td>
+                                <td>Uso contínuo de 98% por mais de 10 min.</td>
+                                <td>26/08/2026 - 14:02</td>
+                                <td><span class="badge-status">Resolvido</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+
+
+
+        </main>
+    </div>
+</body>
+
+</html>
