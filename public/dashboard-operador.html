@@ -200,6 +200,21 @@
 
                 </div>
             </div>
+
+            <!-- Dashboard -->
+            <div class="dashboard none" id="dashboard">
+                <div class="titulo_dashboard">
+                    <h1>Nome do Node</h1>
+                </div>
+
+                <div class="kpis">
+
+                </div>
+
+                <div class="graficos">
+
+                </div>
+            </div>
         </main>
     </div>
 </body>
@@ -211,6 +226,8 @@
     const htmlClusteritens = document.getElementById("cluster_itens");
     const htmlNodes = document.getElementById("nodes");
     const htmlNodesItens = document.getElementById("node_itens");
+    const htmlDashboard = document.getElementById("dashboard");
+
     const ambientes = [
         {
             id_ambiente_hpc: 1,
@@ -324,7 +341,7 @@
         nodes.forEach(node => {
             const statusExibir = (node.status == "manut") ? "manutenção" : node.status;
             htmlNodesItens.innerHTML += `
-                <div class="item">
+                <div class="item" onclick="abrirDash(${node.id_node})">
                     <div class="item-titulo">
                         <h2>${node.hostname} ${node.sistema_operacional}</h2>
                         <p>${node.ip}</p>
@@ -339,6 +356,11 @@
 
         htmlClusters.classList.add("none");
         htmlNodes.classList.toggle("none");
+    }
+
+    function abrirDash(id_node) {
+        htmlNodes.classList.add("none");
+        htmlDashboard.classList.toggle("none");
     }
 </script>
 
