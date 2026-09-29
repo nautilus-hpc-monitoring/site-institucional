@@ -172,13 +172,13 @@
                     <input type="text" placeholder="Ambiente">
                 </div>
 
-                <div class="ambientes_hpc" id="ambientes_hpc">
+                <div class="ambientes_hpc lista" id="ambientes_hpc">
                     <!-- Ambiente -->
                 </div>
             </div>
 
             <!-- Clusters -->
-            <div class="clusters none" id="clusters">
+            <div class="clusters none lista" id="clusters">
 
             </div>
         </main>
@@ -187,6 +187,7 @@
 
 <script>
     const htmlAmbientesHpc = document.getElementById("ambientes_hpc");
+    const htmlClusters = document.getElementById("clusters");
     const ambientes = [
         {
             id_ambiente_hpc: 1,
@@ -208,7 +209,7 @@
     ambientes.forEach(ambiente => {
         const statusExibir = (ambiente.status == "manut") ? "manutenção" : ambiente.status;
         htmlAmbientesHpc.innerHTML += `
-            <div class="ambiente" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
+            <div class="item" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
                 <h2>${ambiente.nome}</h2>
 
                 <div class="status ${ambiente.status}">
@@ -232,6 +233,44 @@
         mobileSidebar.classList.remove('active');
         document.getElementById('sidebar-overlay').classList.remove('active');
     };
+
+
+    function abrirClusters(id_ambiente_hpc) {
+        // id_ambiente_hpc vai ser utilizado para pesquisa no banco de dados
+        const clusters = [
+            {
+                id_cluster: 1,
+                nome: "cluster 1",
+                status: "ativo"
+            },
+            {
+                id_cluster: 2,
+                nome: "cluster 2",
+                status: "manut"
+            },
+            {
+                id_cluster: 3,
+                nome: "cluster 3",
+                status: "desativado"
+            }
+        ]
+
+        clusters.forEach(cluster => {
+            const statusExibir = (cluster.status == "manut") ? "manutenção" : cluster.status;
+            htmlClusters.innerHTML += `
+                <div class="item"">
+                    <h2>${cluster.nome}</h2>
+
+                    <div class="status ${cluster.status}">
+                        <p>${statusExibir}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        htmlClusters.classList.toggle("none");
+        htmlAmbientesHpc.classList.add("none");
+    }
 
 </script>
 
