@@ -39,7 +39,7 @@
             </button>
         </div>
 
-        <ul class="mobile-sidebar-items">
+        <ul class="mobile-sidebar-itens">
             <li class="nav-item">
                 <a href="#"><i class="fa-solid fa-border-all"></i> <span>Visão Geral</span></a>
             </li>
@@ -84,7 +84,7 @@
                 </p>
             </div>
 
-            <ul id="side_items">
+            <ul id="side_itens">
                 <li class="side-item">
                     <a href="#">
                         <i class="fa-solid fa-border-all"></i>
@@ -166,34 +166,51 @@
 
         <main class="page-content">
             <!-- Ambientes HPC -->
-            <div class="ambientes">
+            <div class="ambientes" id="ambientes">
                 <div class="area-filtro">
                     <h1>Buscar ambiente HPC</h1>
                     <input type="text" placeholder="Ambiente">
                 </div>
 
-                <div class="ambientes_hpc lista" id="ambientes_hpc">
+                <div class="ambientes_itens lista" id="ambientes_itens">
                     <!-- Ambiente -->
                 </div>
             </div>
 
             <!-- Clusters -->
-            <div class="clusters none lista" id="clusters">
+            <div class="clusters none" id="clusters">
+                <div class="area-filtro">
+                    <h1>Buscar cluster</h1>
+                    <input type="text" placeholder="Cluster">
+                </div>
 
+                <div class="cluster_itens lista" id="cluster_itens">
+
+                </div>
             </div>
 
             <!-- Nodes -->
-            <div class="nodes none lista" id="nodes">
+            <div class="nodes none" id="nodes">
+                <div class="area-filtro">
+                    <h1>Buscar node</h1>
+                    <input type="text" placeholder="Node">
+                </div>
 
+                <div class="node_itens lista" id="node_itens">
+
+                </div>
             </div>
         </main>
     </div>
 </body>
 
 <script>
-    const htmlAmbientesHpc = document.getElementById("ambientes_hpc");
+    const htmlAmbientes = document.getElementById("ambientes");
+    const htmlAmbientesitens = document.getElementById("ambientes_itens");
     const htmlClusters = document.getElementById("clusters");
+    const htmlClusteritens = document.getElementById("cluster_itens");
     const htmlNodes = document.getElementById("nodes");
+    const htmlNodesItens = document.getElementById("node_itens");
     const ambientes = [
         {
             id_ambiente_hpc: 1,
@@ -214,7 +231,7 @@
 
     ambientes.forEach(ambiente => {
         const statusExibir = (ambiente.status == "manut") ? "manutenção" : ambiente.status;
-        htmlAmbientesHpc.innerHTML += `
+        htmlAmbientesitens.innerHTML += `
             <div class="item" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
                 <h2>${ambiente.nome}</h2>
 
@@ -263,7 +280,7 @@
 
         clusters.forEach(cluster => {
             const statusExibir = (cluster.status == "manut") ? "manutenção" : cluster.status;
-            htmlClusters.innerHTML += `
+            htmlClusteritens.innerHTML += `
                 <div class="item" onclick="abrirNodes(${cluster.id_cluster})">
                     <h2>${cluster.nome}</h2>
 
@@ -275,7 +292,7 @@
         });
 
         htmlClusters.classList.toggle("none");
-        htmlAmbientesHpc.classList.add("none");
+        htmlAmbientes.classList.add("none");
     }
 
     function abrirNodes(id_cluster) {
@@ -306,7 +323,7 @@
 
         nodes.forEach(node => {
             const statusExibir = (node.status == "manut") ? "manutenção" : node.status;
-            htmlNodes.innerHTML += `
+            htmlNodesItens.innerHTML += `
                 <div class="item">
                     <div class="item-titulo">
                         <h2>${node.hostname} ${node.sistema_operacional}</h2>
