@@ -181,6 +181,11 @@
             <div class="clusters none lista" id="clusters">
 
             </div>
+
+            <!-- Nodes -->
+            <div class="nodes none lista" id="nodes">
+
+            </div>
         </main>
     </div>
 </body>
@@ -188,6 +193,7 @@
 <script>
     const htmlAmbientesHpc = document.getElementById("ambientes_hpc");
     const htmlClusters = document.getElementById("clusters");
+    const htmlNodes = document.getElementById("nodes");
     const ambientes = [
         {
             id_ambiente_hpc: 1,
@@ -258,7 +264,7 @@
         clusters.forEach(cluster => {
             const statusExibir = (cluster.status == "manut") ? "manutenção" : cluster.status;
             htmlClusters.innerHTML += `
-                <div class="item"">
+                <div class="item" onclick="abrirNodes(${cluster.id_cluster})">
                     <h2>${cluster.nome}</h2>
 
                     <div class="status ${cluster.status}">
@@ -272,6 +278,51 @@
         htmlAmbientesHpc.classList.add("none");
     }
 
+    function abrirNodes(id_cluster) {
+        // id_cluster vai ser utilizado para pesquisa no banco de dados
+        const nodes = [
+            {
+                id_node: 1,
+                hostname: "Node 01",
+                ip: "192.168.0.1",
+                sistema_operacional: "Linux",
+                status: "ativo"
+            },
+            {
+                id_node: 2,
+                hostname: "Node 02",
+                ip: "192.168.0.2",
+                sistema_operacional: "Linux",
+                status: "manut"
+            },
+            {
+                id_node: 3,
+                hostname: "Node 03",
+                ip: "192.168.0.3",
+                sistema_operacional: "Linux",
+                status: "desativado"
+            }
+        ];
+
+        nodes.forEach(node => {
+            const statusExibir = (node.status == "manut") ? "manutenção" : node.status;
+            htmlNodes.innerHTML += `
+                <div class="item">
+                    <div class="item-titulo">
+                        <h2>${node.hostname} ${node.sistema_operacional}</h2>
+                        <p>${node.ip}</p>
+                    </div>
+
+                    <div class="status ${node.status}">
+                        <p>${statusExibir}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        htmlClusters.classList.add("none");
+        htmlNodes.classList.toggle("none");
+    }
 </script>
 
 </html>
