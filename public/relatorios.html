@@ -206,7 +206,7 @@
                 <div class="mural-busca">
                     <div class="busca-nome">
                         <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-                        <input type="search" id="id_busca" placeholder="Buscar relatórios por nome...">
+                        <input type="search" id="id_busca" placeholder="Buscar relatórios por título...">
                     </div>
                     <div class="busca-data">
                         <input type="date">
@@ -236,7 +236,10 @@
                                         <span>Aumento do uso de CPU</span>
                                     </div>
                                     <div class="desc">
-                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam excepturi quaerat laboriosam sed adipisci corrupti cum officia quae consequatur!</span>
+                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum
+                                            voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam
+                                            excepturi quaerat laboriosam sed adipisci corrupti cum officia quae
+                                            consequatur!</span>
                                     </div>
                                 </div>
 
@@ -293,7 +296,10 @@
                                         <span>Aumento do uso de CPU</span>
                                     </div>
                                     <div class="desc">
-                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam excepturi quaerat laboriosam sed adipisci corrupti cum officia quae consequatur!</span>
+                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum
+                                            voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam
+                                            excepturi quaerat laboriosam sed adipisci corrupti cum officia quae
+                                            consequatur!</span>
                                     </div>
                                 </div>
 
@@ -350,7 +356,10 @@
                                         <span>Aumento do uso de CPU</span>
                                     </div>
                                     <div class="desc">
-                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam excepturi quaerat laboriosam sed adipisci corrupti cum officia quae consequatur!</span>
+                                        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt ipsum
+                                            voluptatibus iure provident impedit cumque optio nisi, repellat ab ullam
+                                            excepturi quaerat laboriosam sed adipisci corrupti cum officia quae
+                                            consequatur!</span>
                                     </div>
                                 </div>
 
@@ -471,12 +480,14 @@
 
                 <div class="form-group">
                     <label for="descricao-relatorio">Descrição <span class="required">*</span></label>
-                    <textarea id="descricao-relatorio" rows="4" placeholder="Descreva as observações, causas, impactos e informações relevantes identificadas durante a análise..."></textarea>
+                    <textarea id="descricao-relatorio" rows="4"
+                        placeholder="Descreva as observações, causas, impactos e informações relevantes identificadas durante a análise..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="acao-recomendada">Ação recomendada</label>
-                    <textarea id="acao-recomendada" rows="3" placeholder="Descreva as ações recomendadas ou realizadas para tratar a situação identificada..."></textarea>
+                    <textarea id="acao-recomendada" rows="3"
+                        placeholder="Descreva as ações recomendadas ou realizadas para tratar a situação identificada..."></textarea>
                 </div>
 
                 <div class="responsavel-box">
@@ -519,6 +530,11 @@
         }
     });
 
+    const data = new Date();
+    const dataFormatada = data.toISOString().split('T')[0];
+
+    document.getElementById('data-emissao').value = dataFormatada;
+
     document.querySelectorAll('.actions-trigger').forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -555,6 +571,45 @@
         mobileSidebar.classList.remove('active');
         document.getElementById('sidebar-overlay').classList.remove('active');
     };
-</script>
 
+    const search_title = document.getElementById('id_busca').addEventListener('input', (e) => {
+        let texto_atual = e.target.value;
+
+        fetch(`/relatorios/buscarRelatorio/${texto_atual}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(function (resposta) {
+
+            if (resposta.ok) {
+                // div_erros_login.style.color = "green";
+                // div_erros_login.innerHTML = "Cadastro efetuado com sucesso!";
+
+                // modal_email.style.display = "flex";
+                console.log('sucesso na busca')
+            } else {
+                resposta.text().then(texto => {
+                    // div_erros_login.style.color = "red";
+                    // div_erros_login.innerHTML = texto || "Erro ao realizar o cadastro.";
+                    // setTimeout(sumirMensagem, 5000);
+                    console.error(texto);
+                    console.log('relatorio nao encontrado')
+                });
+            }
+
+        }).catch(function (erro) {
+            // div_erros_login.style.color = "red";
+            // div_erros_login.innerHTML = "Erro de conexão com o servidor.";
+            // setTimeout(sumirMensagem, 5000);
+            console.log('Erro de conexão com o servidor.')
+            console.log(erro);
+        });
+
+        console.log(`texto digitado: ${texto_atual}`)
+    })
+
+
+
+</script>
 </html>

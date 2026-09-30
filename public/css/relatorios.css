@@ -457,10 +457,6 @@
     }
 }
 
-/* ==========================================================================
-   Dropdown do botão de ações (...) dos posts do mural
-   ========================================================================== */
-
 .mural .mural-posts .post .actions-dropdown {
     display: none;
     position: absolute;
