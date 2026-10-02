@@ -21,6 +21,7 @@ var empresasRouter = require("./src/routes/empresa");
 var nodesRouter = require("./src/routes/nodes");
 var cdUserRouter = require("./src/routes/cduser");
 var qtdFuncionarioRouter = require("./src/routes/qtdFuncionario")
+var hpcRouter = require("./src/routes/hpc")
 const authRouter = require("./src/routes/auth");
 
 app.use(express.json());
@@ -36,6 +37,7 @@ app.use("/nodes", nodesRouter);
 app.use("/cduser", cdUserRouter);
 app.use("/qtdFuncionario", qtdFuncionarioRouter);
 app.use("/autentificacao", authRouter);
+app.use("/hpc", hpcRouter);
 
 app.listen(PORTA_APP, function () {
     console.log(`

@@ -12,7 +12,7 @@ async function enviarEmail(email, token) {
 
         from: "Autenticação de cadastro <onboarding@resend.dev>",
 
-        to: ['isabella.csantos@sptech.school'],
+        to: ['joaopedroalves8503@gmail.com'],
 
         subject: "Verifique seu email",
 

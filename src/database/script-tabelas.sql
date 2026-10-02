@@ -136,12 +136,23 @@ CREATE TABLE componente (
     unidade_medida VARCHAR(20) NOT NULL
 );
 
+-- Tabela unificada (Componente_Node + Parâmetros)
 CREATE TABLE componente_node (
     id_componente_node INT PRIMARY KEY AUTO_INCREMENT,
     num_serie VARCHAR(50),
+    
+    nome_parametro VARCHAR(100) NOT NULL,
+    pico_max DECIMAL(10,2),
+    pico_min DECIMAL(10,2),
+    percentual DECIMAL(5,2),
+    limite_atencao DECIMAL(10,2),
+    limite_critico DECIMAL(10,2),
+    
     fk_componente INT NOT NULL,
     fk_node INT NOT NULL,
-    CONSTRAINT unqComponenteNode UNIQUE (fk_componente, fk_node, num_serie),
+    
+    CONSTRAINT unqComponenteNodeParametro UNIQUE (fk_componente, fk_node, num_serie, nome_parametro),
+    
     CONSTRAINT cFkCnComponente
         FOREIGN KEY (fk_componente)
         REFERENCES componente(id_componente),
@@ -150,22 +161,8 @@ CREATE TABLE componente_node (
         REFERENCES node(id_node)
 );
 
-CREATE TABLE parametro (
-    id_parametro INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    pico_max DECIMAL(10,2),
-    pico_min DECIMAL(10,2),
-    percentual DECIMAL(5,2),
-    limite_atencao DECIMAL(10,2),
-    limite_critico DECIMAL(10,2),
-    fk_componente_node INT NOT NULL,
-    CONSTRAINT cFkParametroCompNode
-        FOREIGN KEY (fk_componente_node)
-        REFERENCES componente_node(id_componente_node)
-);
-
 INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
-('Sem empresa associada', '12345678000195', '2024-01-15', 'email.com'),
+('Sem empresa associada', '00000000000100', '2024-01-15', 'email.com'),
 ('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
 ('DataData HPC Solutions', '98765432000110', '2024-03-20', 'datadata.io'),
 ('SPTECH', '18765432000110', '2022-08-20', 'sptech.school');
@@ -221,15 +218,10 @@ INSERT INTO componente (tipo, fabricante, modelo, unidade_medida) VALUES
 ('RAM', 'Samsung', '64GB DDR5 4800MHz', 'GB'),
 ('Disco', 'Kingston', 'NVMe DC1500M 3.84TB', '%');
 
-INSERT INTO componente_node (num_serie, fk_componente, fk_node) VALUES
-('CPU-INT-8380-001', 1, 1),
-('GPU-NVD-H100-001', 2, 1),
-('RAM-SAM-64GB-001', 3, 1),
-('CPU-INT-8380-002', 1, 2),
-('GPU-NVD-H100-002', 2, 2);
-
-INSERT INTO parametro (nome, pico_max, pico_min, percentual, limite_atencao, limite_critico, fk_componente_node) VALUES
-('Uso de Processamento CPU-01', 100.00, 0.00, 85.00, 80.00, 95.00, 1),
-('Temperatura GPU-01', 110.00, 20.00, NULL, 75.00, 88.00, 2),
-('Consumo de Memoria RAM-01', 64.00, 0.00, 90.00, 50.00, 60.00, 3),
-('Temperatura GPU-02', 110.00, 20.00, NULL, 75.00, 88.00, 5);
+-- Tabelas unificadas: componente_node e parâmetro em um insert só
+INSERT INTO componente_node (num_serie, nome_parametro, pico_max, pico_min, percentual, limite_atencao, limite_critico, fk_componente, fk_node) VALUES
+('CPU-INT-8380-001', 'Uso de Processamento CPU-01', 100.00, 0.00, 85.00, 80.00, 95.00, 1, 1),
+('GPU-NVD-H100-001', 'Temperatura GPU-01', 110.00, 20.00, NULL, 75.00, 88.00, 2, 1),
+('RAM-SAM-64GB-001', 'Consumo de Memoria RAM-01', 64.00, 0.00, 90.00, 50.00, 60.00, 3, 1),
+('CPU-INT-8380-002', 'Uso de Processamento CPU-02', 100.00, 0.00, 10.00, 80.00, 95.00, 1, 2), 
+('GPU-NVD-H100-002', 'Temperatura GPU-02', 110.00, 20.00, NULL, 75.00, 88.00, 2, 2);
