@@ -61,16 +61,18 @@ async function autenticar(req, res) {
 
         // Consulta dos node
         let node;
-        let host;
         for (let i = 0; i < clusters.length; i++) {
             for (let j = 0; j < clusters[i].length; j++) {
                 const resultnode = await authModel.buscarNode(hostname, clusters[i][j].id_cluster)
-                
+
                 if (resultnode.length > 0) {
                     node = resultnode[0];
-                    host = resultnode[1]
                 }
             }
+        }
+
+        if (!node) {
+            return res.status(404).json({ mensagem: 'Node não encontrado' });
         }
 
         // Fim da consulta dos node
@@ -88,14 +90,14 @@ async function autenticar(req, res) {
 
         // Consulta dos parametros
         for (let i = 0; i < componentesnode.length; i++) {
-            const parametro = await authModel.buscarParametro(componentesnode[i].id_componente);
+            const parametro = await authModel.buscarParametro(componentesnode[i].id_componente_node);
             componentesnode[i]["parametro"] = parametro[0];
         }
         // Fim da consulta dos parametros
 
         return res.status(200).json({
             autenticado: true,
-            hostname: host,
+            hostname: node.hostname,
             node: node,
             componentesnode: componentesnode
         });

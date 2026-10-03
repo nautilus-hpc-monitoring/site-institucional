@@ -3,7 +3,7 @@ const router = express.Router();
 
 const authController = require("../controllers/authController");
 
-router.post("/autenticacao", function (req, res) {
+router.post("/", function (req, res) {
     authController.autenticar(req, res);
 });
 

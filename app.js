@@ -36,7 +36,7 @@ app.use("/empresas", empresasRouter);
 app.use("/nodes", nodesRouter);
 app.use("/cduser", cdUserRouter);
 app.use("/qtdFuncionario", qtdFuncionarioRouter);
-app.use("/autentificacao", authRouter);
+app.use("/autenticacao", authRouter);
 app.use("/hpc", hpcRouter);
 
 app.listen(PORTA_APP, function () {
