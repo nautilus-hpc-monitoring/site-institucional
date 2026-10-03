@@ -61,12 +61,14 @@ async function autenticar(req, res) {
 
         // Consulta dos node
         let node;
+        let host;
         for (let i = 0; i < clusters.length; i++) {
             for (let j = 0; j < clusters[i].length; j++) {
                 const resultnode = await authModel.buscarNode(hostname, clusters[i][j].id_cluster)
                 
                 if (resultnode.length > 0) {
                     node = resultnode[0];
+                    host = resultnode[1]
                 }
             }
         }
@@ -93,7 +95,7 @@ async function autenticar(req, res) {
 
         return res.status(200).json({
             autenticado: true,
-            usuario: usuario,
+            hostname: host,
             node: node,
             componentesnode: componentesnode
         });
