@@ -15,6 +15,8 @@
     <script src="./js/sessao.js"></script>
     <title>Nautilus - Cadastro Node</title>
     <link rel="icon" href="./assets/icon/logo.png">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -202,18 +204,209 @@
             </div>
 
             <!-- Dashboard -->
-            <div class="dashboard none" id="dashboard">
-                <div class="titulo_dashboard">
-                    <h1>Nome do Node</h1>
-                </div>
+            <div class="dashboard-operador-content">
 
-                <div class="kpis">
+                <!-- KPIs -->
+                <section class="operador-kpis">
 
-                </div>
+                    <!-- CPU -->
+                    <div class="operador-kpi">
+                        <div class="operador-kpi-topo">
+                            <div class="operador-kpi-icone">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
 
-                <div class="graficos">
+                            <span class="operador-status normal">
+                                <span>•</span> Normal
+                            </span>
+                        </div>
 
-                </div>
+                        <div class="operador-kpi-valor">
+                            <strong>69.9</strong>
+                            <span>%</span>
+                        </div>
+
+                        <p>Uso de CPU</p>
+                    </div>
+
+
+                    <!-- RAM -->
+                    <div class="operador-kpi">
+                        <div class="operador-kpi-topo">
+                            <div class="operador-kpi-icone">
+                                <i class="fa-solid fa-memory"></i>
+                            </div>
+
+                            <span class="operador-status atencao">
+                                <span>•</span> Atenção
+                            </span>
+                        </div>
+
+                        <div class="operador-kpi-valor">
+                            <strong>79.8</strong>
+                            <span>%</span>
+                        </div>
+
+                        <p>Uso de RAM</p>
+                    </div>
+
+
+                    <!-- DISCO -->
+                    <div class="operador-kpi">
+                        <div class="operador-kpi-topo">
+                            <div class="operador-kpi-icone">
+                                <i class="fa-solid fa-hard-drive"></i>
+                            </div>
+
+                            <span class="operador-status atencao">
+                                <span>•</span> Atenção
+                            </span>
+                        </div>
+
+                        <div class="operador-kpi-valor">
+                            <strong>83.4</strong>
+                            <span>%</span>
+                        </div>
+
+                        <p>Uso de Disco</p>
+                    </div>
+
+
+                    <!-- SWAP -->
+                    <div class="operador-kpi">
+                        <div class="operador-kpi-topo">
+                            <div class="operador-kpi-icone">
+                                <i class="fa-solid fa-right-left"></i>
+                            </div>
+
+                            <span class="operador-status normal">
+                                <span>•</span> Normal
+                            </span>
+                        </div>
+
+                        <div class="operador-kpi-valor">
+                            <strong>30.7</strong>
+                            <span>%</span>
+                        </div>
+
+                        <p>Uso de SWAP</p>
+                    </div>
+
+                </section>
+
+
+                <!-- GRÁFICOS -->
+                <section class="operador-graficos">
+
+                    <!-- CPU -->
+                    <div class="operador-grafico-card">
+
+                        <div class="operador-grafico-header">
+                            <div class="operador-grafico-titulo">
+                                <strong>Uso de CPU</strong>
+                                <span></span>
+                            </div>
+
+                            <div class="operador-grafico-valor">
+                                <strong>69.9</strong>
+                                <span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="operador-chart-container">
+                            <canvas id="graficoCpu"></canvas>
+                        </div>
+
+                        <div class="operador-grafico-footer">
+                            <span>Últimos 60 min</span>
+                            <span>Ao vivo</span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- RAM -->
+                    <div class="operador-grafico-card">
+
+                        <div class="operador-grafico-header">
+                            <div class="operador-grafico-titulo">
+                                <strong>Uso de RAM</strong>
+                                <span></span>
+                            </div>
+
+                            <div class="operador-grafico-valor">
+                                <strong>79.8</strong>
+                                <span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="operador-chart-container">
+                            <canvas id="graficoRam"></canvas>
+                        </div>
+
+                        <div class="operador-grafico-footer">
+                            <span>Últimos 60 min</span>
+                            <span>Ao vivo</span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- DISCO -->
+                    <div class="operador-grafico-card">
+
+                        <div class="operador-grafico-header">
+                            <div class="operador-grafico-titulo">
+                                <strong>Uso de Disco</strong>
+                                <span></span>
+                            </div>
+
+                            <div class="operador-grafico-valor">
+                                <strong>83.4</strong>
+                                <span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="operador-chart-container">
+                            <canvas id="graficoDisco"></canvas>
+                        </div>
+
+                        <div class="operador-grafico-footer">
+                            <span>Últimos 60 min</span>
+                            <span>Ao vivo</span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- SWAP -->
+                    <div class="operador-grafico-card">
+
+                        <div class="operador-grafico-header">
+                            <div class="operador-grafico-titulo">
+                                <strong>Uso de SWAP</strong>
+                                <span></span>
+                            </div>
+
+                            <div class="operador-grafico-valor">
+                                <strong>30.7</strong>
+                                <span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="operador-chart-container">
+                            <canvas id="graficoSwap"></canvas>
+                        </div>
+
+                        <div class="operador-grafico-footer">
+                            <span>Últimos 60 min</span>
+                            <span>Ao vivo</span>
+                        </div>
+
+                    </div>
+
+                </section>
+
             </div>
         </main>
     </div>
@@ -263,12 +456,10 @@
         mobileSidebar.classList.add('active');
         document.getElementById('sidebar-overlay').classList.add('active');
     };
-
     document.getElementById('close-sidebar-btn').onclick = function () {
         mobileSidebar.classList.remove('active');
         document.getElementById('sidebar-overlay').classList.remove('active');
     };
-
     document.getElementById('sidebar-overlay').onclick = function () {
         mobileSidebar.classList.remove('active');
         document.getElementById('sidebar-overlay').classList.remove('active');
@@ -362,6 +553,248 @@
         htmlNodes.classList.add("none");
         htmlDashboard.classList.toggle("none");
     }
+
+    const labels = [
+        "15:10",
+        "15:11",
+        "15:12",
+        "15:13",
+        "15:14",
+        "15:15"
+    ];
+
+    function configurarGrafico(id, dados) {
+
+        const canvas = document.getElementById(id);
+
+        new Chart(canvas, {
+            type: "line",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    data: dados,
+
+                    borderColor: "#42B8C4",
+                    borderWidth: 2,
+
+                    backgroundColor: "transparent",
+
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+
+                    tension: 0.35
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                animation: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        enabled: true,
+
+                        callbacks: {
+                            label: function (context) {
+                                return context.parsed.y + "%";
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+
+                    x: {
+                        grid: {
+                            display: false
+                        },
+
+                        border: {
+                            display: false
+                        },
+
+                        ticks: {
+                            color: "#94A3B8",
+                            font: {
+                                family: "Exo 2",
+                                size: 10
+                            }
+                        }
+                    },
+
+                    y: {
+
+                        min: 0,
+                        max: 100,
+
+                        ticks: {
+                            stepSize: 25,
+
+                            color: "#94A3B8",
+
+                            font: {
+                                family: "Exo 2",
+                                size: 10
+                            }
+                        },
+
+                        grid: {
+                            color: "#F1F5F9",
+
+                            borderDash: [3, 3]
+                        },
+
+                        border: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    configurarGrafico("graficoCpu", [
+        38,
+        41,
+        44,
+        43,
+        47,
+        45,
+        48,
+        46,
+        51,
+        47,
+        53,
+        55,
+        52,
+        57,
+        54,
+        58,
+        56,
+        61,
+        59,
+        64,
+        67,
+        65,
+        70,
+        69,
+        73,
+        70,
+        74,
+        71,
+        76,
+        69.9
+    ]);
+
+    configurarGrafico("graficoRam", [
+        98,
+        99,
+        97,
+        100,
+        98,
+        96,
+        97,
+        94,
+        92,
+        90,
+        87,
+        85,
+        87,
+        84,
+        86,
+        82,
+        84,
+        80,
+        78,
+        74,
+        71,
+        74,
+        73,
+        76,
+        75,
+        78,
+        77,
+        81,
+        80,
+        79.8
+    ]);
+
+    configurarGrafico("graficoDisco", [
+        83,
+        82,
+        81,
+        83,
+        82,
+        85,
+        87,
+        89,
+        88,
+        90,
+        88,
+        91,
+        89,
+        90,
+        92,
+        90,
+        88,
+        86,
+        85,
+        87,
+        86,
+        85,
+        87,
+        84,
+        86,
+        84,
+        85,
+        84,
+        83,
+        83.4
+    ]);
+
+    configurarGrafico("graficoSwap", [
+        31,
+        29,
+        30,
+        27,
+        25,
+        26,
+        23,
+        22,
+        24,
+        23,
+        24,
+        25,
+        27,
+        28,
+        30,
+        27,
+        29,
+        28,
+        25,
+        23,
+        24,
+        22,
+        24,
+        23,
+        26,
+        25,
+        28,
+        30,
+        32,
+        30.7
+    ]);
+
 </script>
 
 </html>
