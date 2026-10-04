@@ -421,36 +421,38 @@
     const htmlNodesItens = document.getElementById("node_itens");
     const htmlDashboard = document.getElementById("dashboard");
 
-    const ambientes = [
-        {
-            id_ambiente_hpc: 1,
-            nome: "Petrobrás 1",
-            status: "ativo"
+    fetch("/hpc/listarHPC/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
         },
-        {
-            id_ambiente_hpc: 2,
-            nome: "Petrobrás 2",
-            status: "manut"
-        },
-        {
-            id_ambiente_hpc: 3,
-            nome: "Petrobrás 3",
-            status: "desativado"
-        }
-    ]
+        body: JSON.stringify({
+            empresaServer: 1
+        })
+    })
+        .then(function (resposta) {
+            if (resposta.ok) {
+                resposta.json().then(json => {
+                    json.forEach(ambiente => {
+                        const statusExibir = (ambiente.status == "manut") ? "manutenção" : ambiente.status;
+                        htmlAmbientesitens.innerHTML += `
+                            <div class="item" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
+                                <h2>${ambiente.nome}</h2>
 
-    ambientes.forEach(ambiente => {
-        const statusExibir = (ambiente.status == "manut") ? "manutenção" : ambiente.status;
-        htmlAmbientesitens.innerHTML += `
-            <div class="item" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
-                <h2>${ambiente.nome}</h2>
+                                <div class="status ${ambiente.status}">
+                                    <p>${statusExibir}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                });
 
-                <div class="status ${ambiente.status}">
-                    <p>${statusExibir}</p>
-                </div>
-            </div>
-        `;
-    });
+            }
+        })
+        .catch((error) => {
+            console.error("Erro: ", error.message);
+        })
+
 
     document.getElementById('open-sidebar-btn').onclick = function () {
         mobileSidebar.classList.add('active');
