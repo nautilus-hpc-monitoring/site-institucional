@@ -18,9 +18,6 @@ var app = express();
 var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
 var empresasRouter = require("./src/routes/empresa");
-var nodesRouter = require("./src/routes/nodes");
-var cdUserRouter = require("./src/routes/cduser");
-var qtdFuncionarioRouter = require("./src/routes/qtdFuncionario")
 var hpcRouter = require("./src/routes/hpc")
 const authRouter = require("./src/routes/auth");
 
@@ -33,10 +30,14 @@ app.use(cors());
 app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
 app.use("/empresas", empresasRouter);
+<<<<<<< Updated upstream
 app.use("/nodes", nodesRouter);
 app.use("/cduser", cdUserRouter);
 app.use("/qtdFuncionario", qtdFuncionarioRouter);
 app.use("/autenticacao", authRouter);
+=======
+app.use("/autentificacao", authRouter);
+>>>>>>> Stashed changes
 app.use("/hpc", hpcRouter);
 
 app.listen(PORTA_APP, function () {
