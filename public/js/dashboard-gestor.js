@@ -1,3 +1,7 @@
+ if (sessionStorage.NOME_USUARIO) {
+    document.getElementById("b_usuario").innerHTML = sessionStorage.NOME_USUARIO;
+}
+ 
  document.getElementById('open-sidebar-btn').onclick = function () {
 
             mobileSidebar.classList.add('active');

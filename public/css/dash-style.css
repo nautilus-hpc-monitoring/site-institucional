@@ -11,19 +11,27 @@ body {
     color: #1e293b;
     display: flex;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
-
-
 .main-wrapper {
-    margin-left: 72px; 
-    width: calc(100% - 72px);
-    padding: 40px;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .content {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 44px 34px;
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .titulo {
@@ -32,7 +40,6 @@ body {
     color: #0f172a;
     margin-bottom: 30px;
 }
-
 
 .metrics-grid {
     display: grid;
@@ -52,7 +59,6 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-
 .card-red {
     border-left: 4px solid #ef4444; 
 }
@@ -69,13 +75,14 @@ body {
     color: #0f172a;
 }
 
-
 .table-card {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     padding: 30px;
+    width: 100%;
+    display: block;
 }
 
 .table-card-header {
@@ -93,10 +100,10 @@ body {
     color: #0f172a;
 }
 
-
 .table-filters {
     display: flex;
     gap: 15px;
+    width: auto;
 }
 
 .input-container {
@@ -114,6 +121,12 @@ body {
 
 .input-container input {
     padding-left: 40px;
+    padding-right: 15px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
 }
 
 .filter-select {
@@ -126,15 +139,17 @@ body {
     background-color: #ffffff;
     outline: none;
     transition: border 0.3s;
+    height: 40px;
 }
 
-.filter-select:focus {
+.filter-select:focus, .input-container input:focus {
     border-color: #177a83;
 }
 
-
 .table-wrapper {
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -165,7 +180,6 @@ td {
     color: #334155;
 }
 
-
 .badge-status-alert {
     background-color: #fef2f2;
     color: #ef4444;
@@ -194,4 +208,43 @@ td {
     font-size: 12px;
     font-weight: 600;
     display: inline-block;
+}
+
+@media (max-width: 992px) {
+    .content {
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .content {
+        padding: 20px 10px;
+    }
+
+    .table-card {
+        padding: 15px;
+    }
+
+    .table-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .table-filters {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .input-container, 
+    .filter-select,
+    .input-container input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
 }

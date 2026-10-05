@@ -1,3 +1,38 @@
+ if (sessionStorage.NOME_USUARIO) {
+    document.getElementById("b_usuario").innerHTML = sessionStorage.NOME_USUARIO;
+}
+ 
+ document.getElementById('open-sidebar-btn').onclick = function () {
+
+    mobileSidebar.classList.add('active');
+
+    document
+        .getElementById('sidebar-overlay')
+        .classList.add('active');
+
+};
+
+
+document.getElementById('close-sidebar-btn').onclick = function () {
+
+    mobileSidebar.classList.remove('active');
+
+    document
+        .getElementById('sidebar-overlay')
+        .classList.remove('active');
+
+};
+
+
+document.getElementById('sidebar-overlay').onclick = function () {
+
+    mobileSidebar.classList.remove('active');
+
+    document
+        .getElementById('sidebar-overlay')
+        .classList.remove('active');
+
+};
  const ctx = document.getElementById('line-chart').getContext('2d');
 
         const labels = ['07 abr', '', '', '', '05 mai', '', '', '02 jun', '', '', '30 jun', '', '', '28 jul', '', '', '25 ago', '', '15 set'];

@@ -31,128 +31,153 @@
     <div id="sidebar-overlay"></div>
 
     <aside class="mobile-sidebar" id="mobileSidebar">
+
         <div class="mobile-sidebar-header">
             <div class="mobile-logo">
                 <img src="./assets/img/logo.png" alt="Nautilus Logo">
                 <span>NAUTILUS</span>
             </div>
+
             <button id="close-sidebar-btn" aria-label="Fechar menu">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <ul class="mobile-sidebar-itens">
+        <ul class="mobile-sidebar-items">
+
             <li class="nav-item">
-                <a href="#"><i class="fa-solid fa-border-all"></i> <span>Visão Geral</span></a>
+                <a href="./alertas.html">
+                    <i class="fa-solid fa-bell"></i>
+                    <span>Alertas</span>
+                </a>
             </li>
+
+            <li class="nav-item active" >
+                <a href="./dashboard-operador.html">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Operador</span>
+                </a>
+            </li>
+
             <li class="nav-item">
-                <a href="#"><i class="fa-solid fa-database"></i> <span>Ambientes</span></a>
+                <a href="./dashboard-analista.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Analista</span>
+                </a>
             </li>
+
             <li class="nav-item">
-                <a href="#"><i class="fa-solid fa-chart-line"></i> <span>Clusters</span></a>
+                <a href="./dashboard-gestor.html">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>Administrador</span>
+                </a>
             </li>
+
             <li class="nav-item">
-                <a href="./cadastro-node.html"><i class="fa-solid fa-memory"></i> <span>Nodes</span></a>
+                <a href="./cadastro-hpc.html">
+                    <i class="fa-solid fa-server"></i>
+                    <span>Ambientes</span>
+                </a>
             </li>
-            <li class="nav-item active">
-                <a href="./dashboard-operador.html"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="./cadastro-funcionario.html"><i class="fa-solid fa-users"></i> <span>Funcionários</span></a>
-            </li>
-            <li class="nav-item">
-                <a href="./cadastro-empresa.html"><i class="fa-solid fa-building"></i> <span>Empresas</span></a>
-            </li>
+
         </ul>
 
         <div class="mobile-sidebar-bottom">
             <a href="#" class="nav-item">
-                <i class="fa-solid fa-sliders"></i>
-                <span>Configurações</span>
+                <i class="fa-regular fa-user"></i>
+                <span id="b_usuario_mobile"></span>
             </a>
             <a href="#" class="nav-item" onclick="encerrarSessao()">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Sair</span>
             </a>
         </div>
+
     </aside>
 
     <nav id="sidebar">
+
         <div id="sidebar_content">
+
             <div id="logo">
-                <img src="./assets/img/logo.png" id="logo_sidebar" alt="">
+                <img src="./assets/img/logo.png" id="logo_sidebar" alt="Nautilus">
+
                 <p id="logo_infos">
                     <span class="item-description">NAUTILUS</span>
                 </p>
             </div>
 
-            <ul id="side_itens">
-                <li class="side-item">
-                    <a href="#">
-                        <i class="fa-solid fa-border-all"></i>
-                        <span class="item-description">Visão Geral</span>
-                    </a>
-                </li>
+            <ul id="side_items">
 
-                <li class="side-item">
-                    <a href="#">
-                        <i class="fa-solid fa-database"></i>
-                        <span class="item-description">Ambientes</span>
-                    </a>
-                </li>
-
-                <li class="side-item">
-                    <a href="#">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <span class="item-description">Clusters</span>
-                    </a>
-                </li>
-
-                <li class="side-item">
-                    <a href="./cadastro-node.html">
-                        <i class="fa-solid fa-memory"></i>
-                        <span class="item-description">Nodes</span>
+                <li class="side-item ">
+                    <a href="./alertas.html">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="item-description">
+                            Alertas
+                        </span>
                     </a>
                 </li>
 
                 <li class="side-item active">
                     <a href="./dashboard-operador.html">
+                        <i class="fa-solid fa-desktop"></i>
+                        <span class="item-description">
+                            Operador
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item ">
+                    <a href="./dashboard-analista.html">
                         <i class="fa-solid fa-chart-line"></i>
-                        <span class="item-description">Dashboard</span>
+                        <span class="item-description">
+                            Analista
+                        </span>
+                    </a>
+                </li>
+
+                <li class="side-item ">
+                    <a href="./dashboard-gestor.html">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span class="item-description">
+                            Administrador
+                        </span>
                     </a>
                 </li>
 
                 <li class="side-item">
-                    <a href="./cadastro-funcionario.html">
-                        <i class="fa-solid fa-users"></i>
-                        <span class="item-description">Funcionários</span>
+                    <a href="./cadastro-hpc.html">
+                        <i class="fa-solid fa-server"></i>
+                        <span class="item-description">
+                            Ambientes
+                        </span>
                     </a>
                 </li>
 
-                <li class="side-item">
-                    <a href="./cadastro-empresa.html">
-                        <i class="fa-solid fa-building"></i>
-                        <span class="item-description">Empresas</span>
-                    </a>
-                </li>
             </ul>
+
         </div>
 
-
         <ul id="side_bottom">
-            <li class="side-item">
+
+             <li class="side-item">
                 <a href="#">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span class="item-description">Configurações</span>
+                    <i class="fa-regular fa-user"></i>
+                    <span class="item-description" id="b_usuario"></span>
                 </a>
             </li>
+
             <li class="side-item">
                 <a href="#" onclick="encerrarSessao()">
                     <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="item-description">Sair</span>
+                    <span class="item-description">
+                        Sair
+                    </span>
                 </a>
             </li>
+
         </ul>
+
     </nav>
 
 
@@ -412,6 +437,6 @@
     </div>
 </body>
 
-<script src="assets/js/dashboard-operador.js"></script>
+<script src="js/dashboard-operador.js"></script>
 
 </html>

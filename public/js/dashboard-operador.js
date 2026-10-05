@@ -1,3 +1,8 @@
+ if (sessionStorage.NOME_USUARIO) {
+    document.getElementById("b_usuario").innerHTML = sessionStorage.NOME_USUARIO;
+}
+
+
 const htmlAmbientes = document.getElementById("ambientes");
     const htmlAmbientesitens = document.getElementById("ambientes_itens");
     const htmlClusters = document.getElementById("clusters");
