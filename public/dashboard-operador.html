@@ -204,7 +204,7 @@
             </div>
 
             <!-- Dashboard -->
-            <div class="dashboard-operador-content">
+            <div class="dashboard-operador-content none" id="dashboard">
 
                 <!-- KPIs -->
                 <section class="operador-kpis">
@@ -507,46 +507,43 @@
     }
 
     function abrirNodes(id_cluster) {
-        // id_cluster vai ser utilizado para pesquisa no banco de dados
-        const nodes = [
-            {
-                id_node: 1,
-                hostname: "Node 01",
-                ip: "192.168.0.1",
-                sistema_operacional: "Linux",
-                status: "ativo"
-            },
-            {
-                id_node: 2,
-                hostname: "Node 02",
-                ip: "192.168.0.2",
-                sistema_operacional: "Linux",
-                status: "manut"
-            },
-            {
-                id_node: 3,
-                hostname: "Node 03",
-                ip: "192.168.0.3",
-                sistema_operacional: "Linux",
-                status: "desativado"
-            }
-        ];
 
-        nodes.forEach(node => {
-            const statusExibir = (node.status == "manut") ? "manutenção" : node.status;
-            htmlNodesItens.innerHTML += `
-                <div class="item" onclick="abrirDash(${node.id_node})">
-                    <div class="item-titulo">
-                        <h2>${node.hostname} ${node.sistema_operacional}</h2>
-                        <p>${node.ip}</p>
-                    </div>
+        fetch("/hpc/listarNodes/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                idClusterServer: id_cluster
+            })
+        })
+            .then(function (resposta) {
 
-                    <div class="status ${node.status}">
-                        <p>${statusExibir}</p>
-                    </div>
-                </div>
-            `;
-        });
+                if (resposta.ok) {
+                    resposta.json().then(json => {
+                        json.forEach(node => {
+                            const statusExibir = (node.status == "manut") ? "manutenção" : node.status;
+                            htmlNodesItens.innerHTML += `
+                                <div class="item" onclick="abrirDash(${node.id})">
+                                    <div class="item-titulo">
+                                        <h2>${node.hostname} ${node.sistemaOperacional}</h2>
+                                        <p>${node.ip}</p>
+                                    </div>
+
+                                    <div class="status ${node.status}">
+                                        <p>${statusExibir}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    });
+
+                }
+            })
+            .catch((error) => {
+                console.error("Erro: ", error.message);
+            })
+
 
         htmlClusters.classList.add("none");
         htmlNodes.classList.toggle("none");
