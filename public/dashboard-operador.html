@@ -436,7 +436,7 @@
                     json.forEach(ambiente => {
                         const statusExibir = (ambiente.status == "manut") ? "manutenção" : ambiente.status;
                         htmlAmbientesitens.innerHTML += `
-                            <div class="item" onclick="abrirClusters(${ambiente.id_ambiente_hpc})">
+                            <div class="item" onclick="abrirClusters(${ambiente.id})">
                                 <h2>${ambiente.nome}</h2>
 
                                 <div class="status ${ambiente.status}">
@@ -469,37 +469,38 @@
 
 
     function abrirClusters(id_ambiente_hpc) {
-        // id_ambiente_hpc vai ser utilizado para pesquisa no banco de dados
-        const clusters = [
-            {
-                id_cluster: 1,
-                nome: "cluster 1",
-                status: "ativo"
+        fetch("/hpc/listarClusters/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
             },
-            {
-                id_cluster: 2,
-                nome: "cluster 2",
-                status: "manut"
-            },
-            {
-                id_cluster: 3,
-                nome: "cluster 3",
-                status: "desativado"
-            }
-        ]
+            body: JSON.stringify({
+                idHpcServer: id_ambiente_hpc
+            })
+        })
+            .then(function (resposta) {
+                if (resposta.ok) {
+                    resposta.json().then(json => {
+                        json.forEach(cluster => {
+                            const statusExibir = (cluster.status == "manut") ? "manutenção" : cluster.status;
+                            htmlClusteritens.innerHTML += `
+                            <div class="item" onclick="abrirNodes(${cluster.id})">
+                                <h2>${cluster.nome}</h2>
 
-        clusters.forEach(cluster => {
-            const statusExibir = (cluster.status == "manut") ? "manutenção" : cluster.status;
-            htmlClusteritens.innerHTML += `
-                <div class="item" onclick="abrirNodes(${cluster.id_cluster})">
-                    <h2>${cluster.nome}</h2>
+                                <div class="status ${cluster.status}">
+                                    <p>${statusExibir}</p>
+                                </div>
+                            </div>
+                        `;
+                        });
+                    });
 
-                    <div class="status ${cluster.status}">
-                        <p>${statusExibir}</p>
-                    </div>
-                </div>
-            `;
-        });
+                }
+            })
+            .catch((error) => {
+                console.error("Erro: ", error.message);
+            })
+
 
         htmlClusters.classList.toggle("none");
         htmlAmbientes.classList.add("none");
