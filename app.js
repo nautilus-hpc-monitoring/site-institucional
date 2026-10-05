@@ -30,14 +30,7 @@ app.use(cors());
 app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
 app.use("/empresas", empresasRouter);
-<<<<<<< Updated upstream
-app.use("/nodes", nodesRouter);
-app.use("/cduser", cdUserRouter);
-app.use("/qtdFuncionario", qtdFuncionarioRouter);
-app.use("/autenticacao", authRouter);
-=======
 app.use("/autentificacao", authRouter);
->>>>>>> Stashed changes
 app.use("/hpc", hpcRouter);
 
 app.listen(PORTA_APP, function () {

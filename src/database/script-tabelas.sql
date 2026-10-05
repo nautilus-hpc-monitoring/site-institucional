@@ -1,10 +1,4 @@
-DROP USER IF EXISTS 'user_admin'@'localhost';
-CREATE USER 'user_admin'@'localhost' IDENTIFIED BY 'SPTech#2026';
-GRANT ALL PRIVILEGES ON nautilus.* TO 'user_admin'@'localhost';
-FLUSH PRIVILEGES;
-
-DROP DATABASE IF EXISTS nautilus;
-CREATE DATABASE nautilus;
+CREATE DATABASE IF NOT EXISTS nautilus;
 USE nautilus;
 
 CREATE TABLE empresa (
@@ -25,15 +19,7 @@ CREATE TABLE endereco (
     CONSTRAINT cFkEnderecoEmpresa
         FOREIGN KEY (fk_empresa)
         REFERENCES empresa(id_empresa)
-);
-
-CREATE TABLE localizacao (
-    id_localizacao INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    pais VARCHAR(100) NOT NULL,
-    estado VARCHAR(100) NOT NULL,
-    cidade VARCHAR(100) NOT NULL,
-    cod_regiao VARCHAR(20) NOT NULL
+        ON DELETE CASCADE
 );
 
 CREATE TABLE nivel_acesso (
@@ -53,10 +39,12 @@ CREATE TABLE permissao_nivel_acesso (
     PRIMARY KEY (fk_permissao, fk_nivel_acesso),
     CONSTRAINT cFkPnaPermissao
         FOREIGN KEY (fk_permissao)
-        REFERENCES permissao(id_permissao),
+        REFERENCES permissao(id_permissao)
+        ON DELETE CASCADE,
     CONSTRAINT cFkPnaNivelAcesso
         FOREIGN KEY (fk_nivel_acesso)
         REFERENCES nivel_acesso(id_nivel_acesso)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE usuario (
@@ -74,6 +62,7 @@ CREATE TABLE usuario (
     CONSTRAINT cFkUsuarioEmpresa
         FOREIGN KEY (fk_empresa)
         REFERENCES empresa(id_empresa)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE verificacao_email (
@@ -84,22 +73,21 @@ CREATE TABLE verificacao_email (
     CONSTRAINT cFkVerificacaoUsuario
         FOREIGN KEY (fk_usuario)
         REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE ambiente_hpc (
     id_ambiente_hpc INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(45) NOT NULL,
     status VARCHAR(20) NOT NULL,
+    endereco_localizacao VARCHAR(255) NOT NULL, 
     fk_empresa INT NOT NULL,
-    fk_localizacao INT NOT NULL,
     CONSTRAINT ckAmbienteHpcStatus
         CHECK (status IN ('ativo', 'inativo', 'manut.')),
     CONSTRAINT cFkAmbienteEmpresa
         FOREIGN KEY (fk_empresa)
-        REFERENCES empresa(id_empresa),
-    CONSTRAINT cFkAmbienteLocalizacao
-        FOREIGN KEY (fk_localizacao)
-        REFERENCES localizacao(id_localizacao)
+        REFERENCES empresa(id_empresa)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE cluster (
@@ -112,6 +100,7 @@ CREATE TABLE cluster (
     CONSTRAINT cFkClusterAmbiente
         FOREIGN KEY (fk_ambiente_hpc)
         REFERENCES ambiente_hpc(id_ambiente_hpc)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE node (
@@ -126,6 +115,7 @@ CREATE TABLE node (
     CONSTRAINT cFkNodeCluster
         FOREIGN KEY (fk_cluster)
         REFERENCES cluster(id_cluster)
+        ON DELETE CASCADE 
 );
 
 CREATE TABLE componente (
@@ -136,11 +126,8 @@ CREATE TABLE componente (
     unidade_medida VARCHAR(20) NOT NULL
 );
 
--- Tabela unificada (Componente_Node + Parâmetros)
 CREATE TABLE componente_node (
     id_componente_node INT PRIMARY KEY AUTO_INCREMENT,
-    num_serie VARCHAR(50),
-    
     nome_parametro VARCHAR(100) NOT NULL,
     pico_max DECIMAL(10,2),
     pico_min DECIMAL(10,2),
@@ -151,14 +138,16 @@ CREATE TABLE componente_node (
     fk_componente INT NOT NULL,
     fk_node INT NOT NULL,
     
-    CONSTRAINT unqComponenteNodeParametro UNIQUE (fk_componente, fk_node, num_serie, nome_parametro),
+    CONSTRAINT unqComponenteNodeParametro UNIQUE (fk_componente, fk_node, nome_parametro),
     
     CONSTRAINT cFkCnComponente
         FOREIGN KEY (fk_componente)
-        REFERENCES componente(id_componente),
+        REFERENCES componente(id_componente)
+        ON DELETE CASCADE,
     CONSTRAINT cFkCnNode
         FOREIGN KEY (fk_node)
         REFERENCES node(id_node)
+        ON DELETE CASCADE 
 );
 
 INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
