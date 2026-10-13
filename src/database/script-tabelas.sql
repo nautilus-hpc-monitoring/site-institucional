@@ -1,4 +1,3 @@
-```sql
 CREATE DATABASE IF NOT EXISTS nautilus;
 USE nautilus;
 
@@ -230,4 +229,3 @@ VALUES
 ('Consumo de Memoria RAM-01', 64.00, 0.00, 90.00, 50.00, 60.00, 3, 1),
 ('Uso de Processamento CPU-02', 100.00, 0.00, 10.00, 80.00, 95.00, 1, 2),
 ('Temperatura GPU-02', 110.00, 20.00, NULL, 75.00, 88.00, 2, 2);
-```
