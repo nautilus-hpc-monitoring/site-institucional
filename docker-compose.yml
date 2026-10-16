@@ -1,0 +1,26 @@
+services:
+  web:
+    build: .
+    container_name: nautilus-web
+    ports:
+      - "80:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: nautilus
+    environment:
+      MYSQL_ROOT_PASSWORD: urubu100
+      MYSQL_DATABASE: nautilus
+    volumes:
+      - db_data:/var/lib/mysql
+      # cria as tabelas automaticamente na primeira inicialização:
+      - ./src/database/script-tabelas.sql:/docker-entrypoint-initdb.d/01-tabelas.sql:ro
+    restart: unless-stopped
+
+volumes:
+  db_data:
