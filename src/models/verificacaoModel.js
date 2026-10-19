@@ -51,9 +51,7 @@ function excluirToken(token) {
 
 
 module.exports = {
-
     criarToken,
     buscarPorToken,
     excluirToken
-
 };

@@ -1,5 +1,5 @@
-import verificacaoModel from '../models/verificacaoModel.js';
-import usuarioModel from '../models/usuarioModel.js';
+var verificacaoModel = require("../models/verificacaoModel");
+var usuarioModel = require("../models/usuarioModel");
 
 async function verificarEmail(req, res) {
     try {
@@ -11,8 +11,7 @@ async function verificarEmail(req, res) {
             });
         }
 
-        const verificacao =
-            await verificacaoModel.buscarPorToken(token);
+        const verificacao = await verificacaoModel.buscarPorToken(token);
 
         if (!verificacao) {
             return res.status(400).json({
@@ -28,12 +27,14 @@ async function verificarEmail(req, res) {
                 mensagem: 'Token expirado'
             });
         }
-
-        await verificacaoModel.excluirToken(token);
-
+        
         await usuarioModel.verificarEmail(
             verificacao.fk_usuario
         );
+        
+        console.log(`id do usuario verificado: ${verificacao.fk_usuario}`);
+
+        await verificacaoModel.excluirToken(token);
 
         return res.status(200).json({
             mensagem: 'Email verificado com sucesso'

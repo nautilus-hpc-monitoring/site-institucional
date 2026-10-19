@@ -19,7 +19,7 @@ var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
 var empresasRouter = require("./src/routes/empresa");
 var hpcRouter = require("./src/routes/hpc")
-const authRouter = require("./src/routes/auth");
+var authRouter = require("./src/routes/auth");
 var dashGestorRouter = require("./src/routes/dashGestor");
 
 app.use(express.json());
