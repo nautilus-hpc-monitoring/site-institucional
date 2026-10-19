@@ -198,7 +198,7 @@
 
 
             <!-- KPIs -->
-
+             
             <section class="kpi-grid">
 
                 <div class="kpi-card">
@@ -206,101 +206,91 @@
                     <div class="kpi-top">
 
                         <span class="kpi-label">
-                            Incidentes (30 dias)
-                        </span>
-
-                        <div class="kpi-icon tone-red">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-
-                    </div>
-
-                    <span class="kpi-value">
-                        18
-                    </span>
-
-                    <span class="kpi-trend down">
-                        <i class="fa-solid fa-arrow-down"></i>
-                        -15% vs. período anterior
-                    </span>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="kpi-top">
-
-                        <span class="kpi-label">
-                            Nodes com Risco Previsto
-                        </span>
-
-                        <div class="kpi-icon tone-red">
-                            <i class="fa-solid fa-server"></i>
-                        </div>
-
-                    </div>
-
-                    <span class="kpi-value">
-                        7
-                    </span>
-
-                    <span class="kpi-trend neutral">
-                        <i class="fa-solid fa-calendar-days"></i>
-                        próximos 30 dias
-                    </span>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="kpi-top">
-
-                        <span class="kpi-label">
-                            Clusters Afetados
-                        </span>
-
-                        <div class="kpi-icon tone-blue">
-                            <i class="fa-solid fa-layer-group"></i>
-                        </div>
-
-                    </div>
-
-                    <span class="kpi-value">
-                        3
-                    </span>
-
-                    <span class="kpi-trend neutral">
-                        <i class="fa-solid fa-circle-info"></i>
-                        no período analisado
-                    </span>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="kpi-top">
-
-                        <span class="kpi-label">
-                            Tempo Médio de Recuperação
                         </span>
 
                         <div class="kpi-icon tone-teal">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <i class="fa-solid fa-heart-pulse"></i>
                         </div>
 
                     </div>
 
-                    <span class="kpi-value">
-                        4h 32min
+                    <span class="kpi-value" id="kpiSaudeOk">
+                        N/A
                     </span>
 
-                    <span class="kpi-trend down">
-                        <i class="fa-solid fa-arrow-up"></i>
-                        +18min vs. período anterior
+                    <span class="kpi-trend neutral" id="kpiSaudeDetalhe">
                     </span>
 
                 </div>
 
+                <div class="kpi-card">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Disponibilidade
+                        </span>
+
+                        <div class="kpi-icon tone-blue">
+                            <i class="fa-solid fa-signal"></i>
+                        </div>
+
+                    </div>
+
+                    <span class="kpi-value" id="kpiDisponibilidade">
+                        N/A
+                    </span>
+
+                    <span class="kpi-trend neutral" id="kpiDisponibilidadeDetalhe">
+                    </span>
+
+                </div>
+
+                <div class="kpi-card">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Disco cheio em
+                        </span>
+
+                        <div class="kpi-icon tone-red">
+                            <i class="fa-solid fa-hard-drive"></i>
+                        </div>
+
+                    </div>
+
+                    <span class="kpi-value" id="kpiDisco">
+                        N/A
+                    </span>
+
+                    <span class="kpi-trend neutral" id="kpiDiscoDetalhe">
+                    </span>
+
+                </div>
+
+                <div class="kpi-card">
+
+                    <div class="kpi-top">
+
+                        <span class="kpi-label">
+                            Alertas nas 24h
+                        </span>
+
+                        <div class="kpi-icon tone-red">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+
+                    </div>
+
+                    <span class="kpi-value" id="kpiAlertas24h">
+                        N/A
+                    </span>
+
+                    <span class="kpi-trend neutral" id="kpiAlertasDetalhe">
+                    </span>
+
+                </div>
             </section>
 
             <section class="charts-grid">
@@ -346,11 +336,11 @@
                         <div>
 
                             <div class="chart-title">
-                                Nodes com Maior Risco Previsto
+                                Nodes em Piora (Projeção)
                             </div>
 
-                            <div class="chart-subtitle">
-                                Risco estimado nos próximos 30 dias
+                            <div class="chart-subtitle" id="subtituloVariacao">
+                                Calculando projeção...
                             </div>
 
                         </div>
@@ -363,7 +353,7 @@
 
                     <div class="chart-canvas-wrapper">
 
-                        <canvas id="chartPrevisao"></canvas>
+                        <canvas id="chartVariacao"></canvas>
 
                     </div>
 
