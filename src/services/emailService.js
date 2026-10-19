@@ -1,7 +1,7 @@
 var Resend = require("resend").Resend;
 require("dotenv").config();
 
-// var resend = new Resend(process.env.RESEND_API_KEY);
+var resend = new Resend(process.env.RESEND_API_KEY);
 
 
 async function enviarEmail(email, token) {
@@ -12,7 +12,7 @@ async function enviarEmail(email, token) {
 
         from: "Autenticação de cadastro <onboarding@resend.dev>",
 
-        to: ['joaopedroalves8503@gmail.com'],
+        to: ['isabella.csantos@sptech.school'],
 
         subject: "Verifique seu email",
 

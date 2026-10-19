@@ -11,6 +11,7 @@
   "author": "Feito pelos desenvolvedores @ São Paulo Tech School / Bandtec Digital School",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1152.0",
     "archiver": "^8.0.0",
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",

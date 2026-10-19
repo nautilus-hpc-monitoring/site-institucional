@@ -20,6 +20,7 @@ var usuarioRouter = require("./src/routes/usuarios");
 var empresasRouter = require("./src/routes/empresa");
 var hpcRouter = require("./src/routes/hpc")
 const authRouter = require("./src/routes/auth");
+var dashGestorRouter = require("./src/routes/dashGestor");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -32,6 +33,7 @@ app.use("/usuarios", usuarioRouter);
 app.use("/empresas", empresasRouter);
 app.use("/autentificacao", authRouter);
 app.use("/hpc", hpcRouter);
+app.use("/dashgestor", dashGestorRouter);
 
 app.listen(PORTA_APP, function () {
     console.log(`
