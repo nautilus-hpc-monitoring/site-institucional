@@ -45,8 +45,7 @@ async function buscarAmbienteHpc(id_empresa) {
             id_ambiente_hpc,
             nome,
             status,
-            fk_empresa as id_empresa,
-            fk_localizacao as id_localizacao
+            fk_empresa as id_empresa
         FROM ambiente_hpc
         WHERE fk_empresa = '${id_empresa}'
     `;
@@ -94,7 +93,6 @@ async function buscarComponenteNode(id_node) {
     const sql = `
         SELECT
             id_componente_node,
-            num_serie,
             fk_componente as id_componente,
             fk_node as id_node
         FROM componente_node
