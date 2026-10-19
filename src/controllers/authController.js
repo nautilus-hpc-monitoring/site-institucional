@@ -18,16 +18,15 @@ async function autenticar(req, res) {
 
         if (!usuario) {
             return res.status(404).json({
-                mensagem: 'Usuário não encontrado'
+                mensagem: 'Email ou senha inválidos'
             });
         }
 
-        // const senhaValida = await bcrypt.compare(senha, usuario.senha);
-        const senhaValida = true;
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
 
         if (!senhaValida) {
-            return res.status(401).json({
-                mensagem: 'Senha inválida'
+	        return res.status(401).json({
+                mensagem: 'Email ou senha inválidos'
             });
         }
 

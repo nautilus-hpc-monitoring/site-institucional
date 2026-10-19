@@ -31,7 +31,7 @@ app.use(cors());
 app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
 app.use("/empresas", empresasRouter);
-app.use("/autentificacao", authRouter);
+app.use("/auth", authRouter);
 app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
 
