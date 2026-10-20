@@ -27,21 +27,18 @@ async function verificarEmail(req, res) {
                 mensagem: 'Token expirado'
             });
         }
-        
+
+        await verificacaoModel.excluirToken(token);
+
         await usuarioModel.verificarEmail(
             verificacao.fk_usuario
         );
-        
-        console.log(`id do usuario verificado: ${verificacao.fk_usuario}`);
-
-        await verificacaoModel.excluirToken(token);
 
         return res.status(200).json({
             mensagem: 'Email verificado com sucesso'
         });
 
     } catch (erro) {
-
         console.error(erro);
 
         return res.status(500).json({
