@@ -5,7 +5,6 @@ var resend = new Resend(process.env.RESEND_API_KEY);
 
 
 async function enviarEmail(email, token) {
-
     var link = `http://localhost:3000/usuarios/verificarEmail?token=${token}`;
 
     var resultado = await resend.emails.send({
@@ -16,60 +15,85 @@ async function enviarEmail(email, token) {
 
         subject: "Verifique seu email",
 
+
         html: `
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f7; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-                <tr>
-                    <td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+        style="background-color:#F4F7FB; padding:40px 16px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <tr>
+            <td align="center">
 
-                        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                <table role="presentation" width="480" cellpadding="0" cellspacing="0"
+                    style="width:100%; max-width:480px; background-color:#FFFFFF; border:1px solid #DFE7F0; border-radius:12px; overflow:hidden;">
+                    <tr>
+                        <td style="padding:36px 32px 32px 32px;">
 
-                            <tr>
-                                <td style="padding: 40px 40px 32px 40px;">
+                            <p style="margin:0 0 10px 0; color:#12647A; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                Ativação de conta
+                            </p>
 
-                                    <h2 style="margin:0 0 12px 0; color:#1a1f5c; font-size: 22px; font-weight: 700;">
-                                        Verificação de email
-                                    </h2>
+                            <h2 style="margin:0 0 16px 0; color:#0F172A; font-size:24px; line-height:1.3; font-weight:700;">
+                                Verifique seu email
+                            </h2>
 
-                                    <p style="margin:0 0 28px 0; color:#5a6072; font-size: 15px; line-height: 1.6;">
-                                        Falta pouco! Clique no botão abaixo para confirmar seu email e ativar sua conta na Noctua.
-                                    </p>
+                            <p style="margin:0 0 26px 0; color:#64748B; font-size:14px; line-height:1.8;">
+                                Seja bem-vindo ao Nautilus! Para concluir seu cadastro e ativar sua conta, confirme seu endereço de email clicando no botão abaixo.
+                            </p>
 
-                                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                                        <tr>
-                                            <td align="center">
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${link}" target="_blank"
+                                            style="display:inline-block; background-color:#12647A; color:#FFFFFF; text-decoration:none; font-size:14px; font-weight:600; padding:14px 30px; border-radius:8px; line-height:1.4;">
+                                            Confirmar meu email
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
 
-                                                <a href="${link}" target="_blank"
-                                                   style="display:inline-block; background-color:#3854e0; color:#ffffff; text-decoration:none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 8px;">
-                                                    Verificar email
-                                                </a>
+                            <p style="margin:26px 0 0 0; color:#64748B; font-size:12px; line-height:1.8; text-align:center;">
+                                Este link expira em <strong style="color:#334155;">15 minutos</strong>.
+                                Se você não criou uma conta, basta ignorar este email.
+                            </p>
 
-                                            </td>
-                                        </tr>
-                                    </table>
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                                style="margin-top:24px;">
+                                <tr>
+                                    <td style="border-top:1px solid #E2E8F0; padding-top:20px;">
+                                        <p style="margin:0; color:#94A3B8; font-size:12px; line-height:1.7; word-break:break-word;">
+                                            Se o botão não funcionar, copie e cole este endereço no navegador:
+                                        </p>
+                                        <p style="margin:8px 0 0 0; font-size:12px; line-height:1.6; word-break:break-all;">
+                                            <a href="${link}" style="color:#12647A; text-decoration:underline;">
+                                                ${link}
+                                            </a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
 
-                                    <p style="margin: 28px 0 0 0; color:#9599a8; font-size: 13px; line-height: 1.6; text-align:center;">
-                                        Este link expira em 15 minutos. Se você não criou uma conta, pode ignorar este email com segurança.
-                                    </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"
+                            style="background-color:#F8FAFC; border-top:1px solid #E2E8F0; padding:20px 28px;">
 
-                                </td>
-                            </tr>
+                            <p style="margin:0 0 6px 0; color:#334155; font-size:12px; font-weight:600;">
+                                NAUTILUS
+                            </p>
 
-                            <tr>
-                                <td style="background-color:#f4f5f7; padding: 20px 40px; text-align:center; border-top: 1px solid #eceef1;">
+                            <p style="margin:0; color:#94A3B8; font-size:11px; line-height:1.8;">
+                                Monitoramento inteligente de infraestrutura.<br>
+                                &copy; 2026 Nautilus. Todos os direitos reservados.
+                            </p>
 
-                                    <p style="margin:0; color:#9599a8; font-size: 12px; line-height: 1.6;">
-                                        © 2026 Noctua. Todos os direitos reservados.<br>
-                                        Visibilidade total sobre sua infraestrutura.
-                                    </p>
+                        </td>
+                    </tr>
 
-                                </td>
-                            </tr>
+                </table >
 
-                        </table>
-
-                    </td>
-                </tr>
-            </table>
+            </td >
+        </tr >
+    </table >
         `
     });
 
