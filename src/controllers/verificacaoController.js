@@ -1,5 +1,5 @@
-import verificacaoModel from '../models/verificacaoModel.js';
-import usuarioModel from '../models/usuarioModel.js';
+var verificacaoModel = require("../models/verificacaoModel");
+var usuarioModel = require("../models/usuarioModel");
 
 async function verificarEmail(req, res) {
     try {
@@ -11,8 +11,7 @@ async function verificarEmail(req, res) {
             });
         }
 
-        const verificacao =
-            await verificacaoModel.buscarPorToken(token);
+        const verificacao = await verificacaoModel.buscarPorToken(token);
 
         if (!verificacao) {
             return res.status(400).json({
@@ -40,7 +39,6 @@ async function verificarEmail(req, res) {
         });
 
     } catch (erro) {
-
         console.error(erro);
 
         return res.status(500).json({

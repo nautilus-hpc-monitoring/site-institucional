@@ -15,10 +15,9 @@ function criarToken(token, dt_expiracao, fk_usuario) {
 }
 
 
-function buscarPorToken(token) {
+async function buscarPorToken(token) {
 
     var instrucaoSql = `
-
         SELECT
             id_verificacao,
             token,
@@ -31,7 +30,8 @@ function buscarPorToken(token) {
 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
 
-    return database.executar(instrucaoSql);
+    const resultado = await database.executar(instrucaoSql);
+    return resultado[0];
 }
 
 
@@ -51,9 +51,7 @@ function excluirToken(token) {
 
 
 module.exports = {
-
     criarToken,
     buscarPorToken,
     excluirToken
-
 };

@@ -18,10 +18,9 @@ var app = express();
 var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
 var empresasRouter = require("./src/routes/empresa");
-var nodesRouter = require("./src/routes/nodes");
-var cdUserRouter = require("./src/routes/cduser");
-var qtdFuncionarioRouter = require("./src/routes/qtdFuncionario")
-const authRouter = require("./src/routes/auth");
+var hpcRouter = require("./src/routes/hpc")
+var authRouter = require("./src/routes/auth");
+var dashGestorRouter = require("./src/routes/dashGestor");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -32,10 +31,9 @@ app.use(cors());
 app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
 app.use("/empresas", empresasRouter);
-app.use("/nodes", nodesRouter);
-app.use("/cduser", cdUserRouter);
-app.use("/qtdFuncionario", qtdFuncionarioRouter);
-app.use("/autentificacao", authRouter);
+app.use("/auth", authRouter);
+app.use("/hpc", hpcRouter);
+app.use("/dashgestor", dashGestorRouter);
 
 app.listen(PORTA_APP, function () {
     console.log(`

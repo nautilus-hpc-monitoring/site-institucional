@@ -1,5 +1,39 @@
 var alertas = [];
 
+ if (sessionStorage.NOME_USUARIO) {
+    document.getElementById("b_usuario").innerHTML = sessionStorage.NOME_USUARIO;
+}
+document.getElementById('open-sidebar-btn').onclick = function () {
+
+    mobileSidebar.classList.add('active');
+
+    document
+        .getElementById('sidebar-overlay')
+        .classList.add('active');
+
+};
+
+
+document.getElementById('close-sidebar-btn').onclick = function () {
+
+    mobileSidebar.classList.remove('active');
+
+    document
+        .getElementById('sidebar-overlay')
+        .classList.remove('active');
+
+};
+
+
+document.getElementById('sidebar-overlay').onclick = function () {
+
+    mobileSidebar.classList.remove('active');
+
+    document
+        .getElementById('sidebar-overlay')
+        .classList.remove('active');
+
+};
 function obterdados(idAquario) {
     fetch(`/medidas/tempo-real/${idAquario}`)
         .then(resposta => {

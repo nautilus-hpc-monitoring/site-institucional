@@ -18,16 +18,15 @@ async function autenticar(req, res) {
 
         if (!usuario) {
             return res.status(404).json({
-                mensagem: 'Usuário não encontrado'
+                mensagem: 'Email ou senha inválidos'
             });
         }
 
-        // const senhaValida = await bcrypt.compare(senha, usuario.senha);
-        const senhaValida = true;
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
 
         if (!senhaValida) {
-            return res.status(401).json({
-                mensagem: 'Senha inválida'
+	        return res.status(401).json({
+                mensagem: 'Email ou senha inválidos'
             });
         }
 
@@ -64,11 +63,15 @@ async function autenticar(req, res) {
         for (let i = 0; i < clusters.length; i++) {
             for (let j = 0; j < clusters[i].length; j++) {
                 const resultnode = await authModel.buscarNode(hostname, clusters[i][j].id_cluster)
-                
+
                 if (resultnode.length > 0) {
                     node = resultnode[0];
                 }
             }
+        }
+
+        if (!node) {
+            return res.status(404).json({ mensagem: 'Node não encontrado' });
         }
 
         // Fim da consulta dos node
@@ -86,14 +89,14 @@ async function autenticar(req, res) {
 
         // Consulta dos parametros
         for (let i = 0; i < componentesnode.length; i++) {
-            const parametro = await authModel.buscarParametro(componentesnode[i].id_componente);
+            const parametro = await authModel.buscarParametro(componentesnode[i].id_componente_node);
             componentesnode[i]["parametro"] = parametro[0];
         }
         // Fim da consulta dos parametros
 
         return res.status(200).json({
             autenticado: true,
-            usuario: usuario,
+            hostname: node.hostname,
             node: node,
             componentesnode: componentesnode
         });
