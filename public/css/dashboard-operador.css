@@ -16,43 +16,72 @@
 }
 
 .lista {
+    width: 100%;
     overflow-y: auto;
-    margin-top: 50px;
+    margin-top: 25px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 25px;
-    padding: 20px;
-    background-color: #0F172A;
+    gap: 15px;
+
+    padding: 0;
+
+    background-color: transparent;
     height: 75vh;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
+
 
 .item {
     cursor: pointer;
-    width: 95%;
+
+    width: 100%;
+    box-sizing: border-box;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(220, 220, 220, 0.3);
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    padding: 15px 30px;
+    gap: 15px;
+
+    padding: 18px 24px;
+
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-    transition: 0.3s all ease-in-out;
+
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.10);
+
+    /* Remove a animação dos cards */
+    transition: none;
+    transform: none;
 }
 
+
 .item h2 {
-    color: #fff;
+    color: #0F172A;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
 }
 
 .item-titulo {
-    color: #fff;
+    color: #0F172A;
+}
+
+.item-titulo p {
+    color: #64748B;
+    font-size: 13px;
+    margin-top: 5px;
 }
 
 .item:hover {
-    transform: scale(1.02);
+    transform: none;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.10);
+    background-color: #FFFFFF;
 }
 
 .status {
@@ -66,23 +95,25 @@
 }
 
 .status p {
+    font-size: 12px;
     font-weight: bold;
+    color:#222223;
 }
 
 .ativo {
-    background-color: #68ff68;
+    background-color: #6dff6d;
 }
 
 .manut {
-    background-color: #ffff00;
+    background-color: #ffff51;
 }
 
 .desativado {
-    background-color: #ff4848;
+    background-color: #fb4d4d;
 }
 
 .none {
-    display: none;
+    display: none !important;
 }
 
 .dashboard-operador-content {
