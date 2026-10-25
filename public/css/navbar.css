@@ -446,3 +446,140 @@
         display: block;
     }
 }
+
+
+/* =========================================
+   SIDEBAR MOBILE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .mobile-sidebar {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        box-sizing: border-box;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    /* Lista principal */
+    .mobile-sidebar-items {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        margin: 30px 0 0;
+        padding: 0;
+        list-style: none;
+        box-sizing: border-box;
+    }
+
+    /* Cada item da lista */
+    .mobile-sidebar-items .nav-item {
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        box-sizing: border-box;
+    }
+
+    /* Link de cada opção do menu */
+    .mobile-sidebar-items .nav-item > a,
+    .mobile-sidebar-bottom > a.nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 14px;
+
+        width: 100%;
+        min-height: 48px;
+        padding: 12px 16px;
+
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        border-radius: 10px;
+
+        background: transparent;
+        color: var(--cor-secundaria);
+
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.4;
+
+        text-decoration: none;
+        cursor: pointer;
+
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Ícones */
+    .mobile-sidebar-items .nav-item > a > i,
+    .mobile-sidebar-bottom > a.nav-item > i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 22px;
+        width: 22px;
+
+        font-size: 17px;
+        text-align: center;
+    }
+
+    /* Texto */
+    .mobile-sidebar-items .nav-item > a > span,
+    .mobile-sidebar-bottom > a.nav-item > span {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* Hover */
+    .mobile-sidebar-items .nav-item > a:hover,
+    .mobile-sidebar-bottom > a.nav-item:hover {
+        background-color: rgba(0, 74, 173, 0.08);
+        color: var(--cor-primaria);
+    }
+
+    /* Opção selecionada */
+    .mobile-sidebar-items .nav-item.active > a {
+        background-color: rgba(0, 74, 173, 0.10);
+        color: var(--cor-primaria);
+        border-color: rgba(0, 74, 173, 0.12);
+        font-weight: 600;
+    }
+
+    /* Usuário e sair no rodapé, empilhados */
+    .mobile-sidebar-bottom {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+
+        width: 100%;
+        margin-top: auto;
+        padding-top: 24px;
+
+        box-sizing: border-box;
+        flex-shrink: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.10);
+    }
+
+    .mobile-sidebar-bottom > a.nav-item {
+        flex-shrink: 0;
+    }
+
+    /* Cabeçalho */
+    .mobile-sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+}
+
