@@ -16,9 +16,12 @@ function validarSessao() {
         return;
     }
 
-    var b_usuario = document.getElementById("b_usuario");
-    if (b_usuario) {
-        b_usuario.innerHTML = sessionStorage.getItem("NOME_USUARIO");
+    if (document.getElementById("b_usuario")) {
+        document.getElementById("b_usuario").innerHTML = sessionStorage.getItem("NOME_USUARIO");
+    }
+
+    if (document.getElementById("b_usuario_mobile")) {
+        document.getElementById("b_usuario_mobile").innerHTML = sessionStorage.getItem("NOME_USUARIO");
     }
 }
 
