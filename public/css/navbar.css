@@ -90,9 +90,7 @@
     font-size: 14px;
     font-weight: 600;
 
-    padding-bottom: 8px;
-
-    border-bottom: 2px solid var(--cor-secundaria);
+    border-bottom: 1.6px solid var(--cor-secundaria);
 
     transition:
         color 0.2s ease,
@@ -186,6 +184,16 @@
         box-shadow 0.2s ease;
 }
 
+.botoes-sidebar {
+    padding-top: 100%;
+
+}
+
+.botoes-sidebar-c {
+    padding-top: 2%;
+    
+}
+
 .navbar_actions button:first-child {
     background: var(--cor-branco);
 }
@@ -206,6 +214,8 @@
     transform: translateY(-2px);
 
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+
+    color: white;
 }
 
 .navbar_menu {
@@ -296,7 +306,6 @@
     align-items: center;
     justify-content: space-between;
 
-    padding: 16px 4px;
 
     border-bottom: 1px solid var(--cor-secundaria);
 
@@ -323,7 +332,6 @@
 
     border-bottom-color: var(--cor-primaria);
 
-    padding-left: 10px;
 }
 
 .sidebar_actions {
