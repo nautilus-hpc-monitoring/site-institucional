@@ -10,6 +10,7 @@ const htmlAmbientes = document.getElementById("ambientes");
     const htmlNodes = document.getElementById("nodes");
     const htmlNodesItens = document.getElementById("node_itens");
     const htmlDashboard = document.getElementById("dashboard");
+    const mobileSidebar = document.getElementById("mobileSidebar");
 
     const ambientes = [
         {
@@ -42,44 +43,55 @@ const htmlAmbientes = document.getElementById("ambientes");
         `;
     });
 
-    document.getElementById('open-sidebar-btn').onclick = function () {
-        mobileSidebar.classList.add('active');
-        document.getElementById('sidebar-overlay').classList.add('active');
+    document.getElementById("open-sidebar-btn").onclick = function () {
+        mobileSidebar.classList.add("active");
+        document.getElementById("sidebar-overlay").classList.add("active");
     };
-    document.getElementById('close-sidebar-btn').onclick = function () {
-        mobileSidebar.classList.remove('active');
-        document.getElementById('sidebar-overlay').classList.remove('active');
+
+    document.getElementById("close-sidebar-btn").onclick = function () {
+        mobileSidebar.classList.remove("active");
+        document.getElementById("sidebar-overlay").classList.remove("active");
     };
-    document.getElementById('sidebar-overlay').onclick = function () {
-        mobileSidebar.classList.remove('active');
-        document.getElementById('sidebar-overlay').classList.remove('active');
+
+    document.getElementById("sidebar-overlay").onclick = function () {
+        mobileSidebar.classList.remove("active");
+        document.getElementById("sidebar-overlay").classList.remove("active");
     };
 
 
     function abrirClusters(id_ambiente_hpc) {
-        // id_ambiente_hpc vai ser utilizado para pesquisa no banco de dados
+        // Futuramente, utilizar id_ambiente_hpc para consultar o banco.
+
         const clusters = [
             {
                 id_cluster: 1,
-                nome: "cluster 1",
+                nome: "Cluster 1",
                 status: "ativo"
             },
             {
                 id_cluster: 2,
-                nome: "cluster 2",
+                nome: "Cluster 2",
                 status: "manut"
             },
             {
                 id_cluster: 3,
-                nome: "cluster 3",
+                nome: "Cluster 3",
                 status: "desativado"
             }
-        ]
+        ];
+
+        // Limpa os clusters anteriores para não duplicar itens.
+        htmlClusteritens.innerHTML = "";
 
         clusters.forEach(cluster => {
-            const statusExibir = (cluster.status == "manut") ? "manutenção" : cluster.status;
+            const statusExibir =
+                cluster.status === "manut"
+                    ? "manutenção"
+                    : cluster.status;
+
             htmlClusteritens.innerHTML += `
-                <div class="item" onclick="abrirNodes(${cluster.id_cluster})">
+                <div class="item"
+                    onclick="abrirNodes(${cluster.id_cluster})">
                     <h2>${cluster.nome}</h2>
 
                     <div class="status ${cluster.status}">
@@ -89,12 +101,17 @@ const htmlAmbientes = document.getElementById("ambientes");
             `;
         });
 
-        htmlClusters.classList.toggle("none");
+        // Exibe somente o seletor de clusters.
         htmlAmbientes.classList.add("none");
+        htmlClusters.classList.remove("none");
+        htmlNodes.classList.add("none");
+        htmlDashboard.classList.add("none");
     }
 
+
     function abrirNodes(id_cluster) {
-        // id_cluster vai ser utilizado para pesquisa no banco de dados
+        // Futuramente, utilizar id_cluster para consultar o banco.
+
         const nodes = [
             {
                 id_node: 1,
@@ -119,10 +136,19 @@ const htmlAmbientes = document.getElementById("ambientes");
             }
         ];
 
+        // Limpa os nodes anteriores para não duplicar itens.
+        htmlNodesItens.innerHTML = "";
+
         nodes.forEach(node => {
-            const statusExibir = (node.status == "manut") ? "manutenção" : node.status;
+            const statusExibir =
+                node.status === "manut"
+                    ? "manutenção"
+                    : node.status;
+
             htmlNodesItens.innerHTML += `
-                <div class="item" onclick="abrirDash(${node.id_node})">
+                <div class="item"
+                    onclick="abrirDash(${node.id_node})">
+
                     <div class="item-titulo">
                         <h2>${node.hostname} ${node.sistema_operacional}</h2>
                         <p>${node.ip}</p>
@@ -135,13 +161,30 @@ const htmlAmbientes = document.getElementById("ambientes");
             `;
         });
 
+        // Exibe somente o seletor de nodes.
+        htmlAmbientes.classList.add("none");
         htmlClusters.classList.add("none");
-        htmlNodes.classList.toggle("none");
+        htmlNodes.classList.remove("none");
+        htmlDashboard.classList.add("none");
     }
 
     function abrirDash(id_node) {
+        // Futuramente, utilizar id_node para buscar as métricas do node.
+
+        htmlAmbientes.classList.add("none");
+        htmlClusters.classList.add("none");
         htmlNodes.classList.add("none");
-        htmlDashboard.classList.toggle("none");
+
+        // Exibe a dashboard no lugar dos seletores.
+        htmlDashboard.classList.remove("none");
+
+        // Atualiza o tamanho dos gráficos depois que a dashboard aparece.
+        requestAnimationFrame(() => {
+            Chart.getChart("graficoCpu")?.resize();
+            Chart.getChart("graficoRam")?.resize();
+            Chart.getChart("graficoDisco")?.resize();
+            Chart.getChart("graficoSwap")?.resize();
+        });
     }
 
     const labels = [
