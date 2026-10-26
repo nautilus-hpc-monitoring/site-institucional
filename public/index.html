@@ -14,6 +14,7 @@
 
   <script src="./js/navbar.js" defer></script>
   <link rel="icon" href="./assets/icon/logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -217,50 +218,59 @@
             </div>
 
 
-            <div class="coluna-diagrama">
+            
 
-                <img src="assets/HPC2.png" class="img-principal" alt="Servidores HPC">
+<div class="coluna-diagrama">
 
+    <h3>Como funciona na prática</h3>
 
-                <div class="card-nodes">
-                    <div class="imagem-nodes"><img src="assets/HPC3.png" alt="Nodes"
-                            style="display: flex; height: 200px;"></div>
-                    <div class="texto-nodes card-nodes-container">
-                        <strong>NODES</strong>
-                        <p>Coleta de dados em tempo real de cada node do ambiente.</p>
-                    </div>
-                </div>
+    <div class="fluxo-simples">
 
-
-                <div class="card-plataforma">
-                    <div style="display: flex; flex-direction: column; width: 50%; padding-right: 3px; font-size: 80%;">
-                        <strong>PLATAFORMA</strong>
-                        <p>Centraliza e organiza os dados coletados de todo ambiente HPC.</p>
-                    </div>
-                    <div class="beneficios-plataforma">
-                        <p>Coleta contínua</p>
-                        <p>Armazenamento seguro</p>
-                        <p>Disponibilização estruturada</p>
-                    </div>
-                </div>
-
-
-                <div class="info-infraestrutura">
-                    <strong>INFRAESTRUTURA</strong>
-                    <p>Ambiente HPC monitorado com alta disponibilidade.</p>
-                </div>
-
-
-                <div class="rodape-diagrama">
-                    <img src="assets/solucao.png" alt="">
-                    <p class="texto-rodape">
-                        Os principais recursos são monitorados <span class="azul-claro">continuamente</span> para
-                        garantir performance, estabilidade e segurança.
-                    </p>
-                </div>
+        <div class="fluxo-item">
+            <div class="fluxo-icone">
+                <i class="fa-solid fa-server"></i>
             </div>
 
+            <div>
+                <strong>1. Nodes</strong>
+                <p>Fornecem dados de CPU, RAM e disco.</p>
+            </div>
         </div>
+
+        <i class="fa-solid fa-arrow-down fluxo-seta"></i>
+
+        <div class="fluxo-item">
+            <div class="fluxo-icone">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <div>
+                <strong>2. Plataforma</strong>
+                <p>Organiza os dados em gráficos e históricos.</p>
+            </div>
+        </div>
+
+        <i class="fa-solid fa-arrow-down fluxo-seta"></i>
+
+        <div class="fluxo-item">
+            <div class="fluxo-icone">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+
+            <div>
+                <strong>3. Operador</strong>
+                <p>Identifica problemas e decide onde agir.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fluxo-resumo">
+        <i class="fa-solid fa-lightbulb"></i>
+        <p>Mais visibilidade para agir antes que os problemas se agravem.</p>
+    </div>
+
+</div>
     </section>
     
     <section class="impactos container" id="impactos-container">
