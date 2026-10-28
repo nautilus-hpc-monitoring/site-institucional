@@ -12,7 +12,7 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: nautilus
+    container_name: nautilus-db
     environment:
       MYSQL_ROOT_PASSWORD: urubu100
       MYSQL_DATABASE: nautilus
