@@ -1,6 +1,14 @@
 CREATE DATABASE IF NOT EXISTS nautilus;
 USE nautilus;
 
+CREATE TABLE aws_credentials (
+    id TINYINT PRIMARY KEY,
+    access_key_id VARCHAR(128) NOT NULL,
+    secret_access_key TEXT NOT NULL,
+    session_token TEXT NOT NULL,
+    expiration_ms BIGINT NOT NULL
+);
+
 CREATE TABLE empresa (
     id_empresa INT PRIMARY KEY AUTO_INCREMENT,
     razao_social VARCHAR(60) NOT NULL,
@@ -19,7 +27,6 @@ CREATE TABLE endereco (
     CONSTRAINT cFkEnderecoEmpresa
         FOREIGN KEY (fk_empresa)
         REFERENCES empresa(id_empresa)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE nivel_acesso (
@@ -39,12 +46,10 @@ CREATE TABLE permissao_nivel_acesso (
     PRIMARY KEY (fk_permissao, fk_nivel_acesso),
     CONSTRAINT cFkPnaPermissao
         FOREIGN KEY (fk_permissao)
-        REFERENCES permissao(id_permissao)
-        ON DELETE CASCADE,
+        REFERENCES permissao(id_permissao),
     CONSTRAINT cFkPnaNivelAcesso
         FOREIGN KEY (fk_nivel_acesso)
         REFERENCES nivel_acesso(id_nivel_acesso)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE usuario (
@@ -62,7 +67,6 @@ CREATE TABLE usuario (
     CONSTRAINT cFkUsuarioEmpresa
         FOREIGN KEY (fk_empresa)
         REFERENCES empresa(id_empresa)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE verificacao_email (
@@ -73,7 +77,6 @@ CREATE TABLE verificacao_email (
     CONSTRAINT cFkVerificacaoUsuario
         FOREIGN KEY (fk_usuario)
         REFERENCES usuario(id_usuario)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE ambiente_hpc (
@@ -87,7 +90,6 @@ CREATE TABLE ambiente_hpc (
     CONSTRAINT cFkAmbienteEmpresa
         FOREIGN KEY (fk_empresa)
         REFERENCES empresa(id_empresa)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE cluster (
@@ -100,7 +102,6 @@ CREATE TABLE cluster (
     CONSTRAINT cFkClusterAmbiente
         FOREIGN KEY (fk_ambiente_hpc)
         REFERENCES ambiente_hpc(id_ambiente_hpc)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE node (
@@ -115,13 +116,12 @@ CREATE TABLE node (
     CONSTRAINT cFkNodeCluster
         FOREIGN KEY (fk_cluster)
         REFERENCES cluster(id_cluster)
-        ON DELETE CASCADE
 );
 
 CREATE TABLE componente (
     id_componente INT PRIMARY KEY AUTO_INCREMENT,
-    tipo VARCHAR(50) NOT NULL,
-    fabricante VARCHAR(100) NOT NULL,
+    tipo VARCHAR(50) NOT NULL, 
+    fabricante VARCHAR(100) NOT NULL, 
     modelo VARCHAR(100) NOT NULL,
     unidade_medida VARCHAR(20) NOT NULL
 );
@@ -134,18 +134,36 @@ CREATE TABLE componente_node (
     percentual DECIMAL(5,2),
     limite_atencao DECIMAL(10,2),
     limite_critico DECIMAL(10,2),
+    
     fk_componente INT NOT NULL,
     fk_node INT NOT NULL,
-    CONSTRAINT unqComponenteNodeParametro
+    
+    CONSTRAINT unqComponenteNodeParametro 
         UNIQUE (fk_componente, fk_node, nome_parametro),
     CONSTRAINT cFkCnComponente
         FOREIGN KEY (fk_componente)
-        REFERENCES componente(id_componente)
-        ON DELETE CASCADE,
+        REFERENCES componente(id_componente),
     CONSTRAINT cFkCnNode
         FOREIGN KEY (fk_node)
         REFERENCES node(id_node)
-        ON DELETE CASCADE
+);
+
+CREATE TABLE alerta (
+    id_alerta INT PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    nivel VARCHAR(20) NOT NULL,
+    valor_capturado DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'aberto',
+    chave_jira VARCHAR(50),
+    dt_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fk_componente_node INT NOT NULL,
+    
+    CONSTRAINT ckAlertaStatus
+        CHECK (status IN ('aberto', 'em_andamento', 'resolvido', 'fechado')),
+    CONSTRAINT cFkAlertaComponenteNode
+        FOREIGN KEY (fk_componente_node)
+        REFERENCES componente_node(id_componente_node)
 );
 
 INSERT INTO empresa

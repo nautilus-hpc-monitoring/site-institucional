@@ -14,10 +14,10 @@ async function buscarUsuario(email) {
             fk_nivel_acesso,
             fk_empresa as id_empresa
         FROM usuario
-        WHERE email_institucional = '${email}'
+        WHERE email_institucional = ?
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [email]);
 }
 
 async function buscarEmpresa(id_empresa) {
@@ -31,10 +31,10 @@ async function buscarEmpresa(id_empresa) {
             dt_registro,
             dominio
         FROM empresa
-        WHERE id_empresa = '${id_empresa}'
+        WHERE id_empresa = ?
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_empresa]);
 }
 
 async function buscarAmbienteHpc(id_empresa) {
@@ -47,10 +47,10 @@ async function buscarAmbienteHpc(id_empresa) {
             status,
             fk_empresa as id_empresa
         FROM ambiente_hpc
-        WHERE fk_empresa = '${id_empresa}'
+        WHERE fk_empresa = ?
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_empresa]);
 }
 
 async function buscarCluster(id_ambiente_hpc) {
@@ -63,10 +63,10 @@ async function buscarCluster(id_ambiente_hpc) {
             status,
             fk_ambiente_hpc as id_ambiente_hpc
         FROM cluster
-        WHERE fk_ambiente_hpc = '${id_ambiente_hpc}'
+        WHERE fk_ambiente_hpc = ?
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_ambiente_hpc]);
 }
 
 async function buscarNode(hostname, id_cluster) {
@@ -81,10 +81,10 @@ async function buscarNode(hostname, id_cluster) {
             status,
             fk_cluster as id_cluster
         FROM node
-        WHERE fk_cluster = '${id_cluster}' AND hostname = '${hostname}';
+        WHERE fk_cluster = ? AND hostname = ?;
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_cluster, hostname]);
 }
 
 async function buscarComponenteNode(id_node) {
@@ -96,10 +96,10 @@ async function buscarComponenteNode(id_node) {
             fk_componente as id_componente,
             fk_node as id_node
         FROM componente_node
-        WHERE fk_node = '${id_node}';
+        WHERE fk_node = ?;
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_node]);
 }
 
 async function buscarComponente(id_componente) {
@@ -113,10 +113,10 @@ async function buscarComponente(id_componente) {
             modelo,
             unidade_medida
         FROM componente
-        WHERE id_componente = '${id_componente}';
+        WHERE id_componente = ?;
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_componente]);
 }
 
 async function buscarParametro(id_componente_node) {
@@ -133,10 +133,10 @@ async function buscarParametro(id_componente_node) {
             limite_critico,
             fk_componente_node as id_componente_node
         FROM parametro
-        WHERE fk_componente_node = '${id_componente_node}';
+        WHERE fk_componente_node = ?;
     `;
 
-    return database.executar(sql);
+    return database.executar(sql, [id_componente_node]);
 }
 
 module.exports = {

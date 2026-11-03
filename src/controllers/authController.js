@@ -1,13 +1,13 @@
 const authModel = require("../models/authModel");
 const bcrypt = require("bcrypt");
 
-async function autenticar(req, res) {
+async function autenticar(req, res, somenteCredenciais = false) {
     try {
 
         // Validação do usuario
         const { email, senha, hostname } = req.body;
 
-        if (!email || !senha || !hostname) {
+        if (![email, senha, hostname].every(valor => typeof valor === 'string' && valor.length > 0 && valor.length <= 255)) {
             return res.status(400).json({
                 mensagem: 'Email, senha e hostname são obrigatórios'
             });
@@ -74,6 +74,16 @@ async function autenticar(req, res) {
             return res.status(404).json({ mensagem: 'Node não encontrado' });
         }
 
+        if (somenteCredenciais) {
+            res.set('Cache-Control', 'no-store');
+            try {
+                const credenciais = await require('../services/awsCredentialsService').obter();
+                return res.status(200).json({ credenciais, region: process.env.AWS_REGION || 'us-east-1' });
+            } catch (_) {
+                return res.status(503).json({ mensagem: 'Credenciais temporariamente indisponiveis. Tente novamente.' });
+            }
+        }
+
         // Fim da consulta dos node
 
         // Consulta dos componente_node
@@ -102,7 +112,7 @@ async function autenticar(req, res) {
         });
 
     } catch (erro) {
-        console.error('Erro na autenticação:', erro);
+        console.error('Erro na autenticacao.');
 
         return res.status(500).json({
             mensagem: 'Erro interno do servidor'

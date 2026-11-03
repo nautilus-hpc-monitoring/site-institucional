@@ -1,5 +1,5 @@
-// var ambiente_processo = 'producao';
-var ambiente_processo = 'desenvolvimento';
+var ambiente_processo = 'producao';
+var ambiente_processo = process.env.AMBIENTE_PROCESSO || 'desenvolvimento';
 
 var caminho_env = ambiente_processo === 'producao' ? './.env' : './.env.dev';
 // Acima, temos o uso do operador ternário para definir o caminho do arquivo .env
@@ -34,6 +34,10 @@ app.use("/empresas", empresasRouter);
 app.use("/auth", authRouter);
 app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
+
+if (process.env.AWS_CREDENTIAL_SYNC_ENABLED === 'true') {
+    require('./src/services/awsCredentialsService').iniciar();
+}
 
 app.listen(PORTA_APP, function () {
     console.log(`
