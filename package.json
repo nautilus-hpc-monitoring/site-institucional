@@ -21,7 +21,8 @@
     "express": "^4.17.1",
     "mysql2": "^3.9.4",
     "path": "^0.12.7",
-    "resend": "^6.28.1"
+    "resend": "^6.28.1",
+    "@aws-sdk/credential-providers": "^3.1152.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
