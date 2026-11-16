@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="PT-BR">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Nautilus - Histórico de alertas</title>
     <link rel="stylesheet" href="./css/global.css">
     <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="./css/dash-style.css">
@@ -16,7 +16,7 @@
 
 </head>
 
-<body>
+<body class="pagina-alertas">
     <div class="mobile-header">
         <button id="open-sidebar-btn" aria-label="Abrir menu">
             <i class="fa-solid fa-bars"></i>
@@ -62,12 +62,19 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a href="./dashboard-gestor.html">
-                    <i class="fa-solid fa-user-tie"></i>
-                    <span>Administrador</span>
-                </a>
-            </li>
+            <li class="nav-item admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                            <span>Administrador</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+                            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                        </ul>
+                    </details>
+                </li>
 
             <li class="nav-item">
                 <a href="./cadastro-hpc.html">
@@ -132,13 +139,18 @@
                     </a>
                 </li>
 
-                <li class="side-item">
-                    <a href="./dashboard-gestor.html">
-                        <i class="fa-solid fa-user-tie"></i>
-                        <span class="item-description">
-                            Administrador
-                        </span>
-                    </a>
+                <li class="side-item admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                            <span class="item-description">Administrador</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+                            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                        </ul>
+                    </details>
                 </li>
 
                 <li class="side-item">
@@ -180,85 +192,75 @@
     <div class="main-wrapper">
 
 
-        <main class="content">
-            <p class="titulo">Alertas</p>
+        <main class="content" id="conteudo-alertas">
+            <header class="alertas-cabecalho">
+                <p class="alertas-identificacao">MONITORAMENTO</p>
+                <h1>Alertas</h1>
+                <p class="alertas-subtitulo">Acompanhe as ocorrências dos servidores e consulte o histórico da sua empresa.</p>
+            </header>
 
-            <section class="table-card">
-                <div class="table-card-header">
-                    <h3>Histórico de Alertas</h3>
-                    <div class="table-filters">
-                        <div class="input-container">
-                            <input type="text" class="filter-select" placeholder="Buscar Servidor">
-                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        </div>
-                        <select class="filter-select">
-                            <option value="">Status Alerta</option>
-                            <option value="aberto">Em Aberto</option>
-                            <option value="investigacao">Em Investigação</option>
-                            <option value="resolvido">Resolvido</option>
-                        </select>
+            <section class="table-card" aria-labelledby="titulo-historico">
+                <div class="historico-cabecalho">
+                    <div>
+                        <h2 id="titulo-historico">Histórico de alertas</h2>
+                        <p>Consulte as mensagens, o horário e o andamento de cada registro.</p>
                     </div>
+                    <button id="atualizar-alertas" class="botao-atualizar" type="button">
+                        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                        Atualizar
+                    </button>
                 </div>
 
-                <!-- Tabela com Rolagem Interna -->
-                <div class="table-wrapper">
+                <div class="alertas-filtros" role="group" aria-labelledby="titulo-filtros">
+                    <div class="filtros-apresentacao">
+                        <h3 id="titulo-filtros">Filtrar registros</h3>
+                        <p>Encontre um servidor ou selecione o status.</p>
+                    </div>
+                    <div class="table-filters">
+                        <div class="campo-filtro">
+                            <label for="buscar-servidor">Servidor</label>
+                            <div class="input-container">
+                                <input id="buscar-servidor" type="search" class="filter-select" placeholder="Buscar pelo nome do servidor" maxlength="100" aria-describedby="ajuda-busca">
+                                <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="campo-filtro">
+                            <label for="filtro-status">Status do alerta</label>
+                            <select id="filtro-status" class="filter-select">
+                                <option value="">Todos os status</option>
+                                <option value="aberto">Em aberto</option>
+                                <option value="em_andamento">Em andamento</option>
+                                <option value="resolvido">Resolvido</option>
+                                <option value="fechado">Fechado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p id="ajuda-busca" class="ajuda-filtros">Pressione Enter ou saia do campo para aplicar a busca.</p>
+                </div>
+
+                <div class="table-wrapper" role="region" aria-labelledby="titulo-historico" tabindex="0">
                     <table>
+                        <caption class="apenas-leitor">Alertas do mais recente ao mais antigo.</caption>
                         <thead>
                             <tr>
-                                <th>Servidor</th>
-                                <th>Componente</th>
-                                <th>Mensagem do Alerta</th>
-                                <th>Data / Hora</th>
-                                <th>Status Alerta</th>
+                                <th scope="col">Servidor</th>
+                                <th scope="col">Componente</th>
+                                <th scope="col">Mensagem do alerta</th>
+                                <th scope="col">Data / hora</th>
+                                <th scope="col">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>db-primary</strong></td>
-                                <td>RAM</td>
-                                <td>Uso de memória atingiu 96% da capacidade.</td>
-                                <td>27/08/2026 - 10:42</td>
-                                <td><span class="badge-status-alert">Aberto</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>srv-prod-01</strong></td>
-                                <td>Disco</td>
-                                <td>Partição principal /var acima de 91%.</td>
-                                <td>27/08/2026 - 09:15</td>
-                                <td><span class="badge-status-attention">Em Investigação</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>srv-prod-02</strong></td>
-                                <td>RAM</td>
-                                <td>Consumo constante acima de 85%.</td>
-                                <td>27/08/2026 - 08:30</td>
-                                <td><span class="badge-status-attention">Em Investigação</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>srv-web-03</strong></td>
-                                <td>CPU</td>
-                                <td>Pico pontual de processamento (88%).</td>
-                                <td>26/08/2026 - 22:10</td>
-                                <td><span class="badge-status">Resolvido</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>db-secondary</strong></td>
-                                <td>CPU</td>
-                                <td>Uso contínuo de 98% por mais de 10 min.</td>
-                                <td>26/08/2026 - 14:02</td>
-                                <td><span class="badge-status">Resolvido</span></td>
-                            </tr>
-                        </tbody>
+                        <tbody id="lista-alertas"><tr><td colspan="5">Carregando alertas…</td></tr></tbody>
                     </table>
                 </div>
+                <footer class="historico-rodape">
+                    <p id="mensagem-alertas" role="status" aria-live="polite">Carregando histórico…</p>
+                    <button id="mais-alertas" class="botao-mais" type="button" hidden>Carregar mais alertas</button>
+                </footer>
             </section>
-
-
-
-
         </main>
     </div>
+    <script src="js/alerta.js" defer></script>
 </body>
-<script src="js/alerta.js"></script>
 
 </html>

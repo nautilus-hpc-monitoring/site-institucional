@@ -34,6 +34,7 @@ app.use("/empresas", empresasRouter);
 app.use("/auth", authRouter);
 app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
+app.use("/alertas", require("./src/routes/alertas"));
 
 if (process.env.AWS_CREDENTIAL_SYNC_ENABLED === 'true') {
     require('./src/services/awsCredentialsService').iniciar();

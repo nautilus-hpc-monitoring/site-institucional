@@ -62,12 +62,19 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a href="./dashboard-gestor.html">
-                    <i class="fa-solid fa-user-tie"></i>
-                    <span>Administrador</span>
-                </a>
-            </li>
+            <li class="nav-item admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                            <span>Administrador</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+                            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                        </ul>
+                    </details>
+                </li>
 
             <li class="nav-item">
                 <a href="./cadastro-hpc.html">
@@ -132,13 +139,18 @@
                     </a>
                 </li>
 
-                <li class="side-item ">
-                    <a href="./dashboard-gestor.html">
-                        <i class="fa-solid fa-user-tie"></i>
-                        <span class="item-description">
-                            Administrador
-                        </span>
-                    </a>
+                <li class="side-item  admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                            <span class="item-description">Administrador</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+                            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                        </ul>
+                    </details>
                 </li>
 
                 <li class="side-item">

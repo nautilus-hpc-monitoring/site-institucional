@@ -38,6 +38,7 @@ async function autenticar(req, res) {
             return res.status(401).send("Senha inválida");
         }
 
+        require("../services/clusterSessao").criar(req, res, Number(usuario.id_usuario));
         res.json({
             id_usuario: usuario.id_usuario,
             email: usuario.email_institucional,

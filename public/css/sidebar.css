@@ -360,3 +360,106 @@
         outline: none;
     }
 }
+
+/* Administrador: submenu dentro da própria sidebar; abre com details/summary. */
+.admin-item details { width: 100%; }
+.admin-item summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    list-style: none;
+    color: #94a3b8;
+    font-size: 14px;
+}
+.admin-item summary::-webkit-details-marker { display: none; }
+.admin-item.active summary { color: #fff; }
+.admin-item summary:focus-visible { outline: 2px solid #42b8c4; outline-offset: 4px; border-radius: 4px; }
+.admin-item summary > i { display: flex; align-items: center; justify-content: center; width: 66px; height: 24px; font-size: 20px; flex-shrink: 0; }
+/* Chevron desenhado com bordas: leve e alinhado ao centro da linha. */
+.admin-seta {
+    display: none;
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    margin-left: auto;
+    margin-right: 12px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform .15s;
+}
+.admin-item details[open] .admin-seta { transform: translateY(2px) rotate(225deg); }
+.admin-submenu { list-style: none; padding: 8px 8px 0 44px; margin: 0; }
+#sidebar .admin-submenu a,
+#mobileSidebar .admin-submenu a {
+    display: block;
+    padding: 9px 10px;
+    margin: 2px 0;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    color: #94a3b8;
+    background: transparent;
+}
+#sidebar .admin-submenu a:hover,
+#mobileSidebar .admin-submenu a:hover,
+#sidebar .admin-submenu a[aria-current="page"],
+#mobileSidebar .admin-submenu a[aria-current="page"] {
+    color: #fff;
+    background: #0a3146;
+}
+/* Mantém o submenu legível depois que o mouse sai do menu ou ao usar Tab. */
+#sidebar:has(.admin-item details[open]),
+#sidebar:focus-within { width: 210px; }
+#sidebar:has(.admin-item details[open]) .item-description,
+#sidebar:focus-within .item-description { width: auto; opacity: 1; }
+#sidebar:has(.admin-item details[open]) #logo_infos,
+#sidebar:focus-within #logo_infos { opacity: 1; }
+#sidebar:hover .admin-seta,
+#sidebar:focus-within .admin-seta,
+#sidebar:has(.admin-item details[open]) .admin-seta,
+#mobileSidebar .admin-seta { display: inline-block; }
+#sidebar:hover .side-item > a > i,
+#sidebar:focus-within .side-item > a > i,
+#sidebar:has(.admin-item details[open]) .side-item > a > i,
+#sidebar:hover .admin-item summary > i,
+#sidebar:focus-within .admin-item summary > i,
+#sidebar:has(.admin-item details[open]) .admin-item summary > i { width: 34px; }
+#mobileSidebar .admin-item summary { padding: 12px; gap: 12px; border-radius: 8px; }
+#mobileSidebar .admin-item summary > i { width: 20px; }
+#mobileSidebar .admin-item.active summary,
+#mobileSidebar .admin-item summary:hover { background: #0e5e75; color: #fff; }
+#mobileSidebar .admin-submenu { padding-left: 32px; }
+
+/* Linhas com a mesma altura e tipografia para links e Administrador. */
+#sidebar .side-item > a,
+#sidebar .admin-item summary {
+    min-height: 24px;
+    line-height: 24px;
+    gap: 8px;
+}
+#sidebar .admin-item summary .item-description { min-width: 0; }
+
+/* No celular, todos os ícones também usam a mesma coluna. */
+#mobileSidebar .mobile-sidebar-items > .nav-item > a,
+#mobileSidebar .admin-item summary {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 12px;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 24px;
+}
+#mobileSidebar .mobile-sidebar-items > .nav-item > a > i,
+#mobileSidebar .admin-item summary > i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 24px;
+    font-size: 20px;
+}
+#mobileSidebar .admin-submenu { padding-left: 36px; }
