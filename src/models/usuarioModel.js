@@ -5,10 +5,10 @@ function buscarPorEmail(email) {
     var instrucaoSql = `
         SELECT id_usuario, nome, email_institucional, senha, verificado, fk_empresa, fk_nivel_acesso
         FROM usuario
-        WHERE email_institucional = '${email}'
+        WHERE email_institucional = ?
     `;
 
-    return database.executar(instrucaoSql);
+    return database.executar(instrucaoSql, [email]);
 }
 
 function autenticar(email, senha) {

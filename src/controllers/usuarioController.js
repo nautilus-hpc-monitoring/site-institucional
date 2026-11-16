@@ -38,7 +38,6 @@ async function autenticar(req, res) {
             return res.status(401).send("Senha inválida");
         }
 
-        require("../services/clusterSessao").criar(req, res, Number(usuario.id_usuario));
         res.json({
             id_usuario: usuario.id_usuario,
             email: usuario.email_institucional,
@@ -54,7 +53,7 @@ async function autenticar(req, res) {
     }
 }
 
-function cadastrar(req, res) {
+async function cadastrar(req, res) {
     var nome = req.body.nomeServer;
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
@@ -90,63 +89,51 @@ function cadastrar(req, res) {
 
     var dominio = email.split("@")[1];
 
-    // Busca a empresa pelo domínio para obter o id_empresa
-    return empresaModel.buscarDominio(dominio)
-        .then(function (empresa) {
-            if (!empresa || empresa.length == 0) {
-                const erro = new Error("Domínio de empresa não encontrado!");
-                erro.status = 404;
-                throw erro;
-            }
+    try {
+        // Primeiro identifica a empresa pelo domínio do email.
+        const empresas = await empresaModel.buscarDominio(dominio);
+        if (!empresas || empresas.length === 0) {
+            return res.status(404).json({ erro: "Domínio de empresa não encontrado!" });
+        }
 
-            var fk_empresa = empresa[0] ? empresa[0].id_empresa : empresa.id_empresa;
+        let empresa = empresas;
+        if (Array.isArray(empresas)) {
+            empresa = empresas[0];
+        }
 
-            return bcrypt.hash(senha, 10)
-                .then(function (senhaHash) {
-                    return usuarioModel.cadastrar(
-                        nome,
-                        email,
-                        senhaHash,
-                        cpf,
-                        fk_empresa,
-                        fk_nivel_acesso
-                    );
-                });
-        })
-        .then(function (resultado) {
-            if (!resultado || !Number.isInteger(resultado.insertId) || resultado.insertId <= 0) {
-                throw new Error("O cadastro não retornou um ID de usuário válido.");
-            }
+        const senhaHash = await bcrypt.hash(senha, 10);
+        const resultado = await usuarioModel.cadastrar(
+            nome,
+            email,
+            senhaHash,
+            cpf,
+            empresa.id_empresa,
+            fk_nivel_acesso
+        );
 
-            var token = crypto.randomBytes(32).toString("hex");
-            var dtExpiracao = new Date(Date.now() + 15 * 60 * 1000)
-                .toISOString()
-                .slice(0, 19)
-                .replace('T', ' ');
+        // Só cria a verificação depois de receber o ID do usuário salvo no banco.
+        if (!resultado || !Number.isInteger(resultado.insertId) || resultado.insertId <= 0) {
+            throw new Error("O cadastro não retornou um ID de usuário válido.");
+        }
 
-            return verificacaoModel.criarToken(
-                token,
-                dtExpiracao,
-                resultado.insertId
-            )
-            .then(function () {
-                return emailService.enviarEmail(
-                    email,
-                    token
-                );
-            });
-        })
-        .then(function () {
-            res.status(201).json({
-                mensagem: "Usuário cadastrado com sucesso!"
-            });
-        })
-        .catch(function (erro) {
-            console.log(erro);
-            res.status(erro.status || 500).json({
-                erro: erro.sqlMessage || erro.message
-            });
+        const token = crypto.randomBytes(32).toString("hex");
+        const dataExpiracao = new Date(Date.now() + 15 * 60 * 1000)
+            .toISOString()
+            .slice(0, 19)
+            .replace("T", " ");
+
+        await verificacaoModel.criarToken(token, dataExpiracao, resultado.insertId);
+        await emailService.enviarEmail(email, token);
+
+        return res.status(201).json({
+            mensagem: "Usuário cadastrado com sucesso!"
         });
+    } catch (erro) {
+        console.log(erro);
+        return res.status(erro.status || 500).json({
+            erro: erro.sqlMessage || erro.message
+        });
+    }
 }
 
 module.exports = {

@@ -45,6 +45,11 @@ function filtrarAlertas() {
 // Busca uma página de alertas. A API identifica a empresa pela sessão do login.
 function carregarAlertas(pagina) {
     if (carregando) return;
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
+        window.location.href = "./login.html";
+        return;
+    }
     alterarCarregamento(true);
     htmlMensagem.textContent = "Carregando alertas…";
 
@@ -56,7 +61,7 @@ function carregarAlertas(pagina) {
 
     const servidor = encodeURIComponent(htmlBuscaServidor.value.trim());
     const status = encodeURIComponent(htmlFiltroStatus.value);
-    const url = `/alertas?servidor=${servidor}&status=${status}&pagina=${pagina}`;
+    const url = `/alertas?idUsuario=${encodeURIComponent(idUsuario)}&servidor=${servidor}&status=${status}&pagina=${pagina}`;
 
     return fetch(url, { credentials: "same-origin", cache: "no-store" })
         .then(function (resposta) {
@@ -147,14 +152,8 @@ function escaparHtml(valor) {
 }
 
 function encerrarSessao() {
-    return fetch("/dashcluster/sair", { method: "POST", credentials: "same-origin" })
-        .catch(function () {
-            htmlMensagem.textContent = "Não foi possível encerrar a sessão no servidor.";
-        })
-        .finally(function () {
-            sessionStorage.clear();
-            window.location.href = "./login.html";
-        });
+    sessionStorage.clear();
+    window.location.href = "./login.html";
 }
 
 carregarAlertas(1);

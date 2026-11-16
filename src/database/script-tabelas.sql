@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS nautilus;
+CREATE DATABASE	 nautilus;
 USE nautilus;
 
 CREATE TABLE aws_credentials (
@@ -14,7 +14,9 @@ CREATE TABLE empresa (
     razao_social VARCHAR(60) NOT NULL,
     cnpj CHAR(14) NOT NULL UNIQUE,
     dt_registro DATE,
-    dominio VARCHAR(60) NOT NULL UNIQUE
+    dominio VARCHAR(60) NOT NULL UNIQUE,
+    sla_minutos INT NOT NULL DEFAULT 20,
+    CONSTRAINT ckEmpresaSla CHECK (sla_minutos > 0)
 );
 
 CREATE TABLE endereco (
@@ -128,7 +130,6 @@ CREATE TABLE componente (
 
 CREATE TABLE componente_node (
     id_componente_node INT PRIMARY KEY AUTO_INCREMENT,
-    nome_parametro VARCHAR(100) NOT NULL,
     pico_max DECIMAL(10,2),
     pico_min DECIMAL(10,2),
     percentual DECIMAL(5,2),
@@ -139,7 +140,7 @@ CREATE TABLE componente_node (
     fk_node INT NOT NULL,
     
     CONSTRAINT unqComponenteNodeParametro 
-        UNIQUE (fk_componente, fk_node, nome_parametro),
+        UNIQUE (fk_componente, fk_node),
     CONSTRAINT cFkCnComponente
         FOREIGN KEY (fk_componente)
         REFERENCES componente(id_componente),
@@ -157,6 +158,7 @@ CREATE TABLE alerta (
     status VARCHAR(20) NOT NULL DEFAULT 'aberto',
     chave_jira VARCHAR(50),
     dt_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    dt_fim DATETIME NULL,
     fk_componente_node INT NOT NULL,
     
     CONSTRAINT ckAlertaStatus
@@ -165,85 +167,3 @@ CREATE TABLE alerta (
         FOREIGN KEY (fk_componente_node)
         REFERENCES componente_node(id_componente_node)
 );
-
-INSERT INTO empresa
-(razao_social, cnpj, dt_registro, dominio)
-VALUES
-('Sem empresa associada', '00000000000100', '2024-01-15', 'email.com'),
-('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
-('DataData HPC Solutions', '98765432000110', '2024-03-20', 'datadata.io'),
-('SPTECH', '18765432000110', '2022-08-20', 'sptech.school');
-
-INSERT INTO endereco
-(logradouro, numero, cidade, estado, fk_empresa)
-VALUES
-('Av. Paulista', '1000', 'Sao Paulo', 'SP', 1),
-('Rua da Assembleia', '50', 'Rio de Janeiro', 'RJ', 2);
-
-INSERT INTO nivel_acesso (nome)
-VALUES
-('Administrador'),
-('Analista de Infraestrutura'),
-('Operador');
-
-INSERT INTO permissao (nome, descricao)
-VALUES
-('LEITURA_METRICAS', 'Permite visualizar dashboards e graficos de desempenho'),
-('CONFIGURAR_ALERTAS', 'Permite alterar limites de parametros e notificacoes'),
-('GESTAO_DISPOSITIVOS', 'Permite cadastrar e remover nodes, clusters e componentes');
-
-INSERT INTO permissao_nivel_acesso
-(fk_permissao, fk_nivel_acesso)
-VALUES
-(1, 1), (2, 1), (3, 1),
-(1, 2), (2, 2),
-(1, 3);
-
-INSERT INTO usuario
-(nome, email_institucional, cpf, senha, verificado, fk_nivel_acesso, fk_empresa)
-VALUES
-('Carlos Eduardo Silva', 'carlos.silva@techcorp.com.br', '11122233344', '$2a$12$eImiTXuWVxfM37uY4JANjO5E/S8f5S/5iG', 1, 1, 1),
-('Mariana Souza', 'mariana.souza@techcorp.com.br', '55566677788', '$2a$12$eImiTXuWVxfM37uY4JANjO5E/S8f5S/5iG', 1, 2, 1),
-('Lucas Oliveira', 'lucas.oliveira@datadata.io', '99988877766', '$2a$12$eImiTXuWVxfM37uY4JANjO5E/S8f5S/5iG', 0, 1, 2);
-
-INSERT INTO verificacao_email
-(token, dt_expiracao, fk_usuario)
-VALUES
-('a1b2c3d4e5f678901234567890abcdef', '2026-09-21 20:00:00', 3);
-
-INSERT INTO ambiente_hpc
-(nome, status, endereco_localizacao, fk_empresa)
-VALUES
-('Ambiente IA & Analytics', 'ativo', 'Data Center SP1 - Tambore, Barueri, Sao Paulo, Brasil', 1),
-('Ambiente Processamento Pesado', 'manut.', 'Data Center RJ1 - Centro, Rio de Janeiro, Brasil', 2);
-
-INSERT INTO cluster
-(nome, status, fk_ambiente_hpc)
-VALUES
-('Cluster-Alpha-GPU', 'ativo', 1),
-('Cluster-Beta-CPU', 'ativo', 1),
-('Cluster-Gamma-Render', 'manut.', 2);
-
-INSERT INTO node
-(hostname, ip, sistema_operacional, status, fk_cluster)
-VALUES
-('node-gpu-01.techcorp.internal', '10.0.1.10', 'Ubuntu Server 22.04 LTS', 'ativo', 1),
-('node-gpu-02.techcorp.internal', '10.0.1.11', 'Ubuntu Server 22.04 LTS', 'ativo', 1),
-('node-cpu-01.techcorp.internal', '10.0.2.10', 'Red Hat Enterprise Linux 9', 'ativo', 2);
-
-INSERT INTO componente
-(tipo, fabricante, modelo, unidade_medida)
-VALUES
-('CPU', 'Intel', 'Xeon Platinum 8380', '%'),
-('GPU', 'NVIDIA', 'H100 PCIe 80GB', '°C'),
-('RAM', 'Samsung', '64GB DDR5 4800MHz', 'GB'),
-('Disco', 'Kingston', 'NVMe DC1500M 3.84TB', '%');
-
-INSERT INTO componente_node
-(nome_parametro, pico_max, pico_min, percentual, limite_atencao, limite_critico, fk_componente, fk_node)
-VALUES
-('Uso de Processamento CPU-01', 100.00, 0.00, 85.00, 80.00, 95.00, 1, 1),
-('Temperatura GPU-01', 110.00, 20.00, NULL, 75.00, 88.00, 2, 1),
-('Consumo de Memoria RAM-01', 64.00, 0.00, 90.00, 50.00, 60.00, 3, 1),
-('Uso de Processamento CPU-02', 100.00, 0.00, 10.00, 80.00, 95.00, 1, 2),
-('Temperatura GPU-02', 110.00, 20.00, NULL, 75.00, 88.00, 2, 2);

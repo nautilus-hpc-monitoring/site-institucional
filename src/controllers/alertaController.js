@@ -1,30 +1,62 @@
-const alertaModel = require('../models/alertaModel');
-const statusValidos = ['aberto', 'em_andamento', 'resolvido', 'fechado'];
+var alertaModel = require("../models/alertaModel");
 
 async function listar(req, res) {
-    const servidor = req.query.servidor || '';
-    const status = req.query.status || '';
-    const paginaTexto = req.query.pagina === undefined ? '1' : req.query.pagina;
-    if (typeof servidor !== 'string' || servidor.length > 100 ||
-        typeof status !== 'string' || (status && !statusValidos.includes(status)) ||
-        typeof paginaTexto !== 'string' || !/^[1-9]\d*$/.test(paginaTexto)) {
-        return res.status(400).json({ erro: 'Filtros de alertas inválidos.' });
-    }
-    const pagina = Number(paginaTexto), limite = 50;
-    if (!Number.isSafeInteger(pagina) || pagina > 2000) {
-        return res.status(400).json({ erro: 'Página inválida. Refine os filtros de busca.' });
-    }
     try {
-        const registros = await alertaModel.listar(req.usuarioClusterId, {
-            servidor: servidor.trim(), status, limite, deslocamento: (pagina - 1) * limite
-        });
-        return res.set('Cache-Control', 'no-store').json({
-            alertas: registros.slice(0, limite), pagina,
+        if (!Number.isSafeInteger(Number(req.query.idUsuario)) || Number(req.query.idUsuario) <= 0) {
+            return res.status(400).json({ erro: "Usu?rio n?o informado ou inv?lido." });
+        }
+        const servidor = req.query.servidor || "";
+        const status = req.query.status || "";
+        const statusPermitidos = ["aberto", "em_andamento", "resolvido", "fechado"];
+
+        if (typeof servidor !== "string" || servidor.length > 100) {
+            return res.status(400).json({ erro: "Filtros de alertas inválidos." });
+        }
+
+        if (typeof status !== "string" || (status !== "" && !statusPermitidos.includes(status))) {
+            return res.status(400).json({ erro: "Filtros de alertas inválidos." });
+        }
+
+        let paginaInformada = req.query.pagina;
+        if (paginaInformada === undefined) {
+            paginaInformada = "1";
+        }
+
+        // A página deve ser um número inteiro positivo, escrito sem espaços.
+        if (typeof paginaInformada !== "string" || !/^[1-9]\d*$/.test(paginaInformada)) {
+            return res.status(400).json({ erro: "Filtros de alertas inválidos." });
+        }
+
+        const pagina = Number(paginaInformada);
+        if (!Number.isSafeInteger(pagina) || pagina > 2000) {
+            return res.status(400).json({ erro: "Página inválida. Refine os filtros de busca." });
+        }
+
+        const limite = 50;
+        const filtros = {
+            servidor: servidor.trim(),
+            status: status,
+            limite: limite,
+            deslocamento: (pagina - 1) * limite
+        };
+
+        const registros = await alertaModel.listar(Number(req.query.idUsuario), filtros);
+
+        // O model busca um registro extra para saber se existe uma próxima página.
+        res.set("Cache-Control", "no-store");
+        return res.status(200).json({
+            alertas: registros.slice(0, limite),
+            pagina: pagina,
             temMais: registros.length > limite && pagina < 2000
         });
     } catch (erro) {
-        console.error('Falha ao consultar alertas:', erro.code || erro.name);
-        return res.status(503).json({ erro: 'Não foi possível consultar o histórico. Tente novamente.' });
+        console.error("Falha ao consultar alertas:", erro.code || erro.name);
+        return res.status(503).json({
+            erro: "Não foi possível consultar o histórico. Tente novamente."
+        });
     }
 }
-module.exports = { listar };
+
+module.exports = {
+    listar
+};
