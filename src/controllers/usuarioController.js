@@ -90,10 +90,12 @@ function cadastrar(req, res) {
     var dominio = email.split("@")[1];
 
     // Busca a empresa pelo domínio para obter o id_empresa
-    empresaModel.buscarDominio(dominio)
+    return empresaModel.buscarDominio(dominio)
         .then(function (empresa) {
             if (!empresa || empresa.length == 0) {
-                return res.status(404).send("Domínio de empresa não encontrado!");
+                const erro = new Error("Domínio de empresa não encontrado!");
+                erro.status = 404;
+                throw erro;
             }
 
             var fk_empresa = empresa[0] ? empresa[0].id_empresa : empresa.id_empresa;
@@ -111,6 +113,10 @@ function cadastrar(req, res) {
                 });
         })
         .then(function (resultado) {
+            if (!resultado || !Number.isInteger(resultado.insertId) || resultado.insertId <= 0) {
+                throw new Error("O cadastro não retornou um ID de usuário válido.");
+            }
+
             var token = crypto.randomBytes(32).toString("hex");
             var dtExpiracao = new Date(Date.now() + 15 * 60 * 1000)
                 .toISOString()
@@ -136,7 +142,9 @@ function cadastrar(req, res) {
         })
         .catch(function (erro) {
             console.log(erro);
-            res.status(500).json(erro.sqlMessage);
+            res.status(erro.status || 500).json({
+                erro: erro.sqlMessage || erro.message
+            });
         });
 }
 
