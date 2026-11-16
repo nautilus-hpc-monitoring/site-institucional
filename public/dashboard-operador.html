@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
         integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/formulario-cadastro.css">
-    <link rel="stylesheet" href="./css/dashboard-operador.css">
     <link rel="stylesheet" href="./css/sidebar.css">
+    <link rel="stylesheet" href="./css/hpc.css">
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/dashboard-operador.css">
 
 
     <script src="./js/sessao.js"></script>
-    <title>Nautilus - Cadastro Node</title>
+    <title>Nautilus - Dashboard Operador</title>
     <link rel="icon" href="./assets/icon/logo.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -53,7 +53,7 @@
                 </a>
             </li>
 
-            <li class="nav-item active" >
+            <li class="nav-item active">
                 <a href="./dashboard-operador.html">
                     <i class="fa-solid fa-desktop"></i>
                     <span>Operador</span>
@@ -68,18 +68,18 @@
             </li>
 
             <li class="nav-item admin-item">
-                    <details>
-                        <summary>
-                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
-                            <span>Administrador</span>
-                            <span class="admin-seta" aria-hidden="true"></span>
-                        </summary>
-                        <ul class="admin-submenu">
-                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
-                            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
-                        </ul>
-                    </details>
-                </li>
+                <details>
+                    <summary>
+                        <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                        <span>Administrador</span>
+                        <span class="admin-seta" aria-hidden="true"></span>
+                    </summary>
+                    <ul class="admin-submenu">
+                        <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+                        <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                    </ul>
+                </details>
+            </li>
 
             <li class="nav-item">
                 <a href="./cadastro-hpc.html">
@@ -173,7 +173,7 @@
 
         <ul id="side_bottom">
 
-             <li class="side-item">
+            <li class="side-item">
                 <a href="#">
                     <i class="fa-regular fa-user"></i>
                     <span class="item-description" id="b_usuario"></span>
@@ -193,53 +193,17 @@
 
     </nav>
 
-
     <div id="main-container">
 
-        <main class="page-content">
-            <!-- Ambientes HPC -->
-            <div class="ambientes" id="ambientes">
-                <div class="area-filtro">
-                    <h1>Buscar ambiente HPC</h1>
-                    <input type="text" placeholder="Ambiente">
-                </div>
+        <main class="page-content hpc-page" id="conteudo">
+            <div id="seletor"></div>
 
-                <div class="ambientes_itens lista" id="ambientes_itens">
-                    <!-- Ambiente -->
-                </div>
-            </div>
-
-            <!-- Clusters -->
-            <div class="clusters none" id="clusters">
-                <div class="area-filtro">
-                    <h1>Buscar cluster</h1>
-                    <input type="text" placeholder="Cluster">
-                </div>
-
-                <div class="cluster_itens lista" id="cluster_itens">
-
-                </div>
-            </div>
-
-            <!-- Nodes -->
-            <div class="nodes none" id="nodes">
-                <div class="area-filtro">
-                    <h1>Buscar node</h1>
-                    <input type="text" placeholder="Node">
-                </div>
-
-                <div class="node_itens lista" id="node_itens">
-
-                </div>
-            </div>
-
-            <!-- Dashboard -->
-            <div class="dashboard-operador-content none" id="dashboard">
+            <!-- Dashboard do Operador -->
+            <div class="none" id="dashboard">
 
                 <!-- KPIs -->
                 <section class="operador-kpis">
 
-                    <!-- CPU -->
                     <div class="operador-kpi">
                         <div class="operador-kpi-topo">
                             <div class="operador-kpi-icone">
@@ -259,8 +223,6 @@
                         <p>Uso de CPU</p>
                     </div>
 
-
-                    <!-- RAM -->
                     <div class="operador-kpi">
                         <div class="operador-kpi-topo">
                             <div class="operador-kpi-icone">
@@ -280,8 +242,6 @@
                         <p>Uso de RAM</p>
                     </div>
 
-
-                    <!-- DISCO -->
                     <div class="operador-kpi">
                         <div class="operador-kpi-topo">
                             <div class="operador-kpi-icone">
@@ -301,8 +261,6 @@
                         <p>Uso de Disco</p>
                     </div>
 
-
-                    <!-- SWAP -->
                     <div class="operador-kpi">
                         <div class="operador-kpi-topo">
                             <div class="operador-kpi-icone">
@@ -324,11 +282,9 @@
 
                 </section>
 
-
-                <!-- GRÁFICOS -->
+                <!-- Gráficos -->
                 <section class="operador-graficos">
 
-                    <!-- CPU -->
                     <div class="operador-grafico-card">
 
                         <div class="operador-grafico-header">
@@ -354,8 +310,6 @@
 
                     </div>
 
-
-                    <!-- RAM -->
                     <div class="operador-grafico-card">
 
                         <div class="operador-grafico-header">
@@ -381,8 +335,6 @@
 
                     </div>
 
-
-                    <!-- DISCO -->
                     <div class="operador-grafico-card">
 
                         <div class="operador-grafico-header">
@@ -408,8 +360,6 @@
 
                     </div>
 
-
-                    <!-- SWAP -->
                     <div class="operador-grafico-card">
 
                         <div class="operador-grafico-header">
@@ -438,8 +388,11 @@
                 </section>
 
             </div>
+
         </main>
+
     </div>
+
 </body>
 
 <script src="js/dashboard-operador.js"></script>

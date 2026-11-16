@@ -1,29 +1,64 @@
+
+/* =========================================================
+   ESTRUTURA DA PÁGINA
+========================================================= */
+
 .page-content {
-    max-width: 90% !important;
+    width: 100%;
+    max-width: 100% !important;
+    box-sizing: border-box;
 }
+
+#conteudo {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   FILTROS
+========================================================= */
 
 .area-filtro {
     width: 100%;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 16px;
+}
+
+.area-filtro h1 {
+    color: #0F172A;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
 }
 
 .area-filtro input {
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-    max-width: 45%;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    box-shadow: none;
+    max-width: 320px;
+    margin-bottom: 0;
+    box-sizing: border-box;
 }
+
+.area-filtro input:focus {
+    border-color: #0E5E75;
+}
+
+/* =========================================================
+   LISTAGEM DE AMBIENTES, CLUSTERS E NODES
+========================================================= */
 
 .lista {
     width: 100%;
     overflow-y: auto;
-    margin-top: 25px;
+    margin-top: 24px;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 
     padding: 0;
 
@@ -34,7 +69,6 @@
     border-radius: 0;
     box-shadow: none;
 }
-
 
 .item {
     cursor: pointer;
@@ -50,16 +84,14 @@
     padding: 18px 24px;
 
     background-color: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
 
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.10);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
-    /* Remove a animação dos cards */
-    transition: none;
+    transition: background-color 0.2s ease;
     transform: none;
 }
-
 
 .item h2 {
     color: #0F172A;
@@ -80,8 +112,8 @@
 
 .item:hover {
     transform: none;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.10);
-    background-color: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: #F8FAFC;
 }
 
 .status {
@@ -97,43 +129,58 @@
 .status p {
     font-size: 12px;
     font-weight: bold;
-    color:#222223;
+    color: #222223;
 }
 
 .ativo {
-    background-color: #6dff6d;
+    background-color: #DCFCE7;
 }
 
 .manut {
-    background-color: #ffff51;
+    background-color: #FEF3C7;
 }
 
 .desativado {
-    background-color: #fb4d4d;
+    background-color: #FEE2E2;
 }
 
 .none {
     display: none !important;
 }
 
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
 .dashboard-operador-content {
     width: 100%;
+    box-sizing: border-box;
 }
+
+/* =========================================================
+   KPIs
+========================================================= */
 
 .operador-kpis {
     width: 100%;
+
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
     gap: 16px;
     margin-bottom: 24px;
 }
 
 .operador-kpi {
     background-color: #FFFFFF;
+
     border: 1px solid #E2E8F0;
-    border-radius: 10px;
+    border-radius: 8px;
+
     padding: 20px;
     min-height: 145px;
+
+    box-sizing: border-box;
 }
 
 .operador-kpi-topo {
@@ -153,7 +200,7 @@
 
     border-radius: 8px;
 
-    background-color: #F0FAFB;
+    background-color: #F0F9FB;
     color: var(--cor-primaria);
 
     font-size: 17px;
@@ -165,7 +212,6 @@
     gap: 4px;
 
     padding: 4px 9px;
-
     border-radius: 20px;
 
     font-size: 11px;
@@ -194,7 +240,6 @@
     display: flex;
     align-items: flex-end;
     gap: 4px;
-
     line-height: 1;
 }
 
@@ -212,18 +257,20 @@
 
 .operador-kpi > p {
     margin-top: 6px;
-
     font-size: 13px;
     font-weight: 500;
-
     color: #64748B;
 }
+
+/* =========================================================
+   GRÁFICOS
+========================================================= */
 
 .operador-graficos {
     width: 100%;
 
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     gap: 16px;
 }
@@ -235,9 +282,10 @@
     background-color: #FFFFFF;
 
     border: 1px solid #E2E8F0;
-    border-radius: 10px;
+    border-radius: 8px;
 
     padding: 16px;
+    box-sizing: border-box;
 }
 
 .operador-grafico-header {
@@ -256,7 +304,6 @@
 
 .operador-grafico-titulo strong {
     color: #0F172A;
-
     font-size: 13px;
     font-weight: 600;
 }
@@ -266,7 +313,6 @@
     height: 6px;
 
     border-radius: 50%;
-
     background-color: var(--cor-primaria);
 }
 
@@ -279,7 +325,6 @@
 .operador-grafico-valor strong {
     font-size: 20px;
     line-height: 1;
-
     color: #0F172A;
 }
 
@@ -317,10 +362,14 @@
     color: var(--cor-primaria);
 }
 
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
 @media (max-width: 1100px) {
 
     .operador-kpis {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
 }
@@ -339,5 +388,21 @@
         grid-template-columns: 1fr;
     }
 
-}
+    .area-filtro {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
+    .area-filtro input {
+        max-width: 100%;
+    }
+
+    .area-filtro h1 {
+        font-size: 20px;
+    }
+
+    .operador-grafico-card {
+        height: 250px;
+    }
+
+}
