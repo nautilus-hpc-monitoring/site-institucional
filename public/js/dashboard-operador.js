@@ -349,11 +349,29 @@ function desenharTabelaNodes(lista) {
 }
 
 // DASHBOARD DO NODE
+function buscarQuantidadeAlertas(idNode) {
+    // Utilizar o idNode para pesquisar o node
+    
+    return 0;
+}
+
 function abrirDash(idNode) {
     nodeSelecionado = memoriaNodes.find(node => node.id === idNode);
 
     document.getElementById("tituloNode").innerHTML =
         nodeSelecionado.hostname;
+
+    const quantidadeAlertas = buscarQuantidadeAlertas(idNode);
+
+    document.getElementById("kpiAlertasValor").innerHTML = quantidadeAlertas;
+
+    const statusAlertas = document.getElementById("kpiAlertasStatus");
+    statusAlertas.className = quantidadeAlertas === 0
+        ? "operador-status normal"
+        : "operador-status atencao";
+    statusAlertas.innerHTML = quantidadeAlertas === 0
+        ? "<span>•</span> Normal"
+        : "<span>•</span> Atenção";
 
     mostrarDashboard();
 }
