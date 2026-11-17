@@ -135,7 +135,7 @@ Após iniciar, acesse no navegador: `http://localhost:3000` *(ajuste a porta con
 
 
 
-## ⚙️ Variáveis de Ambiente
+## Variáveis de Ambiente
 
 
 
