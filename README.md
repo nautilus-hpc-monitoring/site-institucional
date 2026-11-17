@@ -61,4 +61,92 @@ O Nautilus monitora o ecossistema de HPCs de forma estruturada em quatro camadas
 
 Para rodar os agentes de coleta e o painel de monitoramento localmente em ambiente de testes:
 
-### 1. Clonar o repositório
+### Opção 1: Via Docker (Recomendado)
+
+
+
+Você pode subir toda a aplicação utilizando o script de automação incluído na pasta `docker/`:
+
+
+
+```bash
+
+# Acesse o diretório docker
+
+cd docker
+
+
+
+# Dê permissão de execução ao script (caso necessário)
+
+chmod +x setup_docker.sh
+
+
+
+# Execute o setup
+
+./setup_docker.sh
+
+```
+
+
+
+Ou manualmente via **Docker Compose**:
+
+
+
+```bash
+
+docker compose -f docker/docker-compose.yml up -d --build
+
+```
+
+
+
+### Opção 2: Execução Local (Node.js)
+
+
+
+Certifique-se de ter o **Node.js** instalado em sua máquina:
+
+
+
+```bash
+
+# Instale as dependências
+
+npm install
+
+
+
+# Inicie o servidor
+
+node app.js
+
+```
+
+
+
+Após iniciar, acesse no navegador: `http://localhost:3000` *(ajuste a porta conforme configurado no seu `app.js`)*.
+
+
+
+---
+
+
+
+## ⚙️ Variáveis de Ambiente
+
+
+
+Caso a aplicação utilize variáveis de ambiente, crie um arquivo `.env` na raiz do projeto seguindo o exemplo abaixo:
+
+
+
+```env
+
+PORT=3000
+
+NODE_ENV=development
+
+```
