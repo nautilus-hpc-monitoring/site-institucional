@@ -44,3 +44,13 @@ a {
     padding-inline: var(--container-padding);
     margin-inline: auto;
 }
+
+
+html {
+    scroll-behavior: smooth !important;
+    scroll-padding-top: 80px;
+}
+
+body {
+    scroll-behavior: smooth;
+}

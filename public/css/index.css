@@ -995,7 +995,7 @@ body {
     color: #23343A;
     font-weight: 700;
     margin: 0;
-    padding-bottom: 50px;
+    padding-bottom: 30px;
 }
 
 .quem-somos-titulo span {
@@ -1017,6 +1017,9 @@ body {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 24px;
     width: 100%;
+    border: 2px solid #0a7b92;
+    border-radius: 20px;
+    padding: 50px;
 }
 
 /* CARD */
@@ -1049,7 +1052,7 @@ body {
 /* INFORMAÇÕES */
 .membro-info {
     width: 100%;
-    padding: 20px 0;
+    padding-top: 20px;
     box-sizing: border-box;
     text-align: center;
 }
@@ -1086,7 +1089,7 @@ body {
     font-size: 12px;
     font-weight: 500;
     text-decoration: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: 0.3s ease;
 }
 
 .membro-links a:hover {
@@ -1213,13 +1216,6 @@ body {
     }
 }
 
-/* ACESSIBILIDADE */
-@media (prefers-reduced-motion: reduce) {
-    .membro-links a {
-        transition: none;
-    }
-}
-
 
 /* FALE CONOSCO */
 .fale-conosco {
@@ -1268,6 +1264,7 @@ body {
     font-weight: 500;
 }
 
+
 /* LADO DIREITO */
 .fconosco-container-direita {
     flex: 1;
@@ -1284,8 +1281,13 @@ body {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 24px;
-    color: #0a7b92;
+    color: #ffffff;
 }
+
+.card-formulario h3 span {
+    color: #12C7E5;
+}
+
 
 .input-group {
     margin-bottom: 20px;
