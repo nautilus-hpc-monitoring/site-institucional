@@ -126,12 +126,12 @@ function exibirAlertas(alertas) {
                 <td>${escaparHtml(formatarData(alerta.data_hora))}</td>
                 <td><span class="${classeStatus}">${nomeStatus}</span></td>
                 <td>
-                    <select id="atendimento-${Number(alerta.id_alerta)}" class="filter-select" aria-label="Atendimento do alerta ${Number(alerta.id_alerta)}">
+                    <div class="atendimento-controles"><select id="atendimento-${Number(alerta.id_alerta)}" class="filter-select" aria-label="Atendimento do alerta ${Number(alerta.id_alerta)}">
                         <option value="nao_visto" ${atendimento === "nao_visto" ? "selected" : ""}>Não visto</option>
                         <option value="ciente" ${atendimento === "ciente" ? "selected" : ""}>Ciente</option>
                         <option value="em_analise" ${atendimento === "em_analise" ? "selected" : ""}>Em análise</option>
                     </select>
-                    <button type="button" onclick="salvarAtendimento(${Number(alerta.id_alerta)}, this)">Salvar</button>
+                    <button type="button" class="atendimento-salvar" onclick="salvarAtendimento(${Number(alerta.id_alerta)}, this)">Salvar</button></div>
                     <span id="resultado-atendimento-${Number(alerta.id_alerta)}" role="status" aria-live="polite"></span>
                 </td>
             </tr>
@@ -152,6 +152,7 @@ async function salvarAtendimento(idAlerta, botao) {
     campo.disabled = true;
     botao.disabled = true;
     resultado.textContent = "Salvando…";
+    botao.textContent = "Salvando…";
     try {
         const resposta = await fetch(`/alertas/${idAlerta}/atendimento`, {
             method: "PATCH",
@@ -167,6 +168,7 @@ async function salvarAtendimento(idAlerta, botao) {
     } finally {
         campo.disabled = false;
         botao.disabled = false;
+        botao.textContent = "Salvar";
     }
 }
 

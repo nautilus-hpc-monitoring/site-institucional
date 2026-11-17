@@ -22,6 +22,7 @@ function chamarAPI(rota, dados) {
         body: JSON.stringify(dados || {})
     }).then(async function (resposta) {
         if (resposta.ok) return resposta.json();
+        if (resposta.status === 404) throw new Error("Rota indisponivel no servidor. Atualize o projeto e reinicie o servico nautilus-web na EC2.");
 
         var mensagem = await resposta.text();
         try {
