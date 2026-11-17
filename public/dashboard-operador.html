@@ -195,7 +195,26 @@
     <div id="main-container">
 
         <main class="page-content hpc-page" id="conteudo">
-            <div id="seletor"></div>
+            <div id="seletor">
+                <div class="area-filtro">
+                    <div class="area-filtro-titulo">
+                        <h1 id="titulo-seletor">Ambientes HPC</h1>
+                        <p class="page-subtitle" id="subtitulo-seletor">Selecione um ambiente para visualizar seus clusters</p>
+                    </div>
+
+                    <div class="area-filtro-acoes">
+                        <input type="search" id="ipt-busca-seletor"
+                            placeholder="Buscar ambientes HPC..."
+                            aria-label="Buscar ambientes HPC, clusters ou nodes"
+                            autocomplete="off">
+                        <button class="btn none" id="btn-voltar-seletor" onclick="voltarSeletor()">
+                            Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lista-seletor"></div>
+            </div>
 
             <!-- Dashboard do Operador -->
             <div class="none" id="dashboard">
