@@ -349,13 +349,11 @@ function desenharTabelaNodes(lista) {
 }
 
 // DASHBOARD DO NODE
-
 function abrirDash(idNode) {
-    nodeSelecionado = memoriaNodes.find(n => n.id === idNode);
+    nodeSelecionado = memoriaNodes.find(node => node.id === idNode);
 
-    if (!nodeSelecionado) {
-        return;
-    }
+    document.getElementById("tituloNode").innerHTML =
+        nodeSelecionado.hostname;
 
     mostrarDashboard();
 }
