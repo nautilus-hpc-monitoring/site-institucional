@@ -105,8 +105,8 @@ function alterarCarregamento(valor) {
 function exibirAlertas(alertas) {
     const nomesStatus = {
         aberto: "Em aberto",
-        em_andamento: "Em andamento",
-        resolvido: "Resolvido",
+        em_andamento: "Em aberto",
+        resolvido: "Fechado",
         fechado: "Fechado"
     };
     let linhas = "";
@@ -114,7 +114,7 @@ function exibirAlertas(alertas) {
     alertas.forEach(alerta => {
         let classeStatus = "badge-status";
         if (alerta.status === "aberto") classeStatus = "badge-status-alert";
-        if (alerta.status === "em_andamento") classeStatus = "badge-status-attention";
+        if (alerta.status === "em_andamento") classeStatus = "badge-status-alert";
         const nomeStatus = nomesStatus[alerta.status] || "Não informado";
         const atendimento = alerta.situacao_atendimento || "nao_visto";
 

@@ -7,7 +7,7 @@ async function listar(req, res) {
         }
         const servidor = req.query.servidor || "";
         const status = req.query.status || "";
-        const statusPermitidos = ["aberto", "em_andamento", "resolvido", "fechado"];
+        const statusPermitidos = ["aberto", "fechado"];
 
         if (typeof servidor !== "string" || servidor.length > 100) {
             return res.status(400).json({ erro: "Filtros de alertas inválidos." });

@@ -11,13 +11,13 @@ function listar(usuarioId, filtros) {
         parametros.push('%' + busca + '%');
     }
     if (filtros.status) {
-        condicoes.push('a.status = ?');
-        parametros.push(filtros.status);
+        condicoes.push("a.status IN (?, ?)");
+        parametros.push(...(filtros.status === 'aberto' ? ['aberto', 'em_andamento'] : ['fechado', 'resolvido']));
     }
     parametros.push(filtros.limite + 1, filtros.deslocamento);
     return banco.executar(`
         SELECT a.id_alerta, n.hostname AS servidor, c.tipo AS componente,
-               a.titulo, a.descricao, a.nivel, a.status, a.situacao_atendimento, a.valor_capturado,
+               a.titulo, a.descricao, a.nivel, CASE WHEN a.status IN ('resolvido', 'fechado') THEN 'fechado' ELSE 'aberto' END AS status, a.situacao_atendimento, a.valor_capturado,
                DATE_FORMAT(a.dt_hora, '%Y-%m-%d %H:%i:%s') AS data_hora
         FROM alerta a
         JOIN componente_node cn ON cn.id_componente_node = a.fk_componente_node

@@ -138,6 +138,7 @@ function cards(data) {
         c = data.componente,
         d = a.maior_atraso,
         p = a.comparacao;
+    elemento("kpi-nodes").style.borderTopColor = n.quantidade > 0 ? "var(--red)" : "var(--line)";
     texto("incident-node-count", formatar(n.quantidade));
     texto("cluster-node-total", formatar(n.total_nodes));
     texto(
