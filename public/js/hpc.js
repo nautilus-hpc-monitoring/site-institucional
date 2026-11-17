@@ -20,18 +20,33 @@ function chamarAPI(rota, dados) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dados || {})
+    }).then(async function (resposta) {
+        if (resposta.ok) return resposta.json();
+
+        var mensagem = await resposta.text();
+        try {
+            var erro = JSON.parse(mensagem);
+            mensagem = erro.erro || erro.mensagem || mensagem;
+        } catch (erro) {
+            // Algumas validações retornam texto simples, em vez de JSON.
+        }
+        throw new Error(mensagem || "Não foi possível concluir a operação.");
     });
+}
+
+function mostrarErro(erro) {
+    alert(erro.message || "Não foi possível acessar o servidor. Tente novamente.");
 }
 
 //HPC
 
 function listarHPC() {
     chamarAPI("listarHPC", { empresaServer: fkEmpresaUsuario })
-        .then(resposta => resposta.json())
         .then(lista => {
             memoriaHPCs = lista;
             desenharTabelaHPC(lista);
-        });
+        })
+        .catch(mostrarErro);
 }
 
 function desenharTabelaHPC(lista) {
@@ -146,21 +161,16 @@ function salvarHPC(id) {
     let rota = id ? "editarHPC" : "cadastrarHPC";
     if (id) dados.idHpcServer = id;
 
-    chamarAPI(rota, dados).then(resposta => {
-        if (!resposta.ok) {
-            resposta.text().then(textoErro => alert("❌ Erro do Servidor: " + textoErro));
-        } else {
-            listarHPC();
-        }
-    });
+    chamarAPI(rota, dados)
+        .then(() => listarHPC())
+        .catch(mostrarErro);
 }
 
 function deletarHPC(id) {
-    abrirModal("Deseja mesmo excluir este HPC? Todos os clusters e nodes vinculados serão perdidos.", () => {
-        chamarAPI("deletarHPC", { idHpcServer: id }).then(resposta => {
-            if (!resposta.ok) resposta.text().then(textoErro => alert("❌ Erro: " + textoErro));
-            else listarHPC();
-        });
+    abrirModal("Deseja mesmo excluir este HPC? Ele só pode ser excluído quando não possui clusters.", () => {
+        chamarAPI("deletarHPC", { idHpcServer: id })
+            .then(() => listarHPC())
+            .catch(mostrarErro);
     });
 }
 
@@ -170,11 +180,11 @@ function listarClusters(idHpc) {
     hpcSelecionado = memoriaHPCs.find(h => h.id === idHpc);
 
     chamarAPI("listarClusters", { idHpcServer: idHpc })
-        .then(resposta => resposta.json())
         .then(lista => {
             memoriaClusters = lista;
             desenharTabelaClusters(lista);
-        });
+        })
+        .catch(mostrarErro);
 }
 
 function desenharTabelaClusters(lista) {
@@ -280,21 +290,16 @@ function salvarCluster(id) {
     let rota = id ? "editarCluster" : "cadastrarCluster";
     if (id) dados.idClusterServer = id;
 
-    chamarAPI(rota, dados).then(resposta => {
-        if (!resposta.ok) {
-            resposta.text().then(textoErro => alert("❌ Erro do Servidor: " + textoErro));
-        } else {
-            listarClusters(hpcSelecionado.id);
-        }
-    });
+    chamarAPI(rota, dados)
+        .then(() => listarClusters(hpcSelecionado.id))
+        .catch(mostrarErro);
 }
 
 function deletarCluster(id) {
-    abrirModal("Deseja mesmo excluir este Cluster? Todos os nodes nele serão perdidos.", () => {
-        chamarAPI("deletarCluster", { idClusterServer: id }).then(resposta => {
-            if (!resposta.ok) resposta.text().then(textoErro => alert("❌ Erro: " + textoErro));
-            else listarClusters(hpcSelecionado.id);
-        });
+    abrirModal("Deseja mesmo excluir este Cluster? Ele só pode ser excluído quando não possui nodes.", () => {
+        chamarAPI("deletarCluster", { idClusterServer: id })
+            .then(() => listarClusters(hpcSelecionado.id))
+            .catch(mostrarErro);
     });
 }
 
@@ -304,11 +309,11 @@ function listarNodes(idCluster) {
     clusterSelecionado = memoriaClusters.find(c => c.id === idCluster);
 
     chamarAPI("listarNodes", { idClusterServer: idCluster })
-        .then(resposta => resposta.json())
         .then(lista => {
             memoriaNodes = lista;
             desenharTabelaNodes(lista);
-        });
+        })
+        .catch(mostrarErro);
 }
 
 function desenharTabelaNodes(lista) {
@@ -376,23 +381,33 @@ function desenharTabelaNodes(lista) {
 }
 
 function gerarCaixaComponente(nome, idComp) {
+    let ehSwap = nome.toUpperCase().includes("SWAP");
+
     return `
-        <div class="componente-box" style="border: 1px solid #E2E8F0; padding: 12px; border-radius: 6px; margin-bottom: 10px; display:flex; align-items:center; gap: 10px; flex-wrap: wrap; background: #FAFAF9;">
+        <div class="componente-box" data-tipo="${nome}" style="border: 1px solid #E2E8F0; padding: 12px; border-radius: 6px; margin-bottom: 10px; display:flex; align-items:center; gap: 10px; flex-wrap: wrap; background: #FAFAF9;">
             <div style="width: 140px;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px; margin:0; font-size: 14px;">
                     <input type="checkbox" class="chk-comp" value="${idComp}"> <strong>${nome}</strong>
                 </label>
             </div>
-            <input type="number" class="cfg-picomax" placeholder="Máximo" title="Pico Máximo" style="width:95px; margin:0; padding:6px;">
-            <input type="number" class="cfg-picomin" placeholder="Mínimo" title="Pico Mínimo" style="width:95px; margin:0; padding:6px;">
-            <input type="number" class="cfg-perc" placeholder="Variância %" title="A partir de qual variância de porcentagem esse dado será exibido no gráfico" style="width:95px; margin:0; padding:6px;">
-            <input type="number" class="cfg-atencao" placeholder="Atenção" title="Limite de alerta de Atenção" style="width:95px; margin:0; padding:6px;">
-            <input type="number" class="cfg-critico" placeholder="Crítico" title="Limite Crítico (Perigo)" style="width:95px; margin:0; padding:6px;">
+            ${ehSwap ? "" : `
+                <input type="number" min="0" max="100" step="0.01" class="cfg-picomax" placeholder="Máximo" title="Pico Máximo" style="width:95px; margin:0; padding:6px;">
+                <input type="number" min="0" max="100" step="0.01" class="cfg-picomin" placeholder="Mínimo" title="Pico Mínimo" style="width:95px; margin:0; padding:6px;">
+            `}
+            <input type="number" min="0" max="100" step="0.01" class="cfg-perc" placeholder="Variância %" title="A partir de qual variância de porcentagem esse dado será exibido no gráfico" style="width:95px; margin:0; padding:6px;">
+            <input type="number" min="0" max="100" step="0.01" class="cfg-atencao" placeholder="Atenção" title="Limite de alerta de Atenção" style="width:95px; margin:0; padding:6px;">
+            <input type="number" min="0" max="100" step="0.01" class="cfg-critico" placeholder="Crítico" title="Limite Crítico (Perigo)" style="width:95px; margin:0; padding:6px;">
         </div>
         `;
 }
 
 function abrirFormularioNode(id) {
+    chamarAPI("listarComponentes")
+        .then(componentes => desenharFormularioNode(id, componentes))
+        .catch(mostrarErro);
+}
+
+function desenharFormularioNode(id, componentes) {
     let node = id ? memoriaNodes.find(n => n.id === id) : null;
     let hostname = node ? node.hostname : "";
     let ip = node ? node.ip : "";
@@ -428,23 +443,21 @@ function abrirFormularioNode(id) {
                 
                 <div style="margin-bottom: 20px;">
                     <h3 style="margin: 0 0 5px 0; color: #0F172A; text-align: left;">Componentes Monitorados</h3>
-                    <p style="margin: 0; font-size: 13px; color: #64748B;">Marque os itens e preencha os limites desejados (campos vazios serão salvos como Nulos).</p>
+                    <p style="margin: 0; font-size: 13px; color: #64748B;">CPU, RAM e disco: preencha Mínimo e Máximo. Swap: preencha Atenção e Crítico. Use valores de 0 a 100%, com até duas casas decimais. Variância é opcional.</p>
                 </div>
  
                 <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #334155;">
                     <strong style="color: #0F172A;">Entenda os Limites:</strong>
                     <ul style="margin: 8px 0 0 20px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <li><b>Máximo / Mínimo:</b> Picos absolutos registrados pela máquina.</li>
+                        <li><b>Máximo / Mínimo:</b> Limites de uso para CPU, RAM e disco. Mínimo 0 desativa alertas por baixo uso.</li>
                         <li><b>Variância %:</b> A partir de qual variância de porcentagem o dado será exibido no gráfico (Ex: Se puser 3, variações de 2% são ignoradas).</li>
-                        <li><b>Atenção / Crítico:</b> Parâmetros para serem exibidos nos seus gráficos.</li>
+                        <li><b>Atenção / Crítico:</b> Obrigatórios para swap, com Atenção menor que Crítico. Opcionais nos demais componentes; se preencher um, preencha os dois.</li>
                     </ul>
                 </div>
                 
                 <div id="lista_componentes">
-                    ${gerarCaixaComponente("CPU", 1)}
-                    ${gerarCaixaComponente("Memória RAM", 2)}
-                    ${gerarCaixaComponente("Disco", 3)}
-                    ${gerarCaixaComponente("Memória Swap", 4)} 
+                    ${componentes.map(componente => gerarCaixaComponente(componente.tipo, componente.id)).join("")}
+                    ${componentes.length == 0 ? "<p>Nenhum componente disponível para monitoramento.</p>" : ""}
                 </div>
                 
                 <div class="form-actions" style="margin-top: 24px;">
@@ -456,29 +469,27 @@ function abrirFormularioNode(id) {
 
     if (id) {
         chamarAPI("buscarNode", { idNodeServer: id })
-            .then(resposta => {
-                if (!resposta.ok) {
-                    return resposta.text().then(textoErro => alert("❌ Erro do Servidor: " + textoErro));
-                }
-                return resposta.json().then(nodeCompleto => {
-                    let caixas = document.querySelectorAll(".componente-box");
+            .then(nodeCompleto => {
+                let caixas = document.querySelectorAll(".componente-box");
 
-                    nodeCompleto.componentes.forEach(comp => {
-                        for (let i = 0; i < caixas.length; i++) {
-                            let chk = caixas[i].querySelector(".chk-comp");
+                nodeCompleto.componentes.forEach(comp => {
+                    for (let i = 0; i < caixas.length; i++) {
+                        let chk = caixas[i].querySelector(".chk-comp");
 
-                            if (chk.value == comp.idComponente) {
-                                chk.checked = true;
-                                caixas[i].querySelector(".cfg-picomax").value = comp.picoMax ?? "";
-                                caixas[i].querySelector(".cfg-picomin").value = comp.picoMin ?? "";
-                                caixas[i].querySelector(".cfg-perc").value = comp.percentual ?? "";
-                                caixas[i].querySelector(".cfg-atencao").value = comp.limiteAtencao ?? "";
-                                caixas[i].querySelector(".cfg-critico").value = comp.limiteCritico ?? "";
-                            }
+                        if (chk.value == comp.idComponente) {
+                            chk.checked = true;
+                            let campoMaximo = caixas[i].querySelector(".cfg-picomax");
+                            let campoMinimo = caixas[i].querySelector(".cfg-picomin");
+                            if (campoMaximo) campoMaximo.value = comp.picoMax ?? "";
+                            if (campoMinimo) campoMinimo.value = comp.picoMin ?? "";
+                            caixas[i].querySelector(".cfg-perc").value = comp.percentual ?? "";
+                            caixas[i].querySelector(".cfg-atencao").value = comp.limiteAtencao ?? "";
+                            caixas[i].querySelector(".cfg-critico").value = comp.limiteCritico ?? "";
                         }
-                    });
+                    }
                 });
-            });
+            })
+            .catch(mostrarErro);
     }
 }
 
@@ -490,14 +501,20 @@ function salvarNode(id) {
         let chk = caixas[i].querySelector(".chk-comp");
 
         if (chk.checked) {
-            arrComponentes.push({
+            let componente = {
                 idComponente: chk.value,
-                picoMax: caixas[i].querySelector(".cfg-picomax").value || null,
-                picoMin: caixas[i].querySelector(".cfg-picomin").value || null,
+                picoMax: caixas[i].querySelector(".cfg-picomax")?.value || null,
+                picoMin: caixas[i].querySelector(".cfg-picomin")?.value || null,
                 percentual: caixas[i].querySelector(".cfg-perc").value || null,
                 limiteAtencao: caixas[i].querySelector(".cfg-atencao").value || null,
                 limiteCritico: caixas[i].querySelector(".cfg-critico").value || null
-            });
+            };
+            let erro = validarLimitesComponente(componente, caixas[i].dataset.tipo);
+            if (erro) {
+                alert(erro);
+                return;
+            }
+            arrComponentes.push(componente);
         }
     }
 
@@ -513,21 +530,16 @@ function salvarNode(id) {
     let rota = id ? "editarNode" : "cadastrarNode";
     if (id) dados.idNodeServer = id;
 
-    chamarAPI(rota, dados).then(resposta => {
-        if (!resposta.ok) {
-            resposta.text().then(textoErro => alert("❌ Erro do Servidor: " + textoErro));
-        } else {
-            listarNodes(clusterSelecionado.id);
-        }
-    });
+    chamarAPI(rota, dados)
+        .then(() => listarNodes(clusterSelecionado.id))
+        .catch(mostrarErro);
 }
 
 function deletarNode(id) {
     abrirModal("Deseja mesmo excluir este Node?", () => {
-        chamarAPI("deletarNode", { idNodeServer: id }).then(resposta => {
-            if (!resposta.ok) resposta.text().then(textoErro => alert("❌ Erro: " + textoErro));
-            else listarNodes(clusterSelecionado.id);
-        });
+        chamarAPI("deletarNode", { idNodeServer: id })
+            .then(() => listarNodes(clusterSelecionado.id))
+            .catch(mostrarErro);
     });
 }
 function abrirModal(mensagem, acaoAoConfirmar) {

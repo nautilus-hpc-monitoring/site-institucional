@@ -116,6 +116,7 @@ function exibirAlertas(alertas) {
         if (alerta.status === "aberto") classeStatus = "badge-status-alert";
         if (alerta.status === "em_andamento") classeStatus = "badge-status-attention";
         const nomeStatus = nomesStatus[alerta.status] || "Não informado";
+        const atendimento = alerta.situacao_atendimento || "nao_visto";
 
         linhas += `
             <tr>
@@ -124,11 +125,49 @@ function exibirAlertas(alertas) {
                 <td title="${escaparHtml(alerta.descricao)}">${escaparHtml(alerta.titulo || alerta.descricao)}</td>
                 <td>${escaparHtml(formatarData(alerta.data_hora))}</td>
                 <td><span class="${classeStatus}">${nomeStatus}</span></td>
+                <td>
+                    <select id="atendimento-${Number(alerta.id_alerta)}" class="filter-select" aria-label="Atendimento do alerta ${Number(alerta.id_alerta)}">
+                        <option value="nao_visto" ${atendimento === "nao_visto" ? "selected" : ""}>Não visto</option>
+                        <option value="ciente" ${atendimento === "ciente" ? "selected" : ""}>Ciente</option>
+                        <option value="em_analise" ${atendimento === "em_analise" ? "selected" : ""}>Em análise</option>
+                    </select>
+                    <button type="button" onclick="salvarAtendimento(${Number(alerta.id_alerta)}, this)">Salvar</button>
+                    <span id="resultado-atendimento-${Number(alerta.id_alerta)}" role="status" aria-live="polite"></span>
+                </td>
             </tr>
         `;
     });
 
     htmlAlertas.innerHTML += linhas;
+}
+
+async function salvarAtendimento(idAlerta, botao) {
+    const campo = document.getElementById("atendimento-" + idAlerta);
+    const resultado = document.getElementById("resultado-atendimento-" + idAlerta);
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
+        window.location.href = "./login.html";
+        return;
+    }
+    campo.disabled = true;
+    botao.disabled = true;
+    resultado.textContent = "Salvando…";
+    try {
+        const resposta = await fetch(`/alertas/${idAlerta}/atendimento`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ idUsuario: idUsuario, situacao: campo.value })
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível salvar.");
+        resultado.textContent = "Salvo.";
+    } catch (erro) {
+        resultado.textContent = "Não salvo. " + erro.message;
+    } finally {
+        campo.disabled = false;
+        botao.disabled = false;
+    }
 }
 
 function formatarData(valor) {
