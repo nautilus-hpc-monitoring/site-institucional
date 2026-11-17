@@ -42,7 +42,7 @@ function entrar() {
                     sessionStorage.setItem("ID_NIVEL_ACESSO", json.fk_nivel_acesso);
                     
                     setTimeout(function () {
-                        window.location = "./cadastro-hpc.html";
+                        window.location = "./alertas.html";
                     }, 1000);
                 });
 
