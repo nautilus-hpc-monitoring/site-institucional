@@ -24,6 +24,13 @@ const dia = (v) => {
 };
 const periodo = (datas) =>
     datas?.length ? dia(datas[0]) + " a " + dia(datas.at(-1)) : "Sem período disponível";
+// Distingue a atualização dos dados da hora em que a página os consultou.
+function formatarDataHora(valor) {
+    const data = new Date(valor);
+    if (!valor || !Number.isFinite(data.getTime())) return "indisponível";
+    return data.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+}
+
 const media = (valores) => {
     const validos = valores.filter(numero);
     return validos.length ? validos.reduce((a, b) => a + b, 0) / validos.length : null;
@@ -57,6 +64,9 @@ function texto(id, valor) {
 // Limpa o gráfico e mostra uma mensagem quando faltam dados.
 function semDados(id, mensagem = "Sem dados disponíveis para este período.") {
     limparGrafico(id);
+    const container = elemento(id);
+    container.classList.remove("chartjs-panels");
+    container.classList.add("chart-empty");
     texto(id, mensagem);
 }
 
@@ -222,14 +232,16 @@ function exibirDisco(id) {
     nodeDiscoAtual = id;
     marcar("disk", id);
     const d = dadosNode(id)?.disco;
-    texto(
-        "disk-description",
-        id +
-            " · " +
-            (d
-                ? periodo(d.datas) + " · " + (d.volume || "Volume não informado")
-                : "Sem telemetria de disco")
-    );
+    const descricao = [id, d ? periodo(d.datas) : "Sem telemetria de disco"];
+    if (d) {
+        const ultimoValor = Array.isArray(d.real) ? d.real.findLast(numero) : null;
+        if (numero(ultimoValor))
+            descricao.push("Atual: " + formatar(ultimoValor) + " TB");
+        if (!Array.isArray(d.previsto) || !d.previsto.some(numero)) {
+            descricao.push("Sem base para previsão");
+        }
+    }
+    texto("disk-description", descricao.join(" · "));
     if (
         !d ||
         !Array.isArray(d.datas) ||
@@ -293,6 +305,15 @@ function exibirMapaCalor(recurso) {
         !d.leituras.every((l) => Array.isArray(l) && l.length === 24)
     )
         return semDados("heat");
+    const temLeituras = d.leituras.some((linha) =>
+        linha.some((leitura) => numero(leitura?.[recurso]))
+    );
+    if (!temLeituras) {
+        return semDados(
+            "heat",
+            "Sem horas válidas nos sete dias anteriores. O dia atual não entra neste mapa."
+        );
+    }
     heatDays = d.dias.map(dia);
     heatReadings = d.leituras;
     renderizarCalor(recurso, chaveVisualizacao.checked);
@@ -313,12 +334,18 @@ function exibirConsumo(id) {
         d.datas.length !== 24 ||
         !["cpuObserved", "cpuExpected", "ramObserved", "ramExpected"].every(
             (c) => Array.isArray(d[c]) && d[c].length === 24
-        ) ||
-        !["cpuObserved", "cpuExpected", "ramObserved", "ramExpected"].some((c) =>
-            d[c].some(numero)
         )
     )
         return semDados("expected");
+    const temHoras = ["cpuObserved", "cpuExpected", "ramObserved", "ramExpected"].some(
+        (campo) => d[campo].some(numero)
+    );
+    if (!temHoras) {
+        return semDados(
+            "expected",
+            "Nenhuma hora válida publicada para este dia. Aguardando horas completas com coletas suficientes."
+        );
+    }
     consumoPorNode[id] = d;
     renderizarConsumo(id);
 }
@@ -333,10 +360,21 @@ function calcularFrequencia(leituras, indice) {
 function exibirPrevisoes(nodes) {
     const hosts = new Set(nodes.map((n) => n.hostname));
     renderizarFrequencias(nodes.map((n) => ({ id: n.hostname })));
-    const disponiveis = nodes.filter((n) => memoriaPorNode[n.hostname]);
+    const disponiveis = nodes.filter((node) => {
+        const dados = memoriaPorNode[node.hostname];
+        return (
+            dados &&
+            (dados.semSwap ||
+                dados.leituras.some((leitura) => numero(leitura.swapPercent)))
+        );
+    });
     if (disponiveis.length)
         renderizarMemoria(disponiveis.map((n) => ({ id: n.hostname })));
-    else semDados("swap");
+    else
+        semDados(
+            "swap",
+            "Sem ocupação de swap publicada para este período. Execute a Gold atualizada."
+        );
     texto("forecast-period", periodo(diasPrevisao.map((d) => d.data)));
     const tempos = [...hosts]
         .flatMap((h) => memoriaPorNode[h]?.leituras.map((l) => l.timestamp) || [])
@@ -347,42 +385,47 @@ function exibirPrevisoes(nodes) {
         tempos.length ? periodo([tempos[0], tempos.at(-1)]) : "Sem período disponível"
     );
 }
-// REGRA DE MEMÓRIA — RAM em 90%, swap-out acima de zero e intervalo máximo de 5 minutos.
-const REGRA_MEMORIA = { ramUsoPercent: 90, swapOutMiBs: 0, intervaloMaxSeg: 300 };
+// RAM alta e swap ocupada: não depende dos contadores de paginação do Windows.
+const REGRA_MEMORIA = {
+    ramUsoMinimo: 90,
+    swapUsoMinimo: 0,
+    intervaloMaximoSegundos: 300
+};
 
-// Calcula RAM em uso e taxas de swap entre duas coletas válidas.
 function calcularIntervalosMemoria(leituras) {
-    return leituras.slice(1).map((atual, i) => {
-        const anterior = leituras[i],
-            segundos = (atual.timestamp - anterior.timestamp) / 1000;
+    return leituras.slice(1).map((atual, indice) => {
+        const anterior = leituras[indice];
+        const segundos = (atual.timestamp - anterior.timestamp) / 1000;
+        const percentuais = [
+            atual.ramDisponivel,
+            anterior.ramDisponivel,
+            atual.swapPercent,
+            anterior.swapPercent
+        ];
         const valido =
             segundos > 0 &&
-            segundos <= 300 &&
-            [atual.ramDisponivel, anterior.ramDisponivel].every(
-                (v) => numero(v) && v >= 0 && v <= 100
-            ) &&
-            [atual.swapIn, atual.swapOut, anterior.swapIn, anterior.swapOut].every(
-                (v) => numero(v) && v >= 0
-            ) &&
-            atual.swapIn >= anterior.swapIn &&
-            atual.swapOut >= anterior.swapOut;
+            segundos <= REGRA_MEMORIA.intervaloMaximoSegundos &&
+            percentuais.every((valor) => numero(valor) && valor >= 0 && valor <= 100);
         if (!valido) return { timestamp: atual.timestamp, valido: false, minutos: 0 };
-        const entrada = (atual.swapIn - anterior.swapIn) / segundos / 1048576,
-            saida = (atual.swapOut - anterior.swapOut) / segundos / 1048576,
-            ram = 100 - atual.ramDisponivel;
+
+        const ram = 100 - atual.ramDisponivel;
+        const ramAnterior = 100 - anterior.ramDisponivel;
         return {
             timestamp: atual.timestamp,
             valido: true,
             minutos: segundos / 60,
-            ram,
-            entrada,
-            saida,
-            sinal: ram >= 90 && 100 - anterior.ramDisponivel >= 90 && saida > 0
+            ram: ram,
+            swap: atual.swapPercent,
+            sinal:
+                ram >= REGRA_MEMORIA.ramUsoMinimo &&
+                ramAnterior >= REGRA_MEMORIA.ramUsoMinimo &&
+                atual.swapPercent > REGRA_MEMORIA.swapUsoMinimo &&
+                anterior.swapPercent > REGRA_MEMORIA.swapUsoMinimo
         };
     });
 }
 
-// Soma os minutos com RAM alta e envio para swap.
+// Soma os minutos válidos com RAM alta e swap ocupada nos dois extremos do intervalo.
 function resumirMemoria(dados) {
     const intervalos = calcularIntervalosMemoria(dados.leituras);
     return {
@@ -578,13 +621,18 @@ async function carregarCluster() {
         ["disk", "heat", "expected"].forEach((id) => controles(id));
         estado(data.avisos.length ? data.avisos.join(" ") : "Dados do banco e S3");
         texto("cluster-description", data.cluster.cluster_nome);
-        texto("cluster-summary", nodesClusterAtual.length + " nodes");
+        texto(
+            "cluster-summary",
+            nodesClusterAtual.length +
+                (nodesClusterAtual.length === 1 ? " node" : " nodes")
+        );
+        const dataColeta = data.telemetria.metadados?.telemetria_ate;
         texto(
             "data-time",
-            "Consulta: " +
-                new Date(data.gerado_em).toLocaleString("pt-BR", {
-                    timeZone: "America/Sao_Paulo"
-                })
+            "Coleta: " +
+                formatarDataHora(dataColeta) +
+                " · Consulta: " +
+                formatarDataHora(data.gerado_em)
         );
         const primeiro = nodesClusterAtual[0]?.hostname;
         if (primeiro) {

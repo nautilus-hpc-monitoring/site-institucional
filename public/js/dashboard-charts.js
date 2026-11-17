@@ -18,6 +18,7 @@ function destruirGrafico(id) {
 // Remove a instância e o conteúdo visual do gráfico.
 function limparGrafico(id) {
     destruirGrafico(id);
+    document.getElementById(id).classList.remove("chart-empty");
     document.getElementById(id).replaceChildren();
 }
 
@@ -51,13 +52,18 @@ function redimensionarGraficos(id) {
 
 // Configuração compartilhada das linhas reais e previstas.
 function serieLinha(label, data, cor, tracejada = false) {
+    // Uma série com só um ponto não forma linha: deixa esse ponto visível.
+    const pontosValidos = data.filter((ponto) => {
+        if (typeof ponto === "number") return Number.isFinite(ponto);
+        return ponto !== null && typeof ponto === "object" && Number.isFinite(ponto.y);
+    });
     return {
         label,
         data,
         borderColor: cor,
         backgroundColor: cor,
         borderWidth: 2,
-        pointRadius: 0,
+        pointRadius: pontosValidos.length === 1 ? 4 : 0,
         pointHitRadius: 6,
         tension: 0.15,
         spanGaps: false,
@@ -459,7 +465,7 @@ function renderizarMemoria(nodes) {
             : !n.cobertura
               ? "Sem dados"
               : n.minutos
-                ? n.minutos + " min"
+                ? formatar(n.minutos) + " min"
                 : "Sem sinais"
     );
     const abrir = (event, elements, chart) => {
@@ -508,7 +514,7 @@ function renderizarMemoria(nodes) {
                 onClick: abrir
             }
         },
-        "Minutos acumulados com RAM alta e envio para swap por node. Clique para abrir o histórico."
+        "Minutos acumulados com RAM alta e swap ocupada por node. Clique para abrir o histórico."
     );
     // Acesso por teclado ao mesmo detalhe oferecido pelas barras.
     const atalhos = document.createElement("div");
@@ -603,7 +609,7 @@ function renderizarRankingIncidentes(id, dados, titulo) {
     );
 }
 
-// DETALHE DO GRÁFICO 5 — Histórico de RAM e taxas de swap.
+// DETALHE DO GRÁFICO 5 — Histórico de RAM e ocupação da swap em porcentagem.
 function renderizarDetalheMemoria(node, dados, resumo) {
     const container = document.getElementById("memory-timeline");
     container.className = "chartjs-memory-detail";
@@ -663,16 +669,8 @@ function renderizarDetalheMemoria(node, dados, resumo) {
     );
     montar(
         "memory-timeline-swap",
-        [
-            serieLinha("Swap-in", pontos("entrada"), C.purple),
-            serieLinha("Swap-out", pontos("saida"), C.amber)
-        ],
-        "Swap (MiB/s)",
-        Math.max(
-            1,
-            ...resumo.intervalos
-                .filter((p) => p.valido)
-                .flatMap((p) => [p.entrada, p.saida])
-        )
+        [serieLinha("Swap ocupada", pontos("swap"), C.purple)],
+        "Swap ocupada (%)",
+        100
     );
 }

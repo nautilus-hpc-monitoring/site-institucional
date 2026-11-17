@@ -12,11 +12,10 @@ CREATE TABLE aws_credentials (
 CREATE TABLE empresa (
     id_empresa INT PRIMARY KEY AUTO_INCREMENT,
     razao_social VARCHAR(60) NOT NULL,
+    sla_minutos INT NOT NULL DEFAULT 20,
     cnpj CHAR(14) NOT NULL UNIQUE,
     dt_registro DATE,
-    dominio VARCHAR(60) NOT NULL UNIQUE,
-    sla_minutos INT NOT NULL DEFAULT 20,
-    CONSTRAINT ckEmpresaSla CHECK (sla_minutos > 0)
+    dominio VARCHAR(60) NOT NULL UNIQUE 
 );
 
 CREATE TABLE endereco (
@@ -156,6 +155,7 @@ CREATE TABLE alerta (
     nivel VARCHAR(20) NOT NULL,
     valor_capturado DECIMAL(10,2) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'aberto',
+    situacao_atendimento VARCHAR(20) NOT NULL DEFAULT 'nao_visto',
     chave_jira VARCHAR(50),
     dt_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     dt_fim DATETIME NULL,
@@ -163,6 +163,8 @@ CREATE TABLE alerta (
     
     CONSTRAINT ckAlertaStatus
         CHECK (status IN ('aberto', 'em_andamento', 'resolvido', 'fechado')),
+    CONSTRAINT ckAlertaAtendimento
+        CHECK (situacao_atendimento IN ('nao_visto', 'ciente', 'em_analise')),
     CONSTRAINT cFkAlertaComponenteNode
         FOREIGN KEY (fk_componente_node)
         REFERENCES componente_node(id_componente_node)

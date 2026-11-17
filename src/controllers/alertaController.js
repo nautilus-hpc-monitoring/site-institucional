@@ -57,6 +57,29 @@ async function listar(req, res) {
     }
 }
 
+async function alterarAtendimento(req, res) {
+    const idUsuario = Number(req.body.idUsuario);
+    const idAlerta = Number(req.params.id);
+    const situacao = req.body.situacao;
+    if (!Number.isSafeInteger(idUsuario) || idUsuario <= 0 || !Number.isSafeInteger(idAlerta) || idAlerta <= 0) {
+        return res.status(400).json({ erro: "Usuário ou alerta inválido." });
+    }
+    if (!["nao_visto", "ciente", "em_analise"].includes(situacao)) {
+        return res.status(400).json({ erro: "Escolha Não visto, Ciente ou Em análise." });
+    }
+    try {
+        const resultado = await alertaModel.alterarAtendimento(idUsuario, idAlerta, situacao);
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ erro: "Alerta não encontrado para sua empresa." });
+        }
+        return res.json({ situacao: situacao });
+    } catch (erro) {
+        console.error("Falha ao atualizar atendimento:", erro.code || erro.name);
+        return res.status(503).json({ erro: "Não foi possível salvar o atendimento. Tente novamente." });
+    }
+}
+
 module.exports = {
-    listar
+    listar,
+    alterarAtendimento
 };

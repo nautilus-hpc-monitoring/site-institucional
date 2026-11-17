@@ -33,6 +33,32 @@ function executar(instrucao, parametros = []) {
     });
 }
 
+// Salva todas as etapas juntas. Se alguma falhar, desfaz o cadastro inteiro.
+async function executarTransacao(operacao) {
+    if (process.env.AMBIENTE_PROCESSO !== "producao" && process.env.AMBIENTE_PROCESSO !== "desenvolvimento") {
+        throw new Error("AMBIENTE NÃO CONFIGURADO EM .env");
+    }
+
+    var conexao = mysql.createConnection(mySqlConfig).promise();
+
+    try {
+        await conexao.beginTransaction();
+        var resultado = await operacao(conexao);
+        await conexao.commit();
+        return resultado;
+    } catch (erro) {
+        try {
+            await conexao.rollback();
+        } catch (erroAoDesfazer) {
+            console.error("Não foi possível desfazer a transação:", erroAoDesfazer.message);
+        }
+        throw erro;
+    } finally {
+        await conexao.end();
+    }
+}
+
 module.exports = {
-    executar
+    executar,
+    executarTransacao
 };

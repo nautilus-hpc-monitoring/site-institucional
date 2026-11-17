@@ -17,7 +17,7 @@ function listar(usuarioId, filtros) {
     parametros.push(filtros.limite + 1, filtros.deslocamento);
     return banco.executar(`
         SELECT a.id_alerta, n.hostname AS servidor, c.tipo AS componente,
-               a.titulo, a.descricao, a.nivel, a.status, a.valor_capturado,
+               a.titulo, a.descricao, a.nivel, a.status, a.situacao_atendimento, a.valor_capturado,
                DATE_FORMAT(a.dt_hora, '%Y-%m-%d %H:%i:%s') AS data_hora
         FROM alerta a
         JOIN componente_node cn ON cn.id_componente_node = a.fk_componente_node
@@ -31,4 +31,17 @@ function listar(usuarioId, filtros) {
         LIMIT ? OFFSET ?
     `, parametros);
 }
-module.exports = { listar };
+// Atendimento humano é separado do status técnico e do encerramento pelo Java.
+function alterarAtendimento(usuarioId, alertaId, situacao) {
+    return banco.executar(`
+        UPDATE alerta a
+        JOIN componente_node cn ON cn.id_componente_node = a.fk_componente_node
+        JOIN node n ON n.id_node = cn.fk_node
+        JOIN cluster cl ON cl.id_cluster = n.fk_cluster
+        JOIN ambiente_hpc h ON h.id_ambiente_hpc = cl.fk_ambiente_hpc
+        JOIN usuario u ON u.fk_empresa = h.fk_empresa
+        SET a.situacao_atendimento = ?
+        WHERE a.id_alerta = ? AND u.id_usuario = ?
+    `, [situacao, alertaId, usuarioId]);
+}
+module.exports = { listar, alterarAtendimento };
