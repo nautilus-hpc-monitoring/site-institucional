@@ -1,6 +1,35 @@
 /* Dashboard categórica: KPIs e tabela de episódios por node. */
 
+main{
+    margin: 20px;
+}
+
+header{
+  margin-bottom: 10px;
+}
+
+.cat-badge {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #eef1f5;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cat-badge--teal {
+  position: static;
+  background: #dff3f3;
+  color: #0e7890;
+  font-weight: 700;
+}
+
 .cat-kpis {
+  margin-top: 2.5dvh;
+  margin-bottom: 2dvh;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
@@ -67,24 +96,6 @@
 }
 #kpi-top-severity .cat-kpi-sub b {
   color: #d9620a;
-}
-.cat-badge {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: #eef1f5;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.cat-badge--teal {
-  position: static;
-  background: #dff3f3;
-  color: #0e7890;
-  font-weight: 700;
 }
 
 /* Card da tabela: a altura termina na linha de total. */

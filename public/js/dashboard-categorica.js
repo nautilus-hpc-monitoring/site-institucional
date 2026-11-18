@@ -178,7 +178,6 @@ function cards(data) {
 
     texto("top-node-name", ouTraco(n?.hostname));
     texto("top-node-count", formatar(n ? n.total : 0));
-    texto("top-node-cluster", ouTraco(n?.cluster_nome));
 
     texto("top-category-name", cat ? cat.rotulo : "—");
     texto("top-category-count", formatar(cat ? soma[cat.id] : 0));
