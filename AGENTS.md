@@ -10,6 +10,8 @@ npm start        # node app.js
 npm run dev      # nodemon --exec node app.js
 ```
 
+Docker: `docker compose -f docker/docker-compose.yml up -d --build` → `http://localhost:8080` (MySQL local `root`/`urubu100`). O compose mora em `docker/`, mas o build context é a raiz; não volte para `build: .`.
+
 - `npm run devStart` is broken (`nodemon server.js`; no such file). Do not use it.
 - No test runner. Verify changes by starting the server and calling the affected route; DB routes need a reachable MySQL.
 - Port/host come only from `APP_PORT` / `APP_HOST`; there are no code defaults.
@@ -37,7 +39,6 @@ Request flow: `app.js` mounts routers (`src/routes`) → controllers (`src/contr
 
 ## Known gaps (don't assume these work)
 
-- `docker/` cannot build the app: compose `build: .` uses `docker/` as context, so `package*.json` and `src/` are missing, the volume path `./src/database/...` resolves inside `docker/`, and `EXPOSE 3333` disagrees with the `80:8080` mapping. Run with `npm start` instead.
 - `src/routes/index.js` calls `res.render("index")` with no view engine, but static middleware serves `public/index.html` first. That router is effectively dead — don't copy its pattern.
 - `dashGestorController.buscarDadosGold` calls `conexao.query(...)`, which `config.js` doesn't export; the error is swallowed and the dashboard silently falls back to zero KPIs.
 - Relatórios page is unwired: `app.js` never mounts `src/routes/relatorios.js`, that router requires a missing `relatorioController`, and `relatorios.html` calls a GET where the router defines POST.

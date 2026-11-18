@@ -89,6 +89,8 @@ chmod +x setup_docker.sh
 
 ```
 
+> O `.env` é obrigatório na raiz do projeto. O compose sobrescreve `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `APP_PORT` para usar o MySQL local (`root`/`urubu100`).
+
 
 
 Ou manualmente via **Docker Compose**:
@@ -100,6 +102,10 @@ Ou manualmente via **Docker Compose**:
 docker compose -f docker/docker-compose.yml up -d --build
 
 ```
+
+
+
+Após subir os containers, acesse: `http://localhost:8080`.
 
 
 
@@ -127,7 +133,7 @@ node app.js
 
 
 
-Após iniciar, acesse no navegador: `http://localhost:3000` *(ajuste a porta conforme configurado no seu `app.js`)*.
+Após iniciar, acesse no navegador: `http://localhost:8080` (ou a porta definida em `APP_PORT` no `.env`).
 
 
 
@@ -139,14 +145,22 @@ Após iniciar, acesse no navegador: `http://localhost:3000` *(ajuste a porta con
 
 
 
-Caso a aplicação utilize variáveis de ambiente, crie um arquivo `.env` na raiz do projeto seguindo o exemplo abaixo:
-
-
+Crie um arquivo `.env` na raiz do projeto (ou `.env.dev` para desenvolvimento) seguindo o modelo:
 
 ```env
+AMBIENTE_PROCESSO=producao
 
-PORT=3000
+DB_HOST=localhost
+DB_DATABASE=nautilus
+DB_USER=root
+DB_PASSWORD='suaSenha'
+DB_PORT=3306
 
-NODE_ENV=development
+APP_PORT=8080
+APP_HOST=localhost
 
+RESEND_API_KEY='suaChave'
 ```
+
+> `AMBIENTE_PROCESSO` é lido antes do dotenv: para usar `.env.dev`, defina `AMBIENTE_PROCESSO=desenvolvimento` no shell antes de iniciar o Node.
+
