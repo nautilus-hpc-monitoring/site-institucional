@@ -1,4 +1,5 @@
 var hpcModel = require("../models/hpcModel");
+var validarLimitesComponente = require("../../public/js/validar-limites");
 var STATUS_VALIDOS = ["ativo", "inativo", "manut."];
 
 function tratarErro(res, erro) {
@@ -8,7 +9,52 @@ function tratarErro(res, erro) {
         return res.status(409).json({ erro: "Registro duplicado encontrado (ex: hostname já existe)." });
     }
 
-    return res.status(500).json({ erro: erro.sqlMessage || erro.message });
+    if (erro.code == "ER_NO_REFERENCED_ROW_2") {
+        return res.status(400).json({ erro: "O HPC, cluster ou componente selecionado não existe. Atualize a página e tente novamente." });
+    }
+
+    if (erro.code == "ER_ROW_IS_REFERENCED_2") {
+        return res.status(409).json({ erro: "Este registro possui vínculos e não pode ser excluído." });
+    }
+
+    return res.status(erro.status || 500).json({ erro: erro.sqlMessage || erro.message });
+}
+
+function componentesValidos(componentes) {
+    if (!Array.isArray(componentes)) return false;
+
+    var ids = [];
+    for (var componente of componentes) {
+        if (!componente) return false;
+        var id = Number(componente.idComponente);
+        if (!Number.isInteger(id) || id <= 0 || ids.includes(id)) return false;
+        ids.push(id);
+
+        var valores = [componente.picoMax, componente.picoMin, componente.percentual,
+            componente.limiteAtencao, componente.limiteCritico];
+        for (var valor of valores) {
+            if (valor !== "" && valor !== null && valor !== undefined && !Number.isFinite(Number(valor))) return false;
+        }
+    }
+    return true;
+}
+
+// Confere o tipo pelo cadastro do banco, sem confiar no tipo enviado pela tela.
+async function validarLimites(componentes) {
+    if (componentes.length === 0) return;
+    var cadastrados = await hpcModel.listarComponentes();
+
+    for (var componente of componentes) {
+        var cadastro = cadastrados.find(item => Number(item.id) === Number(componente.idComponente));
+        var mensagem = cadastro
+            ? validarLimitesComponente(componente, cadastro.tipo)
+            : "Componente não encontrado. Atualize a página e tente novamente.";
+        if (mensagem) {
+            var erro = new Error(mensagem);
+            erro.status = 400;
+            throw erro;
+        }
+    }
 }
 
 // HPC 
@@ -173,6 +219,12 @@ function deletarCluster(req, res) {
 
 
 //NODE 
+function listarComponentes(req, res) {
+    hpcModel.listarComponentes()
+        .then(resultado => res.json(resultado))
+        .catch(erro => tratarErro(res, erro));
+}
+
 function listarNodes(req, res) {
     let idCluster = req.body.idClusterServer;
 
@@ -218,11 +270,12 @@ function cadastrarNode(req, res) {
     if (!STATUS_VALIDOS.includes(status)) {
         return res.status(400).send("status inválido!");
     }
-    if (!Array.isArray(componentes)) {
-        return res.status(400).send("componentes inválido!");
+    if (!componentesValidos(componentes)) {
+        return res.status(400).json({ erro: "Selecione componentes válidos, sem repetição, e use números nos limites." });
     }
 
-    hpcModel.cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status, componentes)
+    validarLimites(componentes)
+        .then(() => hpcModel.cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status, componentes))
         .then(resultado => res.json(resultado))
         .catch(erro => tratarErro(res, erro));
 }
@@ -243,11 +296,12 @@ function editarNode(req, res) {
     if (!STATUS_VALIDOS.includes(status)) {
         return res.status(400).send("status inválido!");
     }
-    if (!Array.isArray(componentes)) {
-        return res.status(400).send("componentes inválido!");
+    if (!componentesValidos(componentes)) {
+        return res.status(400).json({ erro: "Selecione componentes válidos, sem repetição, e use números nos limites." });
     }
 
-    hpcModel.editarNode(idNode, hostname, ip, sistemaOperacional, status, componentes)
+    validarLimites(componentes)
+        .then(() => hpcModel.editarNode(idNode, hostname, ip, sistemaOperacional, status, componentes))
         .then(resultado => {
             if (resultado.affectedRows == 0) {
                 return res.status(404).json({ erro: "Node não encontrado." });
@@ -282,6 +336,7 @@ module.exports = {
     editarCluster,
     listarNodes,
     buscarNode,
+    listarComponentes,
     cadastrarNode,
     editarNode,
     deletarHPC,

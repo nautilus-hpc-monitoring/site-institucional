@@ -4,6 +4,11 @@ if (sessionStorage.NOME_USUARIO) {
 
 const fkEmpresaUsuario = sessionStorage.ID_EMPRESA;
 const htmlSeletor = document.getElementById("seletor");
+const htmlListaSeletor = document.getElementById("lista-seletor");
+const htmlBusca = document.getElementById("ipt-busca-seletor");
+const htmlTituloSeletor = document.getElementById("titulo-seletor");
+const htmlSubtituloSeletor = document.getElementById("subtitulo-seletor");
+const htmlVoltarSeletor = document.getElementById("btn-voltar-seletor");
 const htmlDashboard = document.getElementById("dashboard");
 const mobileSidebar = document.getElementById("mobileSidebar");
 
@@ -13,6 +18,7 @@ let memoriaClusters = [];
 let clusterSelecionado = null;
 let memoriaNodes = [];
 let nodeSelecionado = null;
+let nivelSeletor = "hpc";
 
 window.onload = function () {
     validarSessao();
@@ -45,6 +51,49 @@ function classeStatus(status) {
         : "badge-inativo";
 }
 
+function normalizarTexto(valor) {
+    return String(valor ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
+
+function filtrarLista(lista, campos) {
+    const termo = normalizarTexto(htmlBusca.value.trim());
+
+    if (!termo) {
+        return lista;
+    }
+
+    return lista.filter(item =>
+        campos.some(campo => normalizarTexto(item[campo]).includes(termo))
+    );
+}
+
+function redesenharSeletor() {
+    if (nivelSeletor === "node") {
+        desenharTabelaNodes(memoriaNodes);
+    } else if (nivelSeletor === "cluster") {
+        desenharTabelaClusters(memoriaClusters);
+    } else {
+        desenharTabelaHPC(memoriaHPCs);
+    }
+}
+
+function definirCabecalho(titulo, subtitulo, mostrarVoltar) {
+    htmlTituloSeletor.textContent = titulo;
+    htmlSubtituloSeletor.textContent = subtitulo;
+    htmlVoltarSeletor.classList.toggle("none", !mostrarVoltar);
+}
+
+function voltarSeletor() {
+    if (nivelSeletor === "node") {
+        listarClusters(hpcSelecionado.id);
+    } else if (nivelSeletor === "cluster") {
+        listarHPC();
+    }
+}
+
 function mostrarSeletor() {
     htmlSeletor.classList.remove("none");
     htmlDashboard.classList.add("none");
@@ -67,6 +116,8 @@ function mostrarDashboard() {
 function listarHPC() {
     mostrarSeletor();
 
+    htmlBusca.value = "";
+    nivelSeletor = "hpc";
     hpcSelecionado = null;
     clusterSelecionado = null;
     nodeSelecionado = null;
@@ -89,14 +140,17 @@ function listarHPC() {
 }
 
 function desenharTabelaHPC(lista) {
-    let html = `
-        <div style="margin-bottom: 20px;">
-            <h2 style="margin: 0; color: #0F172A;">Ambientes HPC</h2>
-            <p class="page-subtitle" style="margin: 5px 0 0 0;">
-                Selecione um ambiente para visualizar seus clusters
-            </p>
-        </div>
+    const visiveis = filtrarLista(lista, ["nome", "localizacao"]);
+    const buscando = htmlBusca.value.trim() !== "";
 
+    htmlBusca.placeholder = "Buscar ambientes HPC...";
+    definirCabecalho(
+        "Ambientes HPC",
+        "Selecione um ambiente para visualizar seus clusters",
+        false
+    );
+
+    let html = `
         <div class="panel-card">
             <div class="tabela-wrap">
                 <table class="tabela">
@@ -111,16 +165,16 @@ function desenharTabelaHPC(lista) {
                     <tbody>
     `;
 
-    if (lista.length === 0) {
+    if (visiveis.length === 0) {
         html += `
             <tr>
                 <td colspan="4" class="vazio">
-                    Nenhum ambiente HPC encontrado.
+                    ${buscando ? "Nenhum ambiente HPC encontrado para a busca." : "Nenhum ambiente HPC encontrado."}
                 </td>
             </tr>
         `;
     } else {
-        for (let hpc of lista) {
+        for (let hpc of visiveis) {
             html += `
                 <tr class="clicavel"
                     onclick="listarClusters(${hpc.id})">
@@ -146,12 +200,14 @@ function desenharTabelaHPC(lista) {
         </div>
     `;
 
-    htmlSeletor.innerHTML = html;
+    htmlListaSeletor.innerHTML = html;
 }
 
 // CLUSTERS
 
 function listarClusters(idHpc) {
+    htmlBusca.value = "";
+    nivelSeletor = "cluster";
     hpcSelecionado = memoriaHPCs.find(h => h.id === idHpc);
 
     if (!hpcSelecionado) {
@@ -177,25 +233,17 @@ function listarClusters(idHpc) {
 }
 
 function desenharTabelaClusters(lista) {
+    const visiveis = filtrarLista(lista, ["nome"]);
+    const buscando = htmlBusca.value.trim() !== "";
+
+    htmlBusca.placeholder = "Buscar clusters...";
+    definirCabecalho(
+        "Clusters de: " + hpcSelecionado.nome,
+        "Selecione um cluster para visualizar seus nodes",
+        true
+    );
+
     let html = `
-        <div style="display: flex; justify-content: space-between;
-                    align-items: center; margin-bottom: 20px;">
-
-            <div>
-                <h2 style="margin: 0; color: #0F172A;">
-                    Clusters de: ${hpcSelecionado.nome}
-                </h2>
-
-                <p class="page-subtitle" style="margin: 5px 0 0 0;">
-                    Selecione um cluster para visualizar seus nodes
-                </p>
-            </div>
-
-            <button class="btn" onclick="listarHPC()">
-                Voltar
-            </button>
-        </div>
-
         <div class="panel-card">
             <div class="tabela-wrap">
                 <table class="tabela">
@@ -209,16 +257,16 @@ function desenharTabelaClusters(lista) {
                     <tbody>
     `;
 
-    if (lista.length === 0) {
+    if (visiveis.length === 0) {
         html += `
             <tr>
                 <td colspan="3" class="vazio">
-                    Nenhum cluster encontrado.
+                    ${buscando ? "Nenhum cluster encontrado para a busca." : "Nenhum cluster encontrado."}
                 </td>
             </tr>
         `;
     } else {
-        for (let cluster of lista) {
+        for (let cluster of visiveis) {
             html += `
                 <tr class="clicavel"
                     onclick="listarNodes(${cluster.id})">
@@ -243,12 +291,14 @@ function desenharTabelaClusters(lista) {
         </div>
     `;
 
-    htmlSeletor.innerHTML = html;
+    htmlListaSeletor.innerHTML = html;
 }
 
 // NODES
 
 function listarNodes(idCluster) {
+    htmlBusca.value = "";
+    nivelSeletor = "node";
     clusterSelecionado = memoriaClusters.find(c => c.id === idCluster);
 
     if (!clusterSelecionado) {
@@ -274,26 +324,17 @@ function listarNodes(idCluster) {
 }
 
 function desenharTabelaNodes(lista) {
+    const visiveis = filtrarLista(lista, ["hostname", "ip", "sistemaOperacional"]);
+    const buscando = htmlBusca.value.trim() !== "";
+
+    htmlBusca.placeholder = "Buscar nodes...";
+    definirCabecalho(
+        "Nodes de: " + clusterSelecionado.nome,
+        "Selecione um node para acessar o monitoramento",
+        true
+    );
+
     let html = `
-        <div style="display: flex; justify-content: space-between;
-                    align-items: center; margin-bottom: 20px;">
-
-            <div>
-                <h2 style="margin: 0; color: #0F172A;">
-                    Nodes de: ${clusterSelecionado.nome}
-                </h2>
-
-                <p class="page-subtitle" style="margin: 5px 0 0 0;">
-                    Selecione um node para acessar o monitoramento
-                </p>
-            </div>
-
-            <button class="btn"
-                onclick="listarClusters(${hpcSelecionado.id})">
-                Voltar
-            </button>
-        </div>
-
         <div class="panel-card">
             <div class="tabela-wrap">
                 <table class="tabela">
@@ -309,16 +350,16 @@ function desenharTabelaNodes(lista) {
                     <tbody>
     `;
 
-    if (lista.length === 0) {
+    if (visiveis.length === 0) {
         html += `
             <tr>
                 <td colspan="5" class="vazio">
-                    Nenhum node encontrado.
+                    ${buscando ? "Nenhum node encontrado para a busca." : "Nenhum node encontrado."}
                 </td>
             </tr>
         `;
     } else {
-        for (let node of lista) {
+        for (let node of visiveis) {
             html += `
                 <tr class="clicavel"
                     onclick="abrirDash(${node.id})">
@@ -345,17 +386,33 @@ function desenharTabelaNodes(lista) {
         </div>
     `;
 
-    htmlSeletor.innerHTML = html;
+    htmlListaSeletor.innerHTML = html;
 }
 
 // DASHBOARD DO NODE
+function buscarQuantidadeAlertas(idNode) {
+    // Utilizar o idNode para pesquisar o node
+    
+    return 0;
+}
 
 function abrirDash(idNode) {
-    nodeSelecionado = memoriaNodes.find(n => n.id === idNode);
+    nodeSelecionado = memoriaNodes.find(node => node.id === idNode);
 
-    if (!nodeSelecionado) {
-        return;
-    }
+    document.getElementById("tituloNode").innerHTML =
+        nodeSelecionado.hostname;
+
+    const quantidadeAlertas = buscarQuantidadeAlertas(idNode);
+
+    document.getElementById("kpiAlertasValor").innerHTML = quantidadeAlertas;
+
+    const statusAlertas = document.getElementById("kpiAlertasStatus");
+    statusAlertas.className = quantidadeAlertas === 0
+        ? "operador-status normal"
+        : "operador-status atencao";
+    statusAlertas.innerHTML = quantidadeAlertas === 0
+        ? "<span>•</span> Normal"
+        : "<span>•</span> Atenção";
 
     mostrarDashboard();
 }
@@ -485,3 +542,5 @@ document.getElementById("sidebar-overlay").onclick = function () {
     mobileSidebar.classList.remove("active");
     document.getElementById("sidebar-overlay").classList.remove("active");
 };
+
+htmlBusca.addEventListener("input", redesenharSeletor);

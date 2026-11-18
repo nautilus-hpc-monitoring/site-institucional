@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -196,10 +195,39 @@
     <div id="main-container">
 
         <main class="page-content hpc-page" id="conteudo">
-            <div id="seletor"></div>
+            <div id="seletor">
+                <div class="area-filtro">
+                    <div class="area-filtro-titulo">
+                        <h1 id="titulo-seletor">Ambientes HPC</h1>
+                        <p class="page-subtitle" id="subtitulo-seletor">Selecione um ambiente para visualizar seus clusters</p>
+                    </div>
+
+                    <div class="area-filtro-acoes">
+                        <input type="search" id="ipt-busca-seletor"
+                            placeholder="Buscar ambientes HPC..."
+                            aria-label="Buscar ambientes HPC, clusters ou nodes"
+                            autocomplete="off">
+                        <button class="btn none" id="btn-voltar-seletor" onclick="voltarSeletor()">
+                            Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lista-seletor"></div>
+            </div>
 
             <!-- Dashboard do Operador -->
             <div class="none" id="dashboard">
+                <div class="dashboard-header">
+                    <div>
+                        <h2 id="tituloNode"></h2>
+                        <p class="page-subtitle">Monitoramento em tempo real do node</p>
+                    </div>
+
+                    <button class="btn-voltar" onclick="listarNodes(clusterSelecionado.id)">
+                        Voltar
+                    </button>
+                </div>
 
                 <!-- KPIs -->
                 <section class="operador-kpis">
@@ -264,20 +292,20 @@
                     <div class="operador-kpi">
                         <div class="operador-kpi-topo">
                             <div class="operador-kpi-icone">
-                                <i class="fa-solid fa-right-left"></i>
+                                <i class="fa-solid fa-bell"></i>
                             </div>
 
-                            <span class="operador-status normal">
+                            <span class="operador-status normal" id="kpiAlertasStatus">
                                 <span>•</span> Normal
                             </span>
                         </div>
 
                         <div class="operador-kpi-valor">
-                            <strong>30.7</strong>
-                            <span>%</span>
+                            <strong id="kpiAlertasValor">0</strong>
+                            <span>alertas</span>
                         </div>
 
-                        <p>Uso de SWAP</p>
+                        <p>Alertas do node</p>
                     </div>
 
                 </section>
