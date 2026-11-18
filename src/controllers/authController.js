@@ -77,7 +77,7 @@ async function autenticar(req, res, somenteCredenciais = false) {
         if (somenteCredenciais) {
             res.set('Cache-Control', 'no-store');
             try {
-                const credenciais = await require('../services/awsCredentialsService').obter();
+                const credenciais = await require('../services/awsService').obter();
                 return res.status(200).json({ credenciais, region: process.env.AWS_REGION || 'us-east-1' });
             } catch (_) {
                 return res.status(503).json({ mensagem: 'Credenciais temporariamente indisponiveis. Tente novamente.' });

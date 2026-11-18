@@ -24,6 +24,19 @@ function nodes(cluster, empresa) {
         [cluster, empresa]
     );
 }
+function limites(cluster, empresa) {
+    return banco.executar(
+        `SELECT n.hostname, co.tipo AS componente, cn.pico_min, cn.pico_max,
+                cn.limite_atencao, cn.limite_critico
+        FROM componente_node cn
+        JOIN componente co ON co.id_componente = cn.fk_componente
+        JOIN node n ON n.id_node = cn.fk_node
+        JOIN cluster c ON c.id_cluster = n.fk_cluster
+        JOIN ambiente_hpc h ON h.id_ambiente_hpc = c.fk_ambiente_hpc
+        WHERE c.id_cluster = ? AND h.fk_empresa = ?`,
+        [cluster, empresa]
+    );
+}
 function alertas(cluster, empresa, inicio, fim) {
     // DB_UTC_OFFSET informa o fuso dos DATETIME gravados no banco.
     const offset = process.env.DB_UTC_OFFSET || "-03:00";
@@ -42,4 +55,4 @@ function alertas(cluster, empresa, inicio, fim) {
         [offset, offset, cluster, empresa, inicio, offset, fim, offset]
     );
 }
-module.exports = { usuario, listar, nodes, alertas };
+module.exports = { usuario, listar, nodes, limites, alertas };

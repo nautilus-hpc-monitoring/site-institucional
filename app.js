@@ -38,7 +38,7 @@ app.use("/dashcluster", require("./src/routes/dashCluster"));
 app.use("/alertas", require("./src/routes/alertas"));
 
 if (process.env.AWS_CREDENTIAL_SYNC_ENABLED === 'true') {
-    require('./src/services/awsCredentialsService').iniciar();
+    require('./src/services/awsService').iniciar();
 }
 
 app.listen(PORTA_APP, function () {

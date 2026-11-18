@@ -1,15 +1,5 @@
-const { S3Client, ListObjectsV2Command, GetObjectCommand } = require("@aws-sdk/client-s3");
+const awsService = require("../services/awsService");
 const conexao = require("../database/config"); 
-
-// Configuração do cliente S3
-const s3Client = new S3Client({
-    region: process.env.AWS_REGION || "us-east-1",
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        sessionToken: process.env.AWS_SESSION_TOKEN
-    }
-});
 
 // Função auxiliar para converter o stream do S3 em texto (CSV)
 const streamToString = (stream) =>
@@ -42,11 +32,7 @@ function csvParaJson(csvText) {
 // Função auxiliar para buscar arquivos específicos da Gold no S3
 async function lerCsvGoldDoS3(bucketName, prefixoSubpasta) {
     try {
-        const comandoListar = new ListObjectsV2Command({
-            Bucket: bucketName,
-            Prefix: `03-gold/${prefixoSubpasta}/`
-        });
-        const respostaS3 = await s3Client.send(comandoListar);
+        const respostaS3 = await awsService.listarArquivos(bucketName, `03-gold/${prefixoSubpasta}/`);
         
         if (!respostaS3.Contents || respostaS3.Contents.length === 0) return [];
 
@@ -56,12 +42,7 @@ async function lerCsvGoldDoS3(bucketName, prefixoSubpasta) {
         arquivosCsv.sort((a, b) => b.LastModified - a.LastModified);
         const ultimaChave = arquivosCsv[0].Key;
 
-        const comandoGet = new GetObjectCommand({
-            Bucket: bucketName,
-            Key: ultimaChave
-        });
-
-        const arquivoS3 = await s3Client.send(comandoGet);
+        const arquivoS3 = await awsService.lerArquivo(bucketName, ultimaChave);
         const conteudoCsv = await streamToString(arquivoS3.Body);
         return csvParaJson(conteudoCsv);
     } catch (erro) {
