@@ -1,283 +1,317 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nautilus - Dashboard do Cluster</title>
-    <link rel="icon" href="./assets/icon/logo.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nautilus - Dashboard do Cluster</title>
+  <link rel="icon" href="./assets/icon/logo.png">
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
-        integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"
-    >
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/sidebar.css">
-    <link rel="stylesheet" href="./css/dashboard-cluster.css">
-    <link rel="stylesheet" href="./css/dashboard-categorica.css">
-    <style>
-        [hidden] { display: none !important; }
-    </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
+    integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="./css/global.css">
+  <link rel="stylesheet" href="./css/sidebar.css">
+  <link rel="stylesheet" href="./css/dashboard-cluster.css">
+  <link rel="stylesheet" href="./css/dashboard-categorica.css">
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+  </style>
 </head>
-<body>
-    <a class="skip-link" href="#main-container">Pular para o conteúdo</a>
 
-    <div class="mobile-header">
-        <button id="open-sidebar-btn" type="button" aria-label="Abrir menu">
-            <i class="fa-solid fa-bars" aria-hidden="true"></i>
-        </button>
-        <img src="./assets/img/logo.png" alt="Logo Nautilus" class="mobile-header-logo">
+<body>
+  <a class="skip-link" href="#main-container">Pular para o conteúdo</a>
+
+  <div class="mobile-header">
+    <button id="open-sidebar-btn" type="button" aria-label="Abrir menu">
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+    <img src="./assets/img/logo.png" alt="Logo Nautilus" class="mobile-header-logo">
+  </div>
+
+  <div id="sidebar-overlay"></div>
+
+  <aside class="mobile-sidebar" id="mobileSidebar" aria-label="Menu principal">
+    <div class="mobile-sidebar-header">
+      <div class="mobile-logo">
+        <img src="./assets/img/logo.png" alt="">
+        <span>NAUTILUS</span>
+      </div>
+      <button id="close-sidebar-btn" type="button" aria-label="Fechar menu">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
     </div>
 
-    <div id="sidebar-overlay"></div>
+    <ul class="mobile-sidebar-items">
+      <li class="nav-item">
+        <a href="./alertas.html">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          <span>Alertas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="./dashboard-operador.html">
+          <i class="fa-solid fa-desktop" aria-hidden="true"></i>
+          <span>Operador</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="./dashboard-analista.html">
+          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+          <span>Analista</span>
+        </a>
+      </li>
+      <li class="nav-item active admin-item">
+        <details>
+          <summary>
+            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+            <span>Administrador</span>
+            <span class="admin-seta" aria-hidden="true"></span>
+          </summary>
+          <ul class="admin-submenu">
+            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+            <li><a href="./dashboard-cluster.html" aria-current="page">Dash clusters</a></li>
+          </ul>
+        </details>
+      </li>
+      <li class="nav-item">
+        <a href="./cadastro-hpc.html">
+          <i class="fa-solid fa-server" aria-hidden="true"></i>
+          <span>Ambientes</span>
+        </a>
+      </li>
+    </ul>
 
-    <aside class="mobile-sidebar" id="mobileSidebar" aria-label="Menu principal">
-        <div class="mobile-sidebar-header">
-            <div class="mobile-logo">
-                <img src="./assets/img/logo.png" alt="">
-                <span>NAUTILUS</span>
-            </div>
-            <button id="close-sidebar-btn" type="button" aria-label="Fechar menu">
-                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-            </button>
-        </div>
+    <div class="mobile-sidebar-bottom">
+      <a href="#" class="nav-item">
+        <i class="fa-regular fa-user" aria-hidden="true"></i>
+        <span>Perfil</span>
+      </a>
+      <a href="./login.html" class="nav-item">
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+        <span>Sair</span>
+      </a>
+    </div>
+  </aside>
 
-        <ul class="mobile-sidebar-items">
-            <li class="nav-item">
-                <a href="./alertas.html">
-                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
-                    <span>Alertas</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="./dashboard-operador.html">
-                    <i class="fa-solid fa-desktop" aria-hidden="true"></i>
-                    <span>Operador</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="./dashboard-analista.html">
-                    <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                    <span>Analista</span>
-                </a>
-            </li>
-            <li class="nav-item active admin-item">
-                    <details>
-                        <summary>
-                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
-                            <span>Administrador</span>
-                            <span class="admin-seta" aria-hidden="true"></span>
-                        </summary>
-                        <ul class="admin-submenu">
-                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
-                            <li><a href="./dashboard-cluster.html" aria-current="page">Dash clusters</a></li>
-                        </ul>
-                    </details>
-                </li>
-            <li class="nav-item">
-                <a href="./cadastro-hpc.html">
-                    <i class="fa-solid fa-server" aria-hidden="true"></i>
-                    <span>Ambientes</span>
-                </a>
-            </li>
-        </ul>
-
-        <div class="mobile-sidebar-bottom">
-            <a href="#" class="nav-item">
-                <i class="fa-regular fa-user" aria-hidden="true"></i>
-                <span>Perfil</span>
-            </a>
-            <a href="./login.html" class="nav-item">
-                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-                <span>Sair</span>
-            </a>
-        </div>
-    </aside>
-
-    <nav id="sidebar" aria-label="Menu principal">
-        <div id="sidebar_content">
-            <div id="logo">
-                <img src="./assets/img/logo.png" id="logo_sidebar" alt="Nautilus">
-                <p id="logo_infos">
-                    <span class="item-description">NAUTILUS</span>
-                </p>
-            </div>
-
-            <ul id="side_items">
-                <li class="side-item">
-                    <a href="./alertas.html">
-                        <i class="fa-solid fa-bell" aria-hidden="true"></i>
-                        <span class="item-description">Alertas</span>
-                    </a>
-                </li>
-                <li class="side-item">
-                    <a href="./dashboard-operador.html">
-                        <i class="fa-solid fa-desktop" aria-hidden="true"></i>
-                        <span class="item-description">Operador</span>
-                    </a>
-                </li>
-                <li class="side-item active admin-item">
-                    <details>
-                        <summary>
-                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                            <span class="item-description">Analista</span>
-                            <span class="admin-seta" aria-hidden="true"></span>
-                        </summary>
-                        <ul class="admin-submenu">
-                            <li><a href="./dashboard-analista.html">Dash preditiva</a></li>
-                            <li><a href="./dashboard-categorica.html" aria-current="page">Dash categórica</a></li>
-                        </ul>
-                    </details>
-                </li>
-                <li class="side-item active admin-item">
-                    <details>
-                        <summary>
-                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
-                            <span class="item-description">Administrador</span>
-                            <span class="admin-seta" aria-hidden="true"></span>
-                        </summary>
-                        <ul class="admin-submenu">
-                            <li><a href="./dashboard-gestor.html">Dash geral</a></li>
-                            <li><a href="./dashboard-cluster.html" aria-current="page">Dash clusters</a></li>
-                        </ul>
-                    </details>
-                </li>
-                <li class="side-item">
-                    <a href="./cadastro-hpc.html">
-                        <i class="fa-solid fa-server" aria-hidden="true"></i>
-                        <span class="item-description">Ambientes</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <ul id="side_bottom">
-            <li class="side-item">
-                <a href="#">
-                    <i class="fa-regular fa-user" aria-hidden="true"></i>
-                    <span class="item-description">Perfil</span>
-                </a>
-            </li>
-            <li class="side-item">
-                <a href="./login.html">
-                    <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-                    <span class="item-description">Sair</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <main id="main-container">
-      <header class="page-header">
-        <div>
-          <h1>Categorias de episódio</h1>
-          <p id="cluster-description">Acompanhe posssíveis incidentes categorizados para apoiar sua análise de dados</p>
-        </div>
-        <div class="controls">
-          <div class="filter">
-            <label for="hpc-select">HPC</label>
-            <div class="select-wrapper">
-              <select id="hpc-select">
-                
-                
-              </select>
-            </div>
-          </div>
-          <div class="filter">
-            <label for="cluster-select">Cluster</label>
-            <div class="select-wrapper">
-              <select id="cluster-select">
-                
-                
-              </select>
-            </div>
-          </div>
-        </div>
-      </header>
-      <div class="context-bar" aria-live="polite">
-        <span id="connection-status">Carregando dados…</span><span id="cluster-summary">— nodes</span
-        ><span id="data-time">Aguardando consulta</span>
+  <nav id="sidebar" aria-label="Menu principal">
+    <div id="sidebar_content">
+      <div id="logo">
+        <img src="./assets/img/logo.png" id="logo_sidebar" alt="Nautilus">
+        <p id="logo_infos">
+          <span class="item-description">NAUTILUS</span>
+        </p>
       </div>
-      <section id="empty-state" hidden>
-        <h2>Sem dados para este cluster</h2>
-        <p>Selecione um cluster ou tente novamente.</p>
-        <button id="restore-cluster" class="btn-primary" type="button">
-          Tentar novamente
-        </button>
-      </section>
 
-      <section hidden class="cat-kpis" id="cat-kpis" aria-label="Indicadores principais">
-        <article class="cat-kpi" id="kpi-top-node">
-          <div class="cat-kpi-icon cat-kpi-icon--red" aria-hidden="true">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
-          <div class="cat-kpi-body">
-            <span class="cat-kpi-eyebrow">Node mais problemático</span>
-            <strong class="cat-kpi-value" id="top-node-name">—</strong>
-            <span class="cat-kpi-sub"><b id="top-node-count">—</b> episódios registrados</span>
-          </div>
-          <span class="cat-badge" id="top-node-cluster">—</span>
-        </article>
-        <article class="cat-kpi" id="kpi-top-category">
-          <div class="cat-kpi-icon cat-kpi-icon--teal" aria-hidden="true">
-            <i class="fa-solid fa-shapes"></i>
-          </div>
-          <div class="cat-kpi-body">
-            <span class="cat-kpi-eyebrow">Categoria mais comum</span>
-            <strong class="cat-kpi-value" id="top-category-name">—</strong>
-            <span class="cat-kpi-sub"><b id="top-category-count">—</b> ocorrências em todos os nodes</span>
-          </div>
-          <span class="cat-badge" id="top-category-share">—</span>
-        </article>
-      </section>
+      <ul id="side_items">
+        <li class="side-item">
+          <a href="./alertas.html">
+            <i class="fa-solid fa-bell" aria-hidden="true"></i>
+            <span class="item-description">Alertas</span>
+          </a>
+        </li>
+        <li class="side-item">
+          <a href="./dashboard-operador.html">
+            <i class="fa-solid fa-desktop" aria-hidden="true"></i>
+            <span class="item-description">Operador</span>
+          </a>
+        </li>
+        <li class="side-item active admin-item">
+          <details>
+            <summary>
+              <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+              <span class="item-description">Analista</span>
+              <span class="admin-seta" aria-hidden="true"></span>
+            </summary>
+            <ul class="admin-submenu">
+              <li><a href="./dashboard-analista.html">Dash preditiva</a></li>
+              <li><a href="./dashboard-categorica.html" aria-current="page">Dash categórica</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="side-item active admin-item">
+          <details>
+            <summary>
+              <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+              <span class="item-description">Administrador</span>
+              <span class="admin-seta" aria-hidden="true"></span>
+            </summary>
+            <ul class="admin-submenu">
+              <li><a href="./dashboard-gestor.html">Dash geral</a></li>
+              <li><a href="./dashboard-cluster.html" aria-current="page">Dash clusters</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="side-item">
+          <a href="./cadastro-hpc.html">
+            <i class="fa-solid fa-server" aria-hidden="true"></i>
+            <span class="item-description">Ambientes</span>
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <!-- Gráfico de categorias -->
-      <section hidden class="cat-card" id="cat-chart-card" aria-label="Gráfico de categorias">
-        <div class="cat-card-head">
-          <div>
-            <h2>Categorias</h2>
-            <div class="desc">Episódios acumulados por categoria</div>
+    <ul id="side_bottom">
+      <li class="side-item">
+        <a href="#">
+          <i class="fa-regular fa-user" aria-hidden="true"></i>
+          <span class="item-description">Perfil</span>
+        </a>
+      </li>
+      <li class="side-item">
+        <a href="./login.html">
+          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+          <span class="item-description">Sair</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <main id="main-container">
+    <header class="page-header">
+      <div>
+        <h1>Categorias de episódio</h1>
+        <p id="cluster-description">Acompanhe posssíveis incidentes categorizados para apoiar sua análise de dados</p>
+      </div>
+      <div class="controls">
+        <div class="filter">
+          <label for="hpc-select">HPC</label>
+          <div class="select-wrapper">
+            <select id="hpc-select">
+
+
+            </select>
           </div>
-          <span class="cat-badge cat-badge--teal" id="cat-total">—</span>
         </div>
-        <div class="cat-card-body">
-          <div class="cat-radar">
-            <canvas id="category-radar" role="img" aria-label="Gráfico radar com episódios por categoria"></canvas>
+        <div class="filter">
+          <label for="cluster-select">Cluster</label>
+          <div class="select-wrapper">
+            <select id="cluster-select">
+
+
+            </select>
           </div>
-          <ul class="cat-legend" id="category-legend" aria-label="Episódios por categoria"></ul>
         </div>
-      </section>
+      </div>
+    </header>
+    <div class="context-bar" aria-live="polite">
+      <span id="connection-status">Carregando dados…</span><span id="cluster-summary">— nodes</span><span
+        id="data-time">Aguardando consulta</span>
+    </div>
+    <section id="empty-state" hidden>
+      <h2>Sem dados para este cluster</h2>
+      <p>Selecione um cluster ou tente novamente.</p>
+      <button id="restore-cluster" class="btn-primary" type="button">
+        Tentar novamente
+      </button>
+    </section>
 
-      <section hidden class="cat-nodes" id="cat-nodes" aria-labelledby="cat-nodes-title">
-        <div class="cat-nodes-head">
-          <div>
-            <h2 id="cat-nodes-title">Episódios por node</h2>
-            <div class="desc">Ocorrências registradas hoje por categoria</div>
-          </div>
-          <span class="cat-updated"><i aria-hidden="true"></i>Dados atualizados diariamente às 05h</span>
+    <section hidden class="cat-kpis" id="cat-kpis" aria-label="Indicadores principais">
+      <article class="cat-kpi" id="kpi-top-node">
+        <div class="cat-kpi-icon cat-kpi-icon--red" aria-hidden="true">
+          <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-        <div class="cat-nodes-grid" id="node-cards"></div>
-      </section>
-    </main>
-    <script>
-        const mobileSidebar = document.getElementById("mobileSidebar");
-        const sidebarOverlay = document.getElementById("sidebar-overlay");
+        <div class="cat-kpi-body">
+          <span class="cat-kpi-eyebrow">Node mais problemático</span>
+          <strong class="cat-kpi-value" id="top-node-name">—</strong>
+          <span class="cat-kpi-sub"><b id="top-node-count">—</b> episódios registrados</span>
+        </div>
+        <span class="cat-badge" id="top-node-cluster">—</span>
+      </article>
+      <article class="cat-kpi" id="kpi-top-category">
+        <div class="cat-kpi-icon cat-kpi-icon--teal" aria-hidden="true">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <div class="cat-kpi-body">
+          <span class="cat-kpi-eyebrow">Categoria mais comum</span>
+          <strong class="cat-kpi-value" id="top-category-name">—</strong>
+          <span class="cat-kpi-sub"><b id="top-category-count">—</b> ocorrências em todos os nodes</span>
+        </div>
+        <span class="cat-badge" id="top-category-share">—</span>
+      </article>
+      <article class="cat-kpi" id="kpi-top-severity">
+        <div class="cat-kpi-icon cat-kpi-icon--amber" aria-hidden="true">
+          <i class="fa-solid fa-gauge-high"></i>
+        </div>
+        <div class="cat-kpi-body">
+          <span class="cat-kpi-eyebrow">Categoria mais severa</span>
+          <strong class="cat-kpi-value" id="top-severity-name">—</strong>
+          <span class="cat-kpi-sub"><b id="top-severity-points">—</b> <span id="top-severity-label">pontos de
+              severidade</span></span>
+        </div>
+        <span class="cat-badge" id="top-severity-share">—</span>
+      </article>
+    </section>
 
-        function closeMobileSidebar() {
-            mobileSidebar.classList.remove("active");
-            sidebarOverlay.classList.remove("active");
-        }
+    <section hidden class="cat-card" id="cat-table-card" aria-labelledby="cat-table-title">
+      <div class="cat-card-head">
+        <div>
+          <h2 id="cat-table-title">Episódios por node</h2>
+          <div class="desc">Ocorrências registradas hoje por categoria</div>
+        </div>
+        <span class="cat-badge cat-badge--teal" id="cat-total">—</span>
+      </div>
+      <div class="cat-table-wrap">
+        <table class="cat-table">
+          <caption class="sr-only">Episódios registrados por node e categoria</caption>
+          <thead id="cat-table-head"></thead>
+          <tbody id="node-rows"></tbody>
+          <tfoot id="cat-table-foot"></tfoot>
+        </table>
+      </div>
+    </section>
 
-        document.getElementById("open-sidebar-btn").addEventListener("click", () => {
-            mobileSidebar.classList.add("active");
-            sidebarOverlay.classList.add("active");
-        });
-        document.getElementById("close-sidebar-btn").addEventListener("click", closeMobileSidebar);
-        sidebarOverlay.addEventListener("click", closeMobileSidebar);
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script>
-    <script src="./js/dashboard-categorica.js" defer></script>
+    <section hidden class="cat-card" id="cat-table-card" aria-labelledby="cat-table-title">
+      <div class="cat-card-head">
+        <div>
+          <h2 id="cat-table-title">Episódios por node</h2>
+          <div class="desc">Ocorrências registradas hoje por categoria</div>
+        </div>
+        <span class="cat-badge cat-badge--teal" id="cat-total">—</span>
+      </div>
+      <div class="cat-table-wrap">
+        <table class="cat-table">
+          <caption class="sr-only">Episódios registrados por node e categoria</caption>
+          <thead id="cat-table-head"></thead>
+          <tbody id="node-rows"></tbody>
+          <tfoot id="cat-table-foot"></tfoot>
+        </table>
+      </div>
+      <div class="cat-card-foot">
+        <span class="cat-updated"><i aria-hidden="true"></i>Dados atualizados diariamente às 05h</span>
+      </div>
+    </section>
+
+    <!-- <section hidden class="cat-card cat-metrics" id="cat-metrics-card" aria-labelledby="cat-metrics-title">
+      <div class="cat-card-head">
+        <div>
+          <h2 id="cat-metrics-title">Métricas por categoria</h2>
+          <div class="desc">Indicadores de telemetria que compõem cada categoria de episódio</div>
+        </div>
+      </div>
+      <ul class="cat-metrics-list" id="cat-metrics-list"></ul>
+    </section> -->
+
+  </main>
+  <script>
+    const mobileSidebar = document.getElementById("mobileSidebar");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+    function closeMobileSidebar() {
+      mobileSidebar.classList.remove("active");
+      sidebarOverlay.classList.remove("active");
+    }
+
+    document.getElementById("open-sidebar-btn").addEventListener("click", () => {
+      mobileSidebar.classList.add("active");
+      sidebarOverlay.classList.add("active");
+    });
+    document.getElementById("close-sidebar-btn").addEventListener("click", closeMobileSidebar);
+    sidebarOverlay.addEventListener("click", closeMobileSidebar);
+  </script>
+  <script src="./js/dashboard-categorica.js" defer></script>
 </body>
+
 </html>

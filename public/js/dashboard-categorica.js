@@ -1,314 +1,340 @@
-(() => {
-  "use strict";
+// Ordem = ordem das colunas da tabela.
+const CATEGORIAS = [
+    { id: 1, rotulo: "Pressão de processamento",  cor: "#00747f" },
+    { id: 2, rotulo: "Degradação de memória", cor: "#25a0a8" },
+    { id: 3, rotulo: "Degradação de disco",             cor: "#e0a84a" },
+    { id: 4, rotulo: "Pressão combinada", cor: "#b8606a" }
+];
+const NODES_VAZIOS = 6; // linhas exibidas na tabela enquanto não há dados
 
-  /* ------------------------------------------------------------------
-   * Categorias (ordem = sentido horário do radar, começando pelo topo)
-   * ------------------------------------------------------------------ */
-  const CATEGORIES = [
-    { id: "job",   label: "Falha de job",         axis: "Falha de job", color: "#00747f" },
-    { id: "cpu",   label: "Alto uso de CPU",      axis: "CPU",          color: "#25a0a8" },
-    { id: "mem",   label: "Memória insuficiente", axis: "Memória",      color: "#5bbfba" },
-    { id: "io",    label: "Erro de I/O",          axis: "I/O",          color: "#7c93a5" },
-    { id: "indis", label: "Indisponibilidade",    axis: "Indisponib.",  color: "#e0a84a" },
-    { id: "rede",  label: "Falha de rede",        axis: "Rede",         color: "#b8606a" },
-  ];
-  const CAT_BY_ID = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
+// Rotas da API (ajuste quando o endpoint do S3 estiver pronto).
+const ROTAS = {
+    catalogo: "/dashcategorica/clusters",
+    dados: (id) => "/dashcategorica/clusters/" + encodeURIComponent(id) + "/dados"
+};
 
-  /* ------------------------------------------------------------------
-   * DADOS DE EXEMPLO — substitua por sua API em loadData().
-   * `totals`: episódios acumulados por categoria no cluster.
-   * `nodes[].top`: principais categorias do node hoje (até 3).
-   * ------------------------------------------------------------------ */
-  const MOCK = {
-    hpcs: [
-      {
-        id: "hpc-1",
-        name: "HPC Principal",
-        clusters: [
-          {
-            id: "alpha", name: "Cluster Alpha",
-            totals: { job: 24, cpu: 20, mem: 14, io: 11, indis: 8, rede: 5 },
-            nodes: [
-              { name: "node-compute-07", total: 18, top: [["job", 7], ["cpu", 6], ["mem", 5]] },
-              { name: "node-compute-03", total: 14, top: [["cpu", 6], ["io", 5], ["job", 3]] },
-            ],
-          },
-          {
-            id: "beta", name: "Cluster Beta",
-            totals: { job: 14, cpu: 9, mem: 10, io: 12, indis: 7, rede: 4 },
-            nodes: [
-              { name: "node-storage-02", total: 11, top: [["io", 5], ["mem", 4], ["indis", 2]] },
-              { name: "node-storage-05", total: 4,  top: [["io", 2], ["mem", 1], ["job", 1]] },
-            ],
-          },
-          {
-            id: "gamma", name: "Cluster Gamma",
-            totals: { job: 10, cpu: 8, mem: 7, io: 3, indis: 4, rede: 6 },
-            nodes: [
-              { name: "node-gpu-04",  total: 9, top: [["job", 4], ["mem", 3], ["rede", 2]] },
-              { name: "node-edge-01", total: 6, top: [["rede", 3], ["indis", 2], ["io", 1]] },
-            ],
-          },
-        ],
-      },
-    ],
-    updatedAt: "hoje às 05h",
-  };
+const MODO_ESTRUTURA = true;
 
-  async function loadData() {
-    // Troque por: const res = await fetch("/api/..."); return res.json();
-    return MOCK;
-  }
+const elemento = (id) => document.getElementById(id);
+const numero = (v) => typeof v === "number" && Number.isFinite(v);
+const formatar = (v) =>
+    numero(v) ? v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—";
+const ouTraco = (v) => (v === null || v === undefined ? "—" : v);
 
-  /* ------------------------------------------------------------------ */
-  const $ = (id) => document.getElementById(id);
-  const nf = new Intl.NumberFormat("pt-BR");
-  const pf = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+// Distingue a atualização dos dados da hora em que a página os consultou.
+function formatarDataHora(valor) {
+    const data = new Date(valor);
+    if (!valor || !Number.isFinite(data.getTime())) return "indisponível";
+    return data.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+}
 
-  const el = {
-    hpc: $("hpc-select"),
-    cluster: $("cluster-select"),
-    status: $("connection-status"),
-    summary: $("cluster-summary"),
-    time: $("data-time"),
-    empty: $("empty-state"),
-    retry: $("restore-cluster"),
-    kpis: $("cat-kpis"),
-    chartCard: $("cat-chart-card"),
-    nodes: $("cat-nodes"),
-    topNodeName: $("top-node-name"),
-    topNodeCount: $("top-node-count"),
-    topNodeCluster: $("top-node-cluster"),
-    topCatName: $("top-category-name"),
-    topCatCount: $("top-category-count"),
-    topCatShare: $("top-category-share"),
-    catTotal: $("cat-total"),
-    legend: $("category-legend"),
-    nodeCards: $("node-cards"),
-    canvas: $("category-radar"),
-  };
+let catalogo = [],
+    painel = null,
+    requisicao = null,
+    versao = 0;
 
-  let data = null;
-  let chart = null;
+// Escreve um valor em um elemento da página.
+function texto(id, valor) {
+    elemento(id).textContent = valor;
+}
 
-  function setVisible(hasData) {
-    [el.kpis, el.chartCard, el.nodes].forEach((s) => { s.hidden = !hasData; });
-    el.empty.hidden = hasData;
-  }
+// Cria um elemento com classe e texto opcionais.
+function criar(tag, classe, conteudo) {
+    const e = document.createElement(tag);
+    if (classe) e.className = classe;
+    if (conteudo !== undefined) e.textContent = conteudo;
+    return e;
+}
 
-  function fillSelect(select, options, withAll) {
-    select.replaceChildren();
-    if (withAll) select.append(new Option("Todos os clusters", "all"));
-    options.forEach((o) => select.append(new Option(o.name, o.id)));
-  }
+// ESTRUTURA VAZIA — números = 0, textos = null.
+function categoriasVazias() {
+    return Object.fromEntries(CATEGORIAS.map((c) => [c.id, 0]));
+}
+function nodeVazio() {
+    return {
+        hostname: null,
+        cluster_nome: null,
+        total: 0,
+        categorias: categoriasVazias()
+    };
+}
+function dadosVazios() {
+    return {
+        gerado_em: null,
+        coleta_ate: null,
+        avisos: [],
+        nodes: Array.from({ length: NODES_VAZIOS }, nodeVazio)
+    };
+}
 
-  function currentHpc() {
-    return data.hpcs.find((h) => h.id === el.hpc.value) || data.hpcs[0];
-  }
+// Garante o formato esperado: números inválidos viram 0 e textos ausentes viram null.
+function normalizar(bruto) {
+    const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+    const str = (v) => (v === undefined || v === null ? null : String(v));
+    if (!bruto) return dadosVazios();
+    return {
+        gerado_em: str(bruto.gerado_em),
+        coleta_ate: str(bruto.coleta_ate),
+        avisos: Array.isArray(bruto.avisos) ? bruto.avisos : [],
+        nodes: (bruto.nodes || []).map((n) => {
+            const categorias = categoriasVazias();
+            CATEGORIAS.forEach((c) => {
+                categorias[c.id] = num(n.categorias?.[c.id]);
+            });
+            const soma = CATEGORIAS.reduce((s, c) => s + categorias[c.id], 0);
+            return {
+                hostname: str(n.hostname),
+                cluster_nome: str(n.cluster_nome),
+                total: num(n.total) || soma,
+                categorias
+            };
+        })
+    };
+}
 
-  function visibleClusters() {
-    const hpc = currentHpc();
-    if (!hpc) return [];
-    return el.cluster.value === "all"
-      ? hpc.clusters
-      : hpc.clusters.filter((c) => c.id === el.cluster.value);
-  }
+// Soma de cada categoria em todos os nodes.
+function somarCategorias(nodes) {
+    const soma = categoriasVazias();
+    nodes.forEach((n) => CATEGORIAS.forEach((c) => (soma[c.id] += n.categorias[c.id])));
+    return soma;
+}
 
-  function aggregate(clusters) {
-    const totals = Object.fromEntries(CATEGORIES.map((c) => [c.id, 0]));
-    const nodes = [];
-    clusters.forEach((cl) => {
-      CATEGORIES.forEach((c) => { totals[c.id] += (cl.totals && cl.totals[c.id]) || 0; });
-      (cl.nodes || []).forEach((n) => nodes.push({ ...n, cluster: cl.name }));
-    });
-    nodes.sort((a, b) => b.total - a.total);
-    return { totals, nodes };
-  }
-
-  function renderKpis(totals, nodes, grandTotal) {
-    const top = nodes[0];
-    el.topNodeName.textContent = top ? top.name : "—";
-    el.topNodeCount.textContent = top ? nf.format(top.total) : "—";
-    el.topNodeCluster.textContent = top ? top.cluster : "—";
-
-    const topCat = CATEGORIES.reduce((a, b) => (totals[b.id] > totals[a.id] ? b : a));
-    el.topCatName.textContent = topCat.label;
-    el.topCatCount.textContent = nf.format(totals[topCat.id]);
-    el.topCatShare.textContent = grandTotal
-      ? `${pf.format((totals[topCat.id] / grandTotal) * 100)}% do total`
-      : "—";
-  }
-
-  function renderLegend(totals) {
-    el.legend.replaceChildren();
-    CATEGORIES.forEach((c) => {
-      const li = document.createElement("li");
-      const label = document.createElement("span");
-      label.className = "cat-legend-label";
-      const dot = document.createElement("i");
-      dot.className = "cat-dot";
-      dot.style.background = c.color;
-      dot.setAttribute("aria-hidden", "true");
-      label.append(dot, document.createTextNode(c.label));
-      const value = document.createElement("strong");
-      value.className = "cat-legend-value";
-      value.textContent = nf.format(totals[c.id]);
-      li.append(label, value);
-      el.legend.append(li);
-    });
-  }
-
-  function renderRadar(totals, grandTotal) {
-    const values = CATEGORIES.map((c) => totals[c.id]);
-    const max = Math.max(...values, 1);
-    el.canvas.setAttribute(
-      "aria-label",
-      "Gráfico radar com episódios por categoria: " +
-        CATEGORIES.map((c) => `${c.label} ${totals[c.id]}`).join(", ")
+// Esvazia a tabela antes de trocar o cluster.
+function limparTela() {
+    ["cat-table-head", "node-rows", "cat-table-foot"].forEach((id) =>
+        elemento(id).replaceChildren()
     );
+}
 
-    if (!window.Chart) return;
+// Atualiza a mensagem de carregamento e a visibilidade da dashboard.
+function estado(mensagem, ocultar = false) {
+    texto("connection-status", mensagem);
+    elemento("empty-state").hidden = !ocultar;
+    elemento("cat-kpis").hidden = ocultar;
+    elemento("cat-table-card").hidden = ocultar;
+}
 
-    if (chart) {
-      chart.data.datasets[0].data = values;
-      chart.options.scales.r.suggestedMax = max;
-      chart.update();
-      return;
+// Consulta a API usando o ID salvo no login.
+async function api(url, signal) {
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
+        location.href = "./login.html";
+        throw new Error("Entre novamente.");
     }
-
-    chart = new Chart(el.canvas, {
-      type: "radar",
-      data: {
-        labels: CATEGORIES.map((c) => c.axis),
-        datasets: [{
-          label: "Episódios",
-          data: values,
-          backgroundColor: "rgba(14, 120, 144, 0.18)",
-          borderColor: "#0e7890",
-          borderWidth: 2,
-          pointBackgroundColor: "#ffffff",
-          pointBorderColor: "#0e7890",
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 5,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          r: {
-            beginAtZero: true,
-            suggestedMax: max,
-            ticks: { display: false, stepSize: Math.ceil(max / 3) },
-            grid: { color: "#e3e8ee" },
-            angleLines: { color: "#e3e8ee" },
-            pointLabels: { color: "#8290a5", font: { size: 11 } },
-          },
-        },
-      },
-    });
-  }
-
-  function renderNodeCards(nodes) {
-    el.nodeCards.replaceChildren();
-    nodes.forEach((n, i) => {
-      const card = document.createElement("article");
-      card.className = "cat-node";
-
-      const head = document.createElement("div");
-      head.className = "cat-node-head";
-
-      const icon = document.createElement("span");
-      icon.className = "cat-node-icon";
-      icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML = '<i class="fa-solid fa-server"></i>';
-
-      const title = document.createElement("div");
-      title.className = "cat-node-title";
-      const name = document.createElement("span");
-      name.className = "cat-node-name";
-      name.textContent = n.name;
-      const cluster = document.createElement("span");
-      cluster.className = "cat-node-cluster";
-      cluster.textContent = n.cluster;
-      title.append(name, cluster);
-
-      const total = document.createElement("span");
-      total.className = "cat-node-total" + (i === 0 ? " cat-node-total--alert" : "");
-      total.textContent = nf.format(n.total);
-      total.setAttribute("aria-label", `${n.total} episódios`);
-
-      head.append(icon, title, total);
-
-      const chips = document.createElement("div");
-      chips.className = "cat-chips";
-      (n.top || []).forEach(([id, count]) => {
-        const cat = CAT_BY_ID[id];
-        if (!cat) return;
-        const chip = document.createElement("span");
-        chip.className = "cat-chip";
-        const count_ = document.createElement("b");
-        count_.textContent = nf.format(count);
-        chip.append(document.createTextNode(cat.label), count_);
-        chips.append(chip);
-      });
-
-      card.append(head, chips);
-      el.nodeCards.append(card);
-    });
-  }
-
-  function render() {
-    const clusters = visibleClusters();
-    const { totals, nodes } = aggregate(clusters);
-    const grandTotal = CATEGORIES.reduce((sum, c) => sum + totals[c.id], 0);
-
-    if (!clusters.length || !grandTotal) {
-      setVisible(false);
-      el.status.textContent = "Sem dados";
-      el.summary.textContent = "— nodes";
-      return;
+    const separador = url.includes("?") ? "&" : "?";
+    const r = await fetch(
+        url + separador + "idUsuario=" + encodeURIComponent(idUsuario),
+        { signal, cache: "no-store" }
+    );
+    if (r.status === 401) {
+        location.href = "./login.html";
+        throw Error("Entre novamente.");
     }
+    const data = await r.json();
+    if (!r.ok) throw Error(data.erro || "Falha ao consultar dados.");
+    return data;
+}
 
-    setVisible(true);
-    el.status.textContent = "Dados carregados";
-    el.summary.textContent = `${nodes.length} nodes`;
-    el.time.textContent = `Atualizado ${data.updatedAt || ""}`.trim();
-    el.catTotal.textContent = `${nf.format(grandTotal)} episódios`;
+// PONTOS DE INTEGRAÇÃO — trocam a estrutura vazia pela API/S3.
+async function buscarCatalogo() {
+    if (MODO_ESTRUTURA)
+        return [{ hpc_id: null, hpc_nome: null, cluster_id: null, cluster_nome: null }];
+    return api(ROTAS.catalogo);
+}
+async function buscarDados(idCluster, signal) {
+    if (MODO_ESTRUTURA) return dadosVazios();
+    return api(ROTAS.dados(idCluster), signal);
+}
 
-    renderKpis(totals, nodes, grandTotal);
-    renderLegend(totals);
-    renderRadar(totals, grandTotal);
-    renderNodeCards(nodes);
-  }
+// Preenche os seletores de HPC e cluster.
+function opcoes(select, lista) {
+    select.replaceChildren(
+        ...lista.map((v) => new Option(ouTraco(v.nome), String(v.id ?? "")))
+    );
+    select.disabled = !lista.length;
+}
 
-  function onHpcChange() {
-    fillSelect(el.cluster, currentHpc().clusters, true);
-    render();
-  }
+// Mostra os clusters do HPC selecionado.
+function atualizarClusters() {
+    opcoes(
+        elemento("cluster-select"),
+        catalogo
+            .filter((c) => String(c.hpc_id ?? "") === elemento("hpc-select").value)
+            .map((c) => ({ id: c.cluster_id, nome: c.cluster_nome }))
+    );
+    carregarCluster();
+}
 
-  async function init() {
-    el.status.textContent = "Carregando dados…";
+// KPIs: node mais problemático e categoria mais comum.
+// KPIs: node mais problemático, categoria mais comum e categoria mais severa.
+function cards(data) {
+    const soma = somarCategorias(data.nodes);
+    const total = CATEGORIAS.reduce((s, c) => s + soma[c.id], 0);
+    const n = [...data.nodes].sort((a, b) => b.total - a.total)[0];
+    const cat =
+        total > 0
+            ? CATEGORIAS.reduce((a, b) => (soma[b.id] > soma[a.id] ? b : a))
+            : null;
+
+    texto("top-node-name", ouTraco(n?.hostname));
+    texto("top-node-count", formatar(n ? n.total : 0));
+    texto("top-node-cluster", ouTraco(n?.cluster_nome));
+
+    texto("top-category-name", cat ? cat.rotulo : "—");
+    texto("top-category-count", formatar(cat ? soma[cat.id] : 0));
+    texto("cat-total", formatar(total) + " episódios");
+
+    // Severidade = episódios da categoria × peso da categoria.
+    const severidade = CATEGORIAS.map((c) => ({ ...c, pontos: soma[c.id] * c.peso }));
+    const pontosTotal = severidade.reduce((s, c) => s + c.pontos, 0);
+    const grave =
+        pontosTotal > 0
+            ? severidade.reduce((a, b) => (b.pontos > a.pontos ? b : a))
+            : null;
+    const pontos = grave ? grave.pontos : 0;
+
+    texto("top-severity-name", grave ? grave.rotulo : "—");
+    texto("top-severity-points", formatar(pontos));
+    texto("top-severity-label", pontos === 1 ? "ponto de severidade" : "pontos de severidade");
+}
+
+// TABELA — Cabeçalho com uma coluna por categoria.
+function renderizarCabecalho() {
+    const tr = document.createElement("tr");
+    tr.appendChild(criar("th", "", "Node")).scope = "col";
+    CATEGORIAS.forEach((c) => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        const rotulo = criar("span", "cat-th-label");
+        const ponto = criar("i", "cat-dot");
+        ponto.style.background = c.cor;
+        ponto.setAttribute("aria-hidden", "true");
+        rotulo.append(ponto, document.createTextNode(c.rotulo));
+        th.appendChild(rotulo);
+        tr.appendChild(th);
+    });
+    tr.appendChild(criar("th", "", "Total")).scope = "col";
+    elemento("cat-table-head").replaceChildren(tr);
+}
+
+// TABELA — Uma linha por node, do mais para o menos problemático.
+function renderizarLinhas(lista) {
+    const nodes = [...lista].sort((a, b) => b.total - a.total);
+    elemento("node-rows").replaceChildren(
+        ...nodes.map((n, i) => {
+            const tr = document.createElement("tr");
+
+            const th = document.createElement("th");
+            th.scope = "row";
+            const celula = criar("div", "cat-node-cell");
+            const icone = criar("span", "cat-node-icon");
+            icone.setAttribute("aria-hidden", "true");
+            icone.innerHTML = '<i class="fa-solid fa-server"></i>';
+            const titulo = criar("div", "cat-node-title");
+            titulo.append(
+                criar("span", "cat-node-name", ouTraco(n.hostname)),
+                criar("span", "cat-node-cluster", ouTraco(n.cluster_nome))
+            );
+            celula.append(icone, titulo);
+            th.appendChild(celula);
+            tr.appendChild(th);
+
+            CATEGORIAS.forEach((c) => {
+                const valor = n.categorias[c.id];
+                tr.appendChild(criar("td", valor === 0 ? "is-zero" : "", formatar(valor)));
+            });
+
+            const td = document.createElement("td");
+            td.appendChild(
+                criar(
+                    "span",
+                    "cat-node-total" + (i === 0 && n.total > 0 ? " cat-node-total--alert" : ""),
+                    formatar(n.total)
+                )
+            );
+            tr.appendChild(td);
+            return tr;
+        })
+    );
+}
+
+// TABELA — Linha de total por categoria.
+function renderizarTotais(nodes) {
+    const soma = somarCategorias(nodes);
+    const tr = document.createElement("tr");
+    tr.appendChild(criar("td", "", "Total"));
+    CATEGORIAS.forEach((c) => tr.appendChild(criar("td", "", formatar(soma[c.id]))));
+    tr.appendChild(
+        criar("td", "", formatar(CATEGORIAS.reduce((s, c) => s + soma[c.id], 0)))
+    );
+    elemento("cat-table-foot").replaceChildren(tr);
+}
+
+// CARREGAMENTO — Busca os dados, preenche KPIs e monta a tabela.
+async function carregarCluster() {
+    requisicao?.abort();
+    requisicao = new AbortController();
+    const atual = ++versao;
+    limparTela();
+    const select = elemento("cluster-select");
+    if (!select.options.length) {
+        estado("Nenhum cluster disponível.", true);
+        return;
+    }
+    estado("Carregando dados…", true);
     try {
-      data = await loadData();
-    } catch (err) {
-      data = null;
+        const data = normalizar(await buscarDados(select.value, requisicao.signal));
+        if (atual !== versao) return;
+        painel = data;
+        cards(data);
+        renderizarCabecalho();
+        renderizarLinhas(data.nodes);
+        renderizarTotais(data.nodes);
+        estado(data.avisos.length ? data.avisos.join(" ") : "Dados do banco e S3");
+        const nomeados = data.nodes.filter((n) => n.hostname !== null).length;
+        texto(
+            "cluster-summary",
+            nomeados ? nomeados + (nomeados === 1 ? " node" : " nodes") : "— nodes"
+        );
+        texto(
+            "data-time",
+            "Coleta: " +
+                formatarDataHora(data.coleta_ate) +
+                " · Consulta: " +
+                formatarDataHora(data.gerado_em)
+        );
+    } catch (e) {
+        if (e.name !== "AbortError" && atual === versao) {
+            limparTela();
+            estado(e.message, true);
+        }
     }
-    if (!data || !data.hpcs || !data.hpcs.length) {
-      setVisible(false);
-      el.status.textContent = "Falha ao carregar dados";
-      return;
+}
+
+// EVENTOS — Seletores e botão de nova tentativa.
+elemento("hpc-select").addEventListener("change", atualizarClusters);
+elemento("cluster-select").addEventListener("change", carregarCluster);
+elemento("restore-cluster").addEventListener("click", () =>
+    catalogo.length ? carregarCluster() : iniciar()
+);
+
+// INÍCIO — Busca os HPCs e clusters disponíveis ao abrir a página.
+async function iniciar() {
+    estado("Carregando ambientes…", true);
+    try {
+        catalogo = await buscarCatalogo();
+        const ambientes = [
+            ...new Map(
+                catalogo.map((c) => [
+                    c.hpc_id ?? "",
+                    { id: c.hpc_id, nome: c.hpc_nome }
+                ])
+            ).values()
+        ];
+        opcoes(elemento("hpc-select"), ambientes);
+        atualizarClusters();
+    } catch (e) {
+        estado(e.message, true);
     }
-    fillSelect(el.hpc, data.hpcs, false);
-    fillSelect(el.cluster, data.hpcs[0].clusters, true);
-    render();
-  }
-
-  el.hpc.addEventListener("change", onHpcChange);
-  el.cluster.addEventListener("change", render);
-  el.retry.addEventListener("click", init);
-
-  init();
-})();
+}
+iniciar();
