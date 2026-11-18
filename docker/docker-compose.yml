@@ -1,13 +1,26 @@
 services:
   web:
-    build: .
+    build:
+      # O Dockerfile fica em docker/, mas o código está na raiz do projeto.
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: nautilus-web
     ports:
-      - "80:8080"
+      - "8080:8080"
     env_file:
       - ../.env
+    environment:
+      # Stack local: o MySQL é o serviço "db" e usa as credenciais definidas abaixo.
+      # Estes valores sobrescrevem DB_HOST/DB_USER/DB_PASSWORD do ../.env.
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: nautilus
+      DB_USER: root
+      DB_PASSWORD: urubu100
+      APP_PORT: "8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   db:
@@ -19,7 +32,13 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       # cria as tabelas automaticamente na primeira inicialização:
-      - ./src/database/script-tabelas.sql:/docker-entrypoint-initdb.d/01-tabelas.sql:ro
+      - ../src/database/script-tabelas.sql:/docker-entrypoint-initdb.d/01-tabelas.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-purubu100"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     restart: unless-stopped
 
 volumes:
