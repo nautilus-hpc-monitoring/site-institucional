@@ -1,4 +1,3 @@
-const { log10 } = require("chart.js/helpers");
 var dashCategoricaModel = require("../models/dashCategoricaModel");
 var s3Service = require("../services/s3Service");
 
@@ -12,7 +11,7 @@ async function buscarNodes(req, res) {
         }
 
         const busca = await dashCategoricaModel.buscarNodes(Number(req.query.id_usuario));
-        return res.status(200).json(busca.nodes);
+        return res.status(200).json(busca);
 
     } catch (erro){
         console.log(erro);
@@ -32,7 +31,7 @@ async function buscarFiltros(req, res) {
             return res.status(400).json({ erro: "Usuário não informado ou inválido." });
         }
 
-        const busca = await buscarFiltros(Number(req.query.id_usuario));
+        const busca = await dashCategoricaModel.buscarFiltros(Number(req.query.id_usuario));
 
         res.set("Cache-Control", "no-store");
         return res.status(200).json(busca);
@@ -51,7 +50,7 @@ async function buscarPorHpc(req, res) {
             return res.status(400).json({ erro: "HPC não informado ou inválido." });
         }
 
-        const busca = await buscarPorHpc(Number(req.query.id_hpc));
+        const busca = await dashCategoricaModel.buscarPorHpc(Number(req.query.id_hpc));
 
         res.set("Cache-Control", "no-store");
         return res.status(200).json(busca);
@@ -70,7 +69,7 @@ async function buscarPorCluster(req, res) {
             return res.status(400).json({ erro: "cluster não informado ou inválido." });
         }
 
-        const busca = await buscarPorCluster(Number(req.query.id_cluster));
+        const busca = await dashCategoricaModel.buscarPorCluster(Number(req.query.id_cluster));
 
         res.set("Cache-Control", "no-store");
         return res.status(200).json(busca);
