@@ -21,6 +21,7 @@ var empresasRouter = require("./src/routes/empresa");
 var hpcRouter = require("./src/routes/hpc")
 var authRouter = require("./src/routes/auth");
 var dashGestorRouter = require("./src/routes/dashGestor");
+var dashCategoricaRouter = require("./src/routes/dashCategorica");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -34,6 +35,7 @@ app.use("/empresas", empresasRouter);
 app.use("/auth", authRouter);
 app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
+app.use("/dashcategorica", dashCategoricaRouter);
 app.use("/dashcluster", require("./src/routes/dashCluster"));
 app.use("/alertas", require("./src/routes/alertas"));
 
