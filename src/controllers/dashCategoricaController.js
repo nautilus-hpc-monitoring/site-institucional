@@ -9,13 +9,15 @@ async function buscarNodes(req, res) {
         ) {
             return res.status(400).json({ erro: "Usuário não informado ou inválido." });
         }
+        const linhas = await dashCategoricaModel.buscarNodes(Number(req.query.id_usuario));
+        const hostnames = linhas.map((l) => l.hostname);
 
-        const busca = await dashCategoricaModel.buscarNodes(Number(req.query.id_usuario));
-        return res.status(200).json(busca);
+        const dados = await s3Service.buscarPorHostnames(hostnames);
+        return res.status(200).json(dados)
 
-    } catch (erro){
+    } catch (erro) {
         console.log(erro);
-        
+
         return res.status(500).json({
             mensagem: 'Erro ao buscar nodes'
         })
@@ -50,10 +52,11 @@ async function buscarPorHpc(req, res) {
             return res.status(400).json({ erro: "HPC não informado ou inválido." });
         }
 
-        const busca = await dashCategoricaModel.buscarPorHpc(Number(req.query.id_hpc));
+        const linhas = await dashCategoricaModel.buscarNodes(Number(req.query.id_usuario));
+        const hostnames = linhas.map((l) => l.hostname);
 
-        res.set("Cache-Control", "no-store");
-        return res.status(200).json(busca);
+        const dados = await s3Service.buscarPorHostnames(hostnames);
+        return res.status(200).json(dados);
     } catch (erro) {
         console.error("Listagem de nodes:", erro.code || erro.name);
         return res.status(503).json({ erro: "Não foi possível buscar os nodes pelo HPC." });
@@ -69,10 +72,11 @@ async function buscarPorCluster(req, res) {
             return res.status(400).json({ erro: "cluster não informado ou inválido." });
         }
 
-        const busca = await dashCategoricaModel.buscarPorCluster(Number(req.query.id_cluster));
+        const linhas = await dashCategoricaModel.buscarNodes(Number(req.query.id_usuario));
+        const hostnames = linhas.map((l) => l.hostname);
 
-        res.set("Cache-Control", "no-store");
-        return res.status(200).json(busca);
+        const dados = await s3Service.buscarPorHostnames(hostnames);
+        return res.status(200).json(dados)
     } catch (erro) {
         console.error("Listagem de nodes:", erro.code || erro.name);
         return res.status(503).json({ erro: "Não foi possível buscar os nodes pelo cluster." });
