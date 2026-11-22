@@ -2,7 +2,7 @@ const banco = require("../database/config");
 
 function buscarNodes(id_usuario) {
     return banco.executar(
-`SELECT 
+        `SELECT 
 	n.hostname
 FROM ambiente_hpc AS a 
 JOIN cluster AS c
@@ -17,7 +17,7 @@ WHERE a.fk_empresa IN (
 
 function buscarFiltros(id_usuario) {
     return banco.executar(
-`SELECT DISTINCT
+        `SELECT DISTINCT
 	a.id_ambiente_hpc,
 	a.nome AS nome_hpc,
 	c.id_cluster,
@@ -33,30 +33,27 @@ WHERE a.fk_empresa IN (
     );
 }
 
-function buscarPorHpc(id_hpc) {
+function buscarPorHpc(id_hpc, id_usuario) {    
     return banco.executar(
-`SELECT
-	n.hostname
-FROM ambiente_hpc AS a 
-JOIN cluster AS c
-ON c.fk_ambiente_hpc = a.id_ambiente_hpc
-JOIN node AS n 
-ON n.fk_cluster = c.id_cluster
-WHERE a.id_ambiente_hpc = ?`,
-        [id_hpc]
+        `SELECT n.hostname
+FROM ambiente_hpc AS a
+JOIN cluster AS c ON c.fk_ambiente_hpc = a.id_ambiente_hpc
+JOIN node AS n ON n.fk_cluster = c.id_cluster
+WHERE a.id_ambiente_hpc = ?
+  AND a.fk_empresa = (SELECT fk_empresa FROM usuario WHERE id_usuario = ?)`,
+        [id_hpc, id_usuario]
     );
 }
-function buscarPorCluster(id_cluster) {
+
+function buscarPorCluster(id_cluster, id_usuario) {
     return banco.executar(
-`SELECT 
-	n.hostname
-FROM ambiente_hpc AS a 
-JOIN cluster AS c
-ON c.fk_ambiente_hpc = a.id_ambiente_hpc
-JOIN node AS n 
-ON n.fk_cluster = c.id_cluster
-WHERE c.id_cluster = ?`,
-        [id_cluster]
+        `SELECT n.hostname
+FROM ambiente_hpc AS a
+JOIN cluster AS c ON c.fk_ambiente_hpc = a.id_ambiente_hpc
+JOIN node AS n ON n.fk_cluster = c.id_cluster
+WHERE c.id_cluster = ?
+  AND a.fk_empresa = (SELECT fk_empresa FROM usuario WHERE id_usuario = ?)`,
+        [id_cluster, id_usuario]
     );
 }
 
