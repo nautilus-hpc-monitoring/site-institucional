@@ -100,6 +100,9 @@ header{
 
 /* Card da tabela: a altura termina na linha de total. */
 .cat-card {
+  --cat-cabecalho-altura: 56px;
+  --cat-linha-altura: 59px;
+  --cat-total-altura: 42px;
   flex: 0 0 auto;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -122,7 +125,13 @@ header{
 /* Tabela */
 .cat-table-wrap {
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  max-height: calc(
+    var(--cat-cabecalho-altura) + 5 * var(--cat-linha-altura) + var(--cat-total-altura)
+  );
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .cat-table {
   width: 100%;
@@ -150,6 +159,11 @@ header{
   padding-right: 20px;
 }
 .cat-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: var(--cat-cabecalho-altura);
+  box-sizing: border-box;
   background: #fafbfc;
   color: #64748b;
   font-size: 11px;
@@ -157,6 +171,9 @@ header{
   white-space: normal;
   line-height: 1.35;
   vertical-align: middle;
+}
+.cat-table thead th:first-child {
+  z-index: 3;
 }
 .cat-th-label {
   display: inline-flex;
@@ -172,7 +189,12 @@ header{
   margin-top: 3px;
   border-radius: 50%;
 }
+.cat-table tbody tr {
+  height: var(--cat-linha-altura);
+}
 .cat-table tbody td {
+  height: var(--cat-linha-altura);
+  box-sizing: border-box;
   background: var(--panel);
   color: #0f172a;
   font-size: 13px;
@@ -189,6 +211,11 @@ header{
   border-bottom: 0;
 }
 .cat-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  height: var(--cat-total-altura);
+  box-sizing: border-box;
   background: #fafbfc;
   border-top: 1px solid var(--line);
   border-bottom: 0;
@@ -196,6 +223,7 @@ header{
   font-weight: 700;
 }
 .cat-table tfoot td:first-child {
+  z-index: 3;
   font-size: 12px;
   color: #64748b;
 }
@@ -206,6 +234,7 @@ header{
   align-items: center;
   gap: 12px;
   min-width: 190px;
+  max-width: 240px;
 }
 .cat-node-icon {
   display: grid;
@@ -225,13 +254,18 @@ header{
   display: block;
   font-size: 13px;
   font-weight: 600;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cat-node-cluster {
   display: block;
   color: #64748b;
   font-size: 10px;
   font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cat-node-total {
   display: inline-grid;

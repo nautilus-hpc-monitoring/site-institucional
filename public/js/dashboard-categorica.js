@@ -359,6 +359,7 @@ async function carregarDados() {
         renderizarCabecalho();
         renderizarLinhas(data.nodes);
         renderizarTotais(data.nodes);
+        elemento("cat-table-wrap").scrollTop = 0;
         estado(data.avisos.length ? data.avisos.join(" ") : "Dados do banco e S3");
         const nomeados = data.nodes.filter((n) => n.hostname !== null).length;
         texto(
