@@ -229,6 +229,8 @@
                     </button>
                 </div>
 
+                <p class="page-subtitle" id="avisoTelemetria" aria-live="polite" hidden></p>
+
                 <!-- KPIs -->
                 <section class="operador-kpis">
 
@@ -238,13 +240,13 @@
                                 <i class="fa-solid fa-microchip"></i>
                             </div>
 
-                            <span class="operador-status normal">
+                            <span class="operador-status normal" id="kpiCpuStatus">
                                 <span>•</span> Normal
                             </span>
                         </div>
 
                         <div class="operador-kpi-valor">
-                            <strong>69.9</strong>
+                            <strong id="kpiCpuValor">—</strong>
                             <span>%</span>
                         </div>
 
@@ -257,13 +259,13 @@
                                 <i class="fa-solid fa-memory"></i>
                             </div>
 
-                            <span class="operador-status atencao">
+                            <span class="operador-status atencao" id="kpiRamStatus">
                                 <span>•</span> Atenção
                             </span>
                         </div>
 
                         <div class="operador-kpi-valor">
-                            <strong>79.8</strong>
+                            <strong id="kpiRamValor">—</strong>
                             <span>%</span>
                         </div>
 
@@ -276,13 +278,13 @@
                                 <i class="fa-solid fa-hard-drive"></i>
                             </div>
 
-                            <span class="operador-status atencao">
+                            <span class="operador-status atencao" id="kpiDiscoStatus">
                                 <span>•</span> Atenção
                             </span>
                         </div>
 
                         <div class="operador-kpi-valor">
-                            <strong>83.4</strong>
+                            <strong id="kpiDiscoValor">—</strong>
                             <span>%</span>
                         </div>
 
@@ -301,7 +303,7 @@
                         </div>
 
                         <div class="operador-kpi-valor">
-                            <strong id="kpiAlertasValor">0</strong>
+                            <strong id="kpiAlertasValor">—</strong>
                             <span>alertas</span>
                         </div>
 
@@ -322,7 +324,7 @@
                             </div>
 
                             <div class="operador-grafico-valor">
-                                <strong>69.9</strong>
+                                <strong id="valorGraficoCpu">—</strong>
                                 <span>%</span>
                             </div>
                         </div>
@@ -332,8 +334,8 @@
                         </div>
 
                         <div class="operador-grafico-footer">
-                            <span>Últimos 60 min</span>
-                            <span>Ao vivo</span>
+                            <span>Últimas 24 h</span>
+                            <span>Coleta: —</span>
                         </div>
 
                     </div>
@@ -347,7 +349,7 @@
                             </div>
 
                             <div class="operador-grafico-valor">
-                                <strong>79.8</strong>
+                                <strong id="valorGraficoRam">—</strong>
                                 <span>%</span>
                             </div>
                         </div>
@@ -357,8 +359,8 @@
                         </div>
 
                         <div class="operador-grafico-footer">
-                            <span>Últimos 60 min</span>
-                            <span>Ao vivo</span>
+                            <span>Últimas 24 h</span>
+                            <span>Coleta: —</span>
                         </div>
 
                     </div>
@@ -372,7 +374,7 @@
                             </div>
 
                             <div class="operador-grafico-valor">
-                                <strong>83.4</strong>
+                                <strong id="valorGraficoDisco">—</strong>
                                 <span>%</span>
                             </div>
                         </div>
@@ -382,8 +384,8 @@
                         </div>
 
                         <div class="operador-grafico-footer">
-                            <span>Últimos 60 min</span>
-                            <span>Ao vivo</span>
+                            <span>Últimas 24 h</span>
+                            <span>Coleta: —</span>
                         </div>
 
                     </div>
@@ -397,7 +399,7 @@
                             </div>
 
                             <div class="operador-grafico-valor">
-                                <strong>30.7</strong>
+                                <strong id="valorGraficoSwap">—</strong>
                                 <span>%</span>
                             </div>
                         </div>
@@ -407,8 +409,8 @@
                         </div>
 
                         <div class="operador-grafico-footer">
-                            <span>Últimos 60 min</span>
-                            <span>Ao vivo</span>
+                            <span>Últimas 24 h</span>
+                            <span>Coleta: —</span>
                         </div>
 
                     </div>

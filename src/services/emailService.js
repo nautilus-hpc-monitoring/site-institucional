@@ -1,7 +1,7 @@
 var Resend = require("resend").Resend;
 require("dotenv").config();
 
-var resend = new Resend(process.env.RESEND_API_KEY);
+// var resend = new Resend(process.env.RESEND_API_KEY);
 
 
 async function enviarEmail(email, token) {
