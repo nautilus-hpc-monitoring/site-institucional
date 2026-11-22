@@ -21,6 +21,7 @@ var empresasRouter = require("./src/routes/empresa");
 var hpcRouter = require("./src/routes/hpc")
 var authRouter = require("./src/routes/auth");
 var dashGestorRouter = require("./src/routes/dashGestor");
+var dashCategoricaRouter = require("./src/routes/dashCategorica");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -34,11 +35,13 @@ app.use("/empresas", empresasRouter);
 app.use("/auth", authRouter);
 app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
+app.use("/dashcategorica", dashCategoricaRouter);
 app.use("/dashcluster", require("./src/routes/dashCluster"));
+app.use("/dashanalista", require("./src/routes/dashAnalista"));
 app.use("/alertas", require("./src/routes/alertas"));
 
 if (process.env.AWS_CREDENTIAL_SYNC_ENABLED === 'true') {
-    require('./src/services/awsCredentialsService').iniciar();
+    require('./src/services/awsService').iniciar();
 }
 
 app.listen(PORTA_APP, function () {

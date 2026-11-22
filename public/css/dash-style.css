@@ -97,3 +97,16 @@
 @media (prefers-reduced-motion: reduce) {
     .pagina-alertas *, .pagina-alertas *::before { scroll-behavior: auto; }
 }
+/* Atendimento: seletor e ação alinhados, sem alterar o status técnico. */
+.atendimento-controles { display:flex; align-items:center; gap:8px; }
+.atendimento-controles .filter-select { width:150px; min-width:130px; height:40px; margin:0; padding:8px 12px; }
+.atendimento-salvar { min-height:40px; padding:8px 14px; border:1px solid #0e7490; border-radius:8px; background:#0e7490; color:#fff; font:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; }
+.atendimento-salvar:hover { background:#155e75; }
+.atendimento-salvar:disabled { opacity:.6; cursor:wait; }
+.atendimento-salvar:focus-visible { outline:3px solid #67e8f9; outline-offset:2px; }
+[id^="resultado-atendimento-"] { display:block; max-width:240px; font-size:12px; line-height:1.4; margin-top:5px; }
+[id^="resultado-atendimento-"]:empty { display:none; }
+@media (max-width:700px) { .atendimento-controles { flex-direction:column; align-items:stretch; } .atendimento-controles .filter-select { width:100%; } }
+
+/* Mantém a ação legível mesmo em tabelas estreitas. */
+.pagina-alertas .atendimento-salvar { font-size:12px; white-space:nowrap; word-break:normal; overflow-wrap:normal; flex-shrink:0; min-width:66px; padding:8px 10px; line-height:1.2; }

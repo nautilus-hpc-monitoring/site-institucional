@@ -1,7 +1,5 @@
 const DIA = 24 * 60 * 60 * 1000;
-const TRINTA_MINUTOS = 30 * 60 * 1000;
-const SEMANAS_DE_HISTORICO = 4;
-const REDUCAO_PERCENTUAL = 15;
+const SEIS_HORAS = 6 * 60 * 60 * 1000;
 
 // Datas dos gráficos: considera o horário de São Paulo.
 function formatarDataLocal(data) {
@@ -85,56 +83,6 @@ function somarAlertas(contagem) {
     return total;
 }
 
-// Gráfico de incidentes: frequência em quatro dias equivalentes, reduzida em 15%.
-// É uma regra da dashboard, não uma probabilidade estatística validada.
-function calcularFrequencias(alertas, nodes, hoje) {
-    const frequencias = [];
-
-    for (const node of nodes) {
-        const dias = [];
-
-        for (let diasAFrente = 1; diasAFrente <= 7; diasAFrente++) {
-            const diaPrevisto = hoje + diasAFrente * DIA;
-            const diaDaSemana = new Date(diaPrevisto).getUTCDay();
-            let diasComAlerta = 0;
-
-            for (let diasAtras = 1; diasAtras <= SEMANAS_DE_HISTORICO * 7; diasAtras++) {
-                const diaHistorico = hoje - diasAtras * DIA;
-                if (new Date(diaHistorico).getUTCDay() !== diaDaSemana) {
-                    continue;
-                }
-
-                const teveAlerta = alertas.some(function (alerta) {
-                    return (
-                        alerta.hostname === node.hostname &&
-                        alerta.horario >= diaHistorico &&
-                        alerta.horario < diaHistorico + DIA
-                    );
-                });
-
-                if (teveAlerta) {
-                    diasComAlerta++;
-                }
-            }
-
-            const frequenciaPercentual = (diasComAlerta / SEMANAS_DE_HISTORICO) * 100;
-            const percentualAjustado =
-                frequenciaPercentual * (1 - REDUCAO_PERCENTUAL / 100);
-
-            dias.push({
-                data: formatarDataLocal(diaPrevisto),
-                percentual: percentualAjustado,
-                ocorrencias: diasComAlerta,
-                amostras: SEMANAS_DE_HISTORICO
-            });
-        }
-
-        frequencias.push({ hostname: node.hostname, dias: dias });
-    }
-
-    return frequencias;
-}
-
 // KPI: maior atraso dos incidentes iniciados desde segunda e já encerrados.
 function calcularMaiorAtraso(alertas, agora, slaMinutos) {
     const slaValido = Number.isFinite(slaMinutos) && slaMinutos > 0;
@@ -176,15 +124,15 @@ function calcularMaiorAtraso(alertas, agora, slaMinutos) {
 
 function calcularAlertas(alertas, nodes, agora = new Date(), slaMinutos = null) {
     const horarioAtual = agora.getTime();
-    const hoje = meiaNoite(horarioAtual);
     const segundaFeira = inicioDaSemana(horarioAtual);
     const alertasValidos = prepararAlertas(alertas, horarioAtual);
 
-    // KPI: nodes que tiveram pelo menos um alerta nos últimos 30 minutos.
+    // KPI: nodes que tiveram pelo menos um alerta nas últimas seis horas.
     const nodesRecentes = [];
     for (const alerta of alertasValidos) {
         if (
-            alerta.horario >= horarioAtual - TRINTA_MINUTOS &&
+            alerta.horario >= horarioAtual - SEIS_HORAS &&
+            nodes.some(node => node.hostname === alerta.hostname) &&
             !nodesRecentes.includes(alerta.hostname)
         ) {
             nodesRecentes.push(alerta.hostname);
@@ -233,7 +181,7 @@ function calcularAlertas(alertas, nodes, agora = new Date(), slaMinutos = null) 
 
     // Zero alertas significa ausência de registros; não garante que a coleta estava funcionando.
     return {
-        nodes_30min: {
+        nodes_6h: {
             quantidade: nodesRecentes.length,
             total_nodes: nodes.length,
             hostnames: nodesRecentes
@@ -247,12 +195,7 @@ function calcularAlertas(alertas, nodes, agora = new Date(), slaMinutos = null) 
             fim: agora.toISOString()
         },
         observados: observados,
-        previstos: previstos,
-        frequencias: calcularFrequencias(alertasValidos, nodes, hoje),
-        janela_alertas: {
-            inicio: new Date(hoje - SEMANAS_DE_HISTORICO * 7 * DIA).toISOString(),
-            fim: agora.toISOString()
-        }
+        previstos: previstos
     };
 }
 
@@ -292,7 +235,6 @@ function normalizarGold(gold, nodes, idCluster) {
                 disco: node.disco || null,
                 calor: node.calor || null,
                 consumo: node.consumo || null,
-                memoria: node.memoria || null,
                 medias_semana: node.medias_semana || null,
                 picos: node.picos || null
             });
@@ -302,9 +244,34 @@ function normalizarGold(gold, nodes, idCluster) {
     return { nodes: nodesValidados, metadados: gold.metadados, avisos: [] };
 }
 
+// Cor da média: prioriza Atenção/Crítico cadastrados; usa picos quando ausentes.
+function situacaoDaMedia(media, limites) {
+    const encontrados = limites.filter(limite => limite.hostname === media.hostname
+        && String(limite.componente).trim().toUpperCase() === media.componente.toUpperCase());
+    if (encontrados.length !== 1) return "neutro";
+    const limite = encontrados[0];
+    const percentual = media.percentual;
+    const valor = v => v === null || v === undefined || v === "" ? null : Number(v);
+    const valido = v => v !== null && Number.isFinite(v) && v >= 0 && v <= 100;
+    const atencao = valor(limite.limite_atencao);
+    const critico = valor(limite.limite_critico);
+    if (valido(atencao) && valido(critico) && atencao < critico) {
+        if (media.componente.toUpperCase() === "SWAP" && percentual === 0) return "bom";
+        return percentual >= critico ? "ruim" : percentual >= atencao ? "atencao" : "bom";
+    }
+    if (media.componente.toUpperCase() === "SWAP") return "neutro";
+    const minimo = valor(limite.pico_min);
+    const maximo = valor(limite.pico_max);
+    if (!valido(minimo) || !valido(maximo) || minimo >= maximo) return "neutro";
+    if ((minimo > 0 && percentual <= minimo * 0.90) || percentual >= maximo) return "ruim";
+    if ((minimo > 0 && percentual <= minimo * 0.95) || percentual >= maximo * 0.95) return "alerta";
+    if ((minimo > 0 && percentual <= minimo * 1.05) || percentual >= maximo * 0.90) return "atencao";
+    return "bom";
+}
+
 // Compara médias por componente e node, desde segunda até a última coleta.
 // Arquivos de outra semana são ignorados até a ETL publicar a nova média.
-function componenteMaiorMedia(nodes, agora = new Date()) {
+function componenteMaiorMedia(nodes, agora = new Date(), limites = []) {
     const componentes = ["CPU", "RAM", "Disco", "Swap"];
     const segunda = inicioDaSemana(agora.getTime());
     let maiorMedia = null;
@@ -341,6 +308,7 @@ function componenteMaiorMedia(nodes, agora = new Date()) {
             }
         }
     }
+    if (maiorMedia) maiorMedia.status_uso = situacaoDaMedia(maiorMedia, limites);
     return maiorMedia;
 }
 

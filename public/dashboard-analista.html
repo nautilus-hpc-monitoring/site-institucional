@@ -55,12 +55,19 @@
                 </a>
             </li>
 
-            <li class="nav-item active">
-                <a href="./dashboard-analista.html">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Analista</span>
-                </a>
-            </li>
+            <li class="nav-item active admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                            <span>Analista</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-analista.html" aria-current="page">Dash preditiva</a></li>
+                            <li><a href="./dashboard-categorica.html">Dash categórica</a></li>
+                        </ul>
+                    </details>
+                </li>
 
             <li class="nav-item admin-item">
                     <details>
@@ -130,13 +137,18 @@
                     </a>
                 </li>
 
-                <li class="side-item active">
-                    <a href="./dashboard-analista.html">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <span class="item-description">
-                            Analista
-                        </span>
-                    </a>
+                <li class="side-item active admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                            <span class="item-description">Analista</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-analista.html" aria-current="page">Dash preditiva</a></li>
+                            <li><a href="./dashboard-categorica.html">Dash categórica</a></li>
+                        </ul>
+                    </details>
                 </li>
 
                 <li class="side-item  admin-item">
@@ -195,121 +207,284 @@
             <div class="title-area">
                 <div class="eyebrow">VISÃO HISTÓRICA</div>
                 <h1>Dashboard do Analista</h1>
-                <p>Análise histórica do comportamento dos componentes</p>
+                <p id="status-analista">Análise histórica do comportamento dos componentes</p>
             </div>
 
-            <div id="seletores-grafico">
-                <div class="seletor">
-                    <span>Node</span>
-                    <select>
-                        <option>Node 01</option>
-                    </select>
-                </div>
-                <div class="seletor">
-                    <span>Período</span>
-                    <select>
-                        <option>Últimos 6 meses</option>
-                    </select>
-                </div>
-                <div class="seletor">
-                    <span>Granularidade</span>
-                    <select>
-                        <option>Semanal</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+            <div class="header-actions">
+                <button type="button" class="help-btn" id="btn-ajuda" aria-label="Como funciona?"
+                    aria-haspopup="dialog" aria-controls="modal-ajuda" title="Como funciona?">
+                    <i class="fa-regular fa-circle-question"></i>
+                </button>
 
-
-        <div id="espaco-grafico">
-            <div class="grafico-header">
-                <div>
-                    <h2>Evolução do uso dos componentes por semana</h2>
-                    <p>Média semanal de utilização • 07 abr — 15 set 2026</p>
-                </div>
-                <div class="custom-legend">
-                    <div class="legend-item"><span class="legend-color" style="background:#3b82f6;"></span> Média CPU
+                <div id="seletores-grafico">
+                    <div class="seletor">
+                        <span>Cluster</span>
+                        <select id="seletor-cluster" aria-label="Cluster">
+                            <option>Carregando…</option>
+                        </select>
                     </div>
-                    <div class="legend-item"><span class="legend-color" style="background:#8b5cf6;"></span> Média RAM
+                    <div class="seletor">
+                        <span>Node</span>
+                        <select id="seletor-node" aria-label="Node">
+                            <option>Carregando…</option>
+                        </select>
                     </div>
-                    <div class="legend-item"><span class="legend-color" style="background:#f97316;"></span> Média Disco
+                    <div class="seletor">
+                        <span>Período</span>
+                        <select id="seletor-periodo" aria-label="Período">
+                            <option value="1">Últimos 30 dias</option>
+                            <option value="3">Últimos 3 meses</option>
+                            <option value="6" selected>Últimos 6 meses</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-
-            <div class="grafico-conteudo">
-                <canvas id="line-chart"></canvas>
             </div>
         </div>
 
 
         <div class="kpi-grid">
-            <div class="kpi-card highlight">
-                <div class="kpi-icon icon-red"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                <div class="kpi-info">
-                    <span class="kpi-title">Maior pico</span>
-                    <span class="kpi-value value-red">97,8%</span>
-                    <span class="kpi-desc">CPU - 15/09/2026 - 14:32</span>
+            <div class="kpi-card accent-red">
+                <span class="kpi-badge badge-orange"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <div class="kpi-metrics">
+                    <div class="kpi-metric">
+                        <span class="kpi-label">Maior pico</span>
+                        <span class="kpi-sub" id="kpi-pico-sub">—</span>
+                        <span class="kpi-value"><span id="kpi-pico-valor">—</span><em
+                                class="delta delta-orange" id="kpi-pico-delta"></em></span>
+                    </div>
+                    <div class="kpi-metric">
+                        <span class="kpi-label">Maior anomalia</span>
+                        <span class="kpi-sub" id="kpi-anomalia-sub">—</span>
+                        <span class="kpi-value"><span id="kpi-anomalia-valor">—</span></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card">
-                <div class="kpi-icon icon-blue"><i class="fa-regular fa-clock"></i></div>
-                <div class="kpi-info">
-                    <span class="kpi-title">Maior duração fora do padrão</span>
-                    <span class="kpi-value">2h 18min</span>
-                    <span class="kpi-desc">Maior período contínuo fora do padrão</span>
+            <div class="kpi-card accent-orange">
+                <span class="kpi-badge badge-orange"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <div class="kpi-metrics">
+                    <div class="kpi-metric">
+                        <span class="kpi-label">Quantidade de picos</span>
+                        <span class="kpi-value"><span id="kpi-picos-total">—</span><em
+                                class="delta delta-orange" id="kpi-picos-delta"></em></span>
+                        <span class="kpi-desc" id="kpi-picos-desc">—</span>
+                    </div>
+                    <div class="kpi-metric">
+                        <span class="kpi-label">Quantidade de anomalias</span>
+                        <span class="kpi-value kpi-value--texto" id="kpi-anomalias-valor">—</span>
+                        <span class="kpi-desc" id="kpi-anomalias-desc">—</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card">
-                <div class="kpi-icon icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                <div class="kpi-info">
-                    <span class="kpi-title">Eventos fora do padrão</span>
-                    <span class="kpi-value value-red">14 eventos</span>
-                    <span class="kpi-desc">2h 37min acumulados no período</span>
+            <div class="kpi-card accent-teal">
+                <span class="kpi-badge badge-teal"><i class="fa-regular fa-clock"></i></span>
+                <div class="kpi-metrics">
+                    <div class="kpi-metric">
+                        <span class="kpi-label">Duração do pico mais longo</span>
+                        <span class="kpi-value"><span id="kpi-duracao-valor">—</span><em
+                                class="delta delta-orange" id="kpi-duracao-delta"></em></span>
+                        <span class="kpi-desc" id="kpi-duracao-desc">Maior período contínuo fora do padrão</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card">
-                <div class="kpi-icon icon-blue"><i class="fa-solid fa-chart-line"></i></div>
-                <div class="kpi-info">
-                    <span class="kpi-title">Componente mais instável</span>
-                    <span class="kpi-value">CPU</span>
-                    <span class="kpi-desc">18,4% de variação no período</span>
+            <div class="kpi-card accent-pink">
+                <span class="kpi-badge badge-pink"><i class="fa-solid fa-heart-pulse"></i></span>
+                <div class="kpi-metrics">
+                    <div class="kpi-metric">
+                        <span class="kpi-label">Componente mais instável</span>
+                        <span class="kpi-value" id="kpi-instavel-valor">—</span>
+                        <span class="kpi-desc" id="kpi-instavel-desc">—</span>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <div class="insight-grid">
+            <div class="insight-card distrib-card">
+                <div class="distrib-header">
+                    <span class="insight-badge"><i class="fa-solid fa-chart-simple"></i></span>
+                    <span class="insight-title">Distribuição de uso com percentis</span>
 
-        <div class="bottom-grid">
-            <div class="bottom-card">
-                <div class="distrib-info">
-                    <h3>Distribuição do uso</h3>
-                    <p>Percentis mostram o comportamento típico e a faixa dos valores mais elevados.</p>
+                    <div class="component-tabs" id="component-tabs" role="tablist" aria-label="Componente">
+                        <button type="button" class="tab active" data-componente="cpu" role="tab" aria-selected="true">CPU</button>
+                        <button type="button" class="tab" data-componente="ram" role="tab" aria-selected="false">RAM</button>
+                        <button type="button" class="tab" data-componente="disco" role="tab" aria-selected="false">Disco</button>
+                    </div>
                 </div>
-                <div class="percentis">
-                    <div class="percentil-item"><span class="p-label">P50</span><span class="p-value">51%</span><span
-                            class="p-desc">Típico</span></div>
-                    <div class="percentil-item"><span class="p-label">P90</span><span class="p-value">73%</span><span
-                            class="p-desc">Elevado</span></div>
-                    <div class="percentil-item"><span class="p-label">P95</span><span class="p-value">81%</span><span
-                            class="p-desc">Alto</span></div>
-                    <div class="percentil-item"><span class="p-label">P99</span><span class="p-value">94%</span><span
-                            class="p-desc">Extremo</span></div>
+
+                <div class="percentis" id="percentis">
+                    <div class="percentil-item">
+                        <span class="p-label">P50</span>
+                        <span class="p-value" data-percentil="p50">51%</span>
+                        <span class="p-desc">Típico</span>
+                    </div>
+                    <div class="percentil-item">
+                        <span class="p-label">P90</span>
+                        <span class="p-value" data-percentil="p90">73%</span>
+                        <span class="p-desc">Elevado</span>
+                    </div>
+                    <div class="percentil-item">
+                        <span class="p-label">P95</span>
+                        <span class="p-value" data-percentil="p95">81%</span>
+                        <span class="p-desc">Alto</span>
+                    </div>
+                    <div class="percentil-item">
+                        <span class="p-label">P99</span>
+                        <span class="p-value" data-percentil="p99">94%</span>
+                        <span class="p-desc">Extremo</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="bottom-card" style="justify-content: flex-start; gap: 20px;">
-                <div class="icon-trend"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <div class="insight-card variation-card">
+                <span class="insight-badge"><i class="fa-solid fa-arrow-trend-up"></i></span>
+
                 <div>
-                    <div class="variation-title">Variação em relação ao período anterior <span
-                            class="variation-value">+13%</span></div>
-                    <p class="variation-info">Média geral de utilização aumentou em relação aos 6 meses anteriores.</p>
+                    <div class="variation-title">Variação em relação ao período anterior
+                        <span class="variation-value" id="variation-valor">—</span>
+                    </div>
+                    <p class="variation-info" id="variation-info">Aguardando dados da telemetria.</p>
                 </div>
             </div>
+
+            <button type="button" class="insight-card correlation-card" id="btn-correlacao" aria-haspopup="dialog"
+                aria-controls="modal-correlacao" title="Ver detalhes da correlação">
+                <div class="correlation-top">
+                    <span class="insight-badge"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                    <span class="insight-title">Correlação entre tempo de espera de CPU e Leitura/escrita do
+                        armazenamento</span>
+                    <i class="fa-solid fa-up-right-from-square correlation-link" aria-hidden="true"></i>
+                </div>
+
+                <div class="correlation-body">
+                    <span class="correlation-value">r = <span id="r-correlacao">—</span></span>
+                    <span class="correlation-badge" id="correlacao-badge">Sem dados</span>
+                </div>
+            </button>
         </div>
 
+        <section id="espaco-grafico">
+            <div class="grafico-header">
+                <div>
+                    <h2>Evolução do uso dos componentes por semana</h2>
+                    <p id="grafico-subtitulo">Médias semanais e picos pontuais • telemetria agregada</p>
+                </div>
+
+                <div class="custom-legend">
+                    <span class="legend-item"><span class="legend-line legend-regressao"></span>Inclinação da
+                        Regressão linear</span>
+                    <span class="legend-item"><span class="legend-line legend-atual"></span>Semestre atual</span>
+                    <span class="legend-item"><span class="legend-line legend-anterior"></span>Semestre anterior</span>
+                    <span class="legend-item"><span class="legend-dot dot-pico"></span>Pico de carga (&gt;80%)</span>
+                    <span class="legend-item"><span class="legend-dot dot-residuo"></span>Anomalia de resíduo</span>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <article class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Média semanal do consumo do CPU</h3>
+                        <span class="chart-value" id="media-cpu">55,0%</span>
+                    </div>
+                    <p class="chart-note" id="nota-cpu">—</p>
+                    <div class="chart-canvas"><canvas id="chart-cpu"></canvas></div>
+                </article>
+
+                <article class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Média semanal do consumo da RAM</h3>
+                        <span class="chart-value" id="media-ram">—</span>
+                    </div>
+                    <p class="chart-note" id="nota-ram">—</p>
+                    <div class="chart-canvas"><canvas id="chart-ram"></canvas></div>
+                </article>
+
+                <article class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Média semanal do consumo do Disco</h3>
+                        <span class="chart-value" id="media-disco">—</span>
+                    </div>
+                    <p class="chart-note" id="nota-disco">—</p>
+                    <div class="chart-canvas"><canvas id="chart-disco"></canvas></div>
+                </article>
+            </div>
+
+            <p class="chart-footnote" id="rodape-telemetria">
+                Aguardando dados da telemetria.
+            </p>
+        </section>
+
+    </div>
+
+    <div class="dash-modal-overlay" id="modal-ajuda">
+        <div class="dash-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-ajuda">
+            <button type="button" class="dash-modal-close" data-fechar-modal aria-label="Fechar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="ajuda-titulo" id="titulo-ajuda">Como funciona?</h3>
+
+            <p class="ajuda-texto">
+                A correlação entre o tempo de espera de CPU (IO wait) e o uso do disco é um indicador forte de perda de
+                desempenho do armazenamento. Através do R, vemos o quanto esses dois valores caminham juntos.
+            </p>
+
+            <div class="ajuda-exemplo">
+                <div class="ajuda-exemplo-card">
+                    <div class="correlation-top">
+                        <span class="insight-badge"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        <span class="insight-title">Correlação entre tempo de espera de CPU e uso do armazenamento</span>
+                        <i class="fa-solid fa-up-right-from-square correlation-link" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="correlation-body">
+                        <span class="correlation-value">r = 0,98</span>
+                        <span class="correlation-badge">Gargalo de I/O Crítico</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="ajuda-texto">
+                Sendo r o nível de correlação de -1 a 1. O valor padrão é 0. Um r muito diferente de zero indica que
+                há algum tipo de comportamento anormal no disco, o que deixa a CPU mais tempo esperando I/O.
+            </p>
+
+            <p class="ajuda-texto ajuda-texto--final">
+                O R² mostra quanto da variação do IO wait é explicado pelo uso do disco. Cada ponto do gráfico é uma
+                amostra da telemetria e n é a quantidade de amostras usadas no cálculo.
+            </p>
+        </div>
+    </div>
+
+    <div class="dash-modal-overlay" id="modal-correlacao">
+        <div class="dash-modal dash-modal--wide" role="dialog" aria-modal="true" aria-labelledby="titulo-correlacao">
+            <button type="button" class="dash-modal-close" data-fechar-modal aria-label="Fechar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-corr-header">
+                <div>
+                    <h3 id="titulo-correlacao">Disco × CPU: regressão linear</h3>
+                    <p id="modal-corr-subtitulo">uso do disco × IO wait da CPU • telemetria real</p>
+                </div>
+                <span class="badge-exemplo" id="modal-corr-badge">Telemetria</span>
+            </div>
+
+            <div class="modal-corr-chart">
+                <canvas id="chart-correlacao"></canvas>
+            </div>
+
+            <div class="modal-corr-footer">
+                <span class="corr-legend"><span class="legend-dot dot-registro"></span>Registros (n = <span
+                        id="corr-n">—</span>)</span>
+                <span class="corr-legend"><span class="legend-line legend-regressao"></span>Regressão linear</span>
+                <span class="corr-stat">r = <strong id="corr-r">—</strong></span>
+                <span class="corr-stat">R² = <strong id="corr-r2">—</strong></span>
+                <span class="corr-stat" id="corr-equacao">—</span>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

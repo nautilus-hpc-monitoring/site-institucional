@@ -24,6 +24,14 @@ const dia = (v) => {
 };
 const periodo = (datas) =>
     datas?.length ? dia(datas[0]) + " a " + dia(datas.at(-1)) : "Sem período disponível";
+const periodoSemana = (inicio, fim) => "Desde " + dia(inicio) + " · até " + dia(fim);
+// Distingue a atualização dos dados da hora em que a página os consultou.
+function formatarDataHora(valor) {
+    const data = new Date(valor);
+    if (!valor || !Number.isFinite(data.getTime())) return "indisponível";
+    return data.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+}
+
 const media = (valores) => {
     const validos = valores.filter(numero);
     return validos.length ? validos.reduce((a, b) => a + b, 0) / validos.length : null;
@@ -40,10 +48,7 @@ let nodeDiscoAtual = null,
     recursoCalorAtual = "CPU";
 let heatReadings = [],
     heatDays = [],
-    consumoPorNode = {},
-    memoriaPorNode = {},
-    historicoPreditivo = {},
-    diasPrevisao = [];
+    consumoPorNode = {};
 let incidentesPorNode = [],
     incidentesPrevistosPorNode = [];
 const chaveNodes = elemento("sync-nodes"),
@@ -57,6 +62,9 @@ function texto(id, valor) {
 // Limpa o gráfico e mostra uma mensagem quando faltam dados.
 function semDados(id, mensagem = "Sem dados disponíveis para este período.") {
     limparGrafico(id);
+    const container = elemento(id);
+    container.classList.remove("chartjs-panels");
+    container.classList.add("chart-empty");
     texto(id, mensagem);
 }
 
@@ -67,11 +75,13 @@ function limparTela() {
         "disk",
         "heat",
         "expected",
-        "forecast",
-        "swap",
         "alerts-predicted",
         "alerts-observed"
     ].forEach((id) => semDados(id));
+    for (const tipo of ["predicted", "observed"]) {
+        elemento(tipo + "-panel").hidden = true;
+        elemento(tipo + "-trigger").setAttribute("aria-expanded", "false");
+    }
 }
 
 // Atualiza a mensagem de carregamento e a visibilidade da dashboard.
@@ -124,23 +134,27 @@ function atualizarClusters() {
 // KPIs: nodes com incidentes, componente, duração/SLA e previstos × observados.
 function cards(data) {
     const a = data.alertas,
-        n = a.nodes_30min,
+        n = a.nodes_6h,
         c = data.componente,
         d = a.maior_atraso,
         p = a.comparacao;
+    elemento("kpi-nodes").dataset.status = n.quantidade > 0 ? "ruim" : "bom";
+    elemento("kpi-stress").dataset.status = c?.status_uso || "neutro";
     texto("incident-node-count", formatar(n.quantidade));
     texto("cluster-node-total", formatar(n.total_nodes));
     texto(
         "incident-node-names",
-        n.hostnames.join(" · ") || "Nenhum node com alerta registrado"
+        n.hostnames.join(" · ") || "Nenhum node com alerta nas últimas 6 horas"
     );
     texto(
         "stress-period",
-        c ? "Desde segunda · até " + dia(c.fim) : "Média semanal indisponível"
+        periodoSemana(p.inicio, p.fim)
     );
     texto("stress-component", c?.componente || "—");
     texto("stress-node", c?.hostname || "—");
     texto("stress-peak", formatar(c?.percentual) + (numero(c?.percentual) ? "%" : ""));
+    elemento("stress-peak").title = c ? "Média com dados disponíveis até " + formatarDataHora(c.fim) : "Média indisponível";
+    elemento("kpi-stress").title = c?.status_uso === "neutro" ? "Sem limites válidos ou únicos cadastrados para este componente" : "Cor conforme os limites cadastrados para o node e componente";
     texto("incident-duration", formatar(d.atraso_minutos));
     texto("sla-max-value", formatar(d.sla_minutos));
     texto(
@@ -166,7 +180,7 @@ function cards(data) {
     texto("incident-observed", formatar(p.observado));
     elemento("kpi-expected").dataset.status =
         p.variacao > 0 ? "ruim" : p.variacao < 0 ? "bom" : "neutro";
-    texto("comparison-period", periodo([p.inicio, p.fim]));
+    texto("comparison-period", periodoSemana(p.inicio, p.fim));
     texto(
         "incident-detail",
         p.variacao === null
@@ -222,14 +236,16 @@ function exibirDisco(id) {
     nodeDiscoAtual = id;
     marcar("disk", id);
     const d = dadosNode(id)?.disco;
-    texto(
-        "disk-description",
-        id +
-            " · " +
-            (d
-                ? periodo(d.datas) + " · " + (d.volume || "Volume não informado")
-                : "Sem telemetria de disco")
-    );
+    const descricao = [id, d ? periodo(d.datas) : "Sem telemetria de disco"];
+    if (d) {
+        const ultimoValor = Array.isArray(d.real) ? d.real.findLast(numero) : null;
+        if (numero(ultimoValor))
+            descricao.push("Atual: " + formatar(ultimoValor) + " TB");
+        if (!Array.isArray(d.previsto) || !d.previsto.some(numero)) {
+            descricao.push("Sem base para previsão");
+        }
+    }
+    texto("disk-description", descricao.join(" · "));
     if (
         !d ||
         !Array.isArray(d.datas) ||
@@ -293,6 +309,15 @@ function exibirMapaCalor(recurso) {
         !d.leituras.every((l) => Array.isArray(l) && l.length === 24)
     )
         return semDados("heat");
+    const temLeituras = d.leituras.some((linha) =>
+        linha.some((leitura) => numero(leitura?.[recurso]))
+    );
+    if (!temLeituras) {
+        return semDados(
+            "heat",
+            "Sem horas válidas nos sete dias anteriores. O dia atual não entra neste mapa."
+        );
+    }
     heatDays = d.dias.map(dia);
     heatReadings = d.leituras;
     renderizarCalor(recurso, chaveVisualizacao.checked);
@@ -313,106 +338,20 @@ function exibirConsumo(id) {
         d.datas.length !== 24 ||
         !["cpuObserved", "cpuExpected", "ramObserved", "ramExpected"].every(
             (c) => Array.isArray(d[c]) && d[c].length === 24
-        ) ||
-        !["cpuObserved", "cpuExpected", "ramObserved", "ramExpected"].some((c) =>
-            d[c].some(numero)
         )
     )
         return semDados("expected");
+    const temHoras = ["cpuObserved", "cpuExpected", "ramObserved", "ramExpected"].some(
+        (campo) => d[campo].some(numero)
+    );
+    if (!temHoras) {
+        return semDados(
+            "expected",
+            "Nenhuma hora válida publicada para este dia. Aguardando horas completas com coletas suficientes."
+        );
+    }
     consumoPorNode[id] = d;
     renderizarConsumo(id);
-}
-
-// Lê o percentual de incidentes já calculado pela API.
-function calcularFrequencia(leituras, indice) {
-    const valor = leituras?.[indice];
-    return numero(valor) ? { percentual: valor } : null;
-}
-
-// GRÁFICOS 4 E 5 — Atualiza incidentes e memória para os nodes escolhidos.
-function exibirPrevisoes(nodes) {
-    const hosts = new Set(nodes.map((n) => n.hostname));
-    renderizarFrequencias(nodes.map((n) => ({ id: n.hostname })));
-    const disponiveis = nodes.filter((n) => memoriaPorNode[n.hostname]);
-    if (disponiveis.length)
-        renderizarMemoria(disponiveis.map((n) => ({ id: n.hostname })));
-    else semDados("swap");
-    texto("forecast-period", periodo(diasPrevisao.map((d) => d.data)));
-    const tempos = [...hosts]
-        .flatMap((h) => memoriaPorNode[h]?.leituras.map((l) => l.timestamp) || [])
-        .filter(numero)
-        .sort((a, b) => a - b);
-    texto(
-        "memory-period",
-        tempos.length ? periodo([tempos[0], tempos.at(-1)]) : "Sem período disponível"
-    );
-}
-// REGRA DE MEMÓRIA — RAM em 90%, swap-out acima de zero e intervalo máximo de 5 minutos.
-const REGRA_MEMORIA = { ramUsoPercent: 90, swapOutMiBs: 0, intervaloMaxSeg: 300 };
-
-// Calcula RAM em uso e taxas de swap entre duas coletas válidas.
-function calcularIntervalosMemoria(leituras) {
-    return leituras.slice(1).map((atual, i) => {
-        const anterior = leituras[i],
-            segundos = (atual.timestamp - anterior.timestamp) / 1000;
-        const valido =
-            segundos > 0 &&
-            segundos <= 300 &&
-            [atual.ramDisponivel, anterior.ramDisponivel].every(
-                (v) => numero(v) && v >= 0 && v <= 100
-            ) &&
-            [atual.swapIn, atual.swapOut, anterior.swapIn, anterior.swapOut].every(
-                (v) => numero(v) && v >= 0
-            ) &&
-            atual.swapIn >= anterior.swapIn &&
-            atual.swapOut >= anterior.swapOut;
-        if (!valido) return { timestamp: atual.timestamp, valido: false, minutos: 0 };
-        const entrada = (atual.swapIn - anterior.swapIn) / segundos / 1048576,
-            saida = (atual.swapOut - anterior.swapOut) / segundos / 1048576,
-            ram = 100 - atual.ramDisponivel;
-        return {
-            timestamp: atual.timestamp,
-            valido: true,
-            minutos: segundos / 60,
-            ram,
-            entrada,
-            saida,
-            sinal: ram >= 90 && 100 - anterior.ramDisponivel >= 90 && saida > 0
-        };
-    });
-}
-
-// Soma os minutos com RAM alta e envio para swap.
-function resumirMemoria(dados) {
-    const intervalos = calcularIntervalosMemoria(dados.leituras);
-    return {
-        intervalos,
-        minutos: intervalos.reduce(
-            (s, p) => s + (p.valido && p.sinal ? p.minutos : 0),
-            0
-        ),
-        cobertura: intervalos.reduce((s, p) => s + p.minutos, 0)
-    };
-}
-
-// Abre o histórico de RAM e swap do node clicado.
-function detalharMemoria(node) {
-    selecionarNodeDashboard(node, "swap");
-    destruirGrafico("memory-timeline");
-    const dados = memoriaPorNode[node];
-    if (!dados || dados.leituras.length < 2) return;
-    texto("monitor-title", node + " · RAM e swap");
-    const container = elemento("monitor-content");
-    container.replaceChildren();
-    const p = document.createElement("p");
-    p.textContent = periodo(dados.leituras.map((l) => l.timestamp));
-    container.appendChild(p);
-    const grafico = document.createElement("div");
-    grafico.id = "memory-timeline";
-    container.appendChild(grafico);
-    elemento("monitor-detail").showModal();
-    renderizarDetalheMemoria(node, dados, resumirMemoria(dados));
-    requestAnimationFrame(() => redimensionarGraficos("memory-timeline"));
 }
 
 // Aplica a seleção a um gráfico ou a todos, conforme a chave.
@@ -424,7 +363,6 @@ function selecionarNodeDashboard(id, origem) {
         exibirDisco(id);
         selecionarNodeCalor(id);
         exibirConsumo(id);
-        exibirPrevisoes([node]);
         texto("sync-nodes-status", "Todos os gráficos: " + id);
         return;
     }
@@ -438,7 +376,6 @@ function sincronizar() {
     if (chaveNodes.checked && nodesClusterAtual.length)
         selecionarNodeDashboard(ultimoNodeSelecionado || nodesClusterAtual[0].hostname);
     else {
-        exibirPrevisoes(nodesClusterAtual);
         texto("sync-nodes-status", "Cada gráfico com seleção independente");
     }
 }
@@ -530,7 +467,6 @@ async function carregarCluster() {
     requisicao = new AbortController();
     const atual = ++versao;
     limparTela();
-    elemento("monitor-detail").close();
     ultimoNodeSelecionado = null;
     chaveNodes.disabled = true;
     const id = elemento("cluster-select").value;
@@ -547,44 +483,23 @@ async function carregarCluster() {
         if (atual !== versao) return;
         painel = data;
         nodesClusterAtual = data.nodes;
-        memoriaPorNode = {};
         consumoPorNode = {};
-        historicoPreditivo = {};
-        data.telemetria.nodes.forEach((n) => {
-            if (n.memoria && Array.isArray(n.memoria.leituras)) {
-                const leituras = n.memoria.leituras
-                    .map((l) => ({
-                        ...l,
-                        timestamp:
-                            typeof l.timestamp === "number"
-                                ? l.timestamp
-                                : Date.parse(l.timestamp)
-                    }))
-                    .filter((l) => numero(l.timestamp))
-                    .sort((a, b) => a.timestamp - b.timestamp);
-                if (leituras.length >= 2)
-                    memoriaPorNode[n.hostname] = { ...n.memoria, leituras };
-            }
-        });
-        diasPrevisao = (data.alertas.frequencias[0]?.dias || []).map((d, i) => ({
-            data: d.data,
-            label: dia(d.data),
-            indice: i
-        }));
-        data.alertas.frequencias.forEach((n) => {
-            historicoPreditivo[n.hostname] = { alertas: n.dias.map((d) => d.percentual) };
-        });
         cards(data);
         ["disk", "heat", "expected"].forEach((id) => controles(id));
         estado(data.avisos.length ? data.avisos.join(" ") : "Dados do banco e S3");
         texto("cluster-description", data.cluster.cluster_nome);
-        texto("cluster-summary", nodesClusterAtual.length + " nodes");
+        texto(
+            "cluster-summary",
+            nodesClusterAtual.length +
+                (nodesClusterAtual.length === 1 ? " node" : " nodes")
+        );
+        const dataColeta = data.telemetria.metadados?.telemetria_ate;
         texto(
             "data-time",
-            "Consulta: " +
-                new Date(data.gerado_em).toLocaleString("pt-BR", {
-                    timeZone: "America/Sao_Paulo"
-                })
+            "Coleta: " +
+                formatarDataHora(dataColeta) +
+                " · Consulta: " +
+                formatarDataHora(data.gerado_em)
         );
         const primeiro = nodesClusterAtual[0]?.hostname;
         if (primeiro) {
@@ -609,21 +524,46 @@ async function carregarCluster() {
     }
 }
 
-// Abre e fecha o detalhamento dos incidentes previstos ou observados.
+// Prévia por mouse ou foco; não depende de clique para abrir.
 function configurarPreview(tipo) {
     const anchor = elemento(tipo + "-preview"),
         trigger = elemento(tipo + "-trigger"),
-        panel = elemento(tipo + "-panel");
-    trigger.addEventListener("click", () => {
-        panel.hidden = !panel.hidden;
-        trigger.setAttribute("aria-expanded", String(!panel.hidden));
-        if (!panel.hidden)
-            requestAnimationFrame(() => redimensionarGraficos("alerts-" + tipo));
+        panel = elemento(tipo + "-panel"),
+        cartao = elemento("kpi-expected");
+    function abrir() {
+        const outro = tipo === "predicted" ? "observed" : "predicted";
+        elemento(outro + "-panel").hidden = true;
+        elemento(outro + "-trigger").setAttribute("aria-expanded", "false");
+        panel.hidden = false;
+        trigger.setAttribute("aria-expanded", "true");
+        requestAnimationFrame(() => redimensionarGraficos("alerts-" + tipo));
+    }
+    function fechar() {
+        panel.hidden = true;
+        trigger.setAttribute("aria-expanded", "false");
+    }
+    anchor.addEventListener("mouseenter", abrir);
+    // Mantém a prévia aberta ao mover o mouse do número até o gráfico.
+    cartao.addEventListener("mouseleave", () => {
+        if (!anchor.contains(document.activeElement)) fechar();
+    });
+    anchor.addEventListener("focusin", abrir);
+    anchor.addEventListener("focusout", e => {
+        if (!anchor.contains(e.relatedTarget)) fechar();
+    });
+    // Em telas de toque, permite abrir a mesma prévia sem exigir hover.
+    trigger.addEventListener("pointerdown", e => {
+        if (e.pointerType === "touch") {
+            e.preventDefault();
+            panel.hidden ? abrir() : fechar();
+        }
+    });
+    document.addEventListener("pointerdown", e => {
+        if (!anchor.contains(e.target)) fechar();
     });
     anchor.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            panel.hidden = true;
-            trigger.setAttribute("aria-expanded", "false");
+            fechar();
         }
     });
 }
@@ -637,12 +577,6 @@ document
     .forEach((b) =>
         b.addEventListener("click", () => exibirMapaCalor(b.dataset.resource))
     );
-elemento("monitor-close").addEventListener("click", () =>
-    elemento("monitor-detail").close()
-);
-elemento("monitor-detail").addEventListener("close", () =>
-    destruirGrafico("memory-timeline")
-);
 elemento("hpc-select").addEventListener("change", atualizarClusters);
 elemento("cluster-select").addEventListener("change", carregarCluster);
 elemento("restore-cluster").addEventListener("click", () =>

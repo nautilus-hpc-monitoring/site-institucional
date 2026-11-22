@@ -59,12 +59,19 @@
                     <span>Operador</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="./dashboard-analista.html">
-                    <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                    <span>Analista</span>
-                </a>
-            </li>
+            <li class="nav-item admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                            <span>Analista</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-analista.html">Dash preditiva</a></li>
+                            <li><a href="./dashboard-categorica.html">Dash categórica</a></li>
+                        </ul>
+                    </details>
+                </li>
             <li class="nav-item active admin-item">
                     <details>
                         <summary>
@@ -120,11 +127,18 @@
                         <span class="item-description">Operador</span>
                     </a>
                 </li>
-                <li class="side-item">
-                    <a href="./dashboard-analista.html">
-                        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                        <span class="item-description">Analista</span>
-                    </a>
+                <li class="side-item admin-item">
+                    <details>
+                        <summary>
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                            <span class="item-description">Analista</span>
+                            <span class="admin-seta" aria-hidden="true"></span>
+                        </summary>
+                        <ul class="admin-submenu">
+                            <li><a href="./dashboard-analista.html">Dash preditiva</a></li>
+                            <li><a href="./dashboard-categorica.html">Dash categórica</a></li>
+                        </ul>
+                    </details>
                 </li>
                 <li class="side-item active admin-item">
                     <details>
@@ -205,13 +219,13 @@
       <section hidden class="kpis" aria-label="Indicadores principais">
         <div class="kpi" id="kpi-nodes">
           <div class="eyebrow">
-            <span>Nodes com incidentes</span
+            <span>Nodes com alertas</span
             >
           </div>
-          <div class="kpi-context">Últimos 30 minutos</div>
+          <div class="kpi-context">Últimas 6 horas</div>
           <div class="kpi-metrics">
             <div>
-              <span class="kpi-label">Com incidentes</span>
+              <span class="kpi-label">Com alertas</span>
               <div class="value" id="incident-node-count">—</div>
             </div>
             <div>
@@ -434,39 +448,8 @@
             aria-label="Node do consumo de CPU e RAM"
           ></div>
         </article>
-        <article class="card prediction-card">
-          <div class="head">
-            <div>
-              <h2>Estimativa de incidentes por dia e node</h2>
-              <div class="desc" id="forecast-period">Aguardando consulta</div>
-            </div>
-          </div>
-          <div class="legend">
-            <span><i class="swatch-amber"></i>Estimativa ajustada (%)</span>
-          </div>
-          <div class="chart prediction-chart" id="forecast"></div>
-          <p class="prediction-note">Base: 4 semanas de alertas registrados · redução de 15%. Ausência de registro não comprova ausência de falha.</p>
-        </article>
-        <article class="card prediction-card">
-          <div class="head">
-            <div>
-              <h2>Tempo com RAM alta e envio para swap</h2>
-              <div class="desc" id="memory-period">Aguardando telemetria</div>
-            </div>
-          </div>
-          <div class="legend">
-            <span><i class="swatch-amber"></i>Minutos acumulados por node</span>
-          </div>
-          <div class="chart prediction-chart" id="swap"></div>
-          <p class="prediction-note">RAM a partir de 90% com envio para swap. Clique no node para ver as curvas.</p>
-        </article>
       </section>
     </main>
-    <dialog id="monitor-detail" aria-labelledby="monitor-title">
-      <h2 id="monitor-title"></h2>
-      <div id="monitor-content"></div>
-      <button id="monitor-close" type="button">Fechar detalhe</button>
-    </dialog>
     <script>
         const mobileSidebar = document.getElementById("mobileSidebar");
         const sidebarOverlay = document.getElementById("sidebar-overlay");

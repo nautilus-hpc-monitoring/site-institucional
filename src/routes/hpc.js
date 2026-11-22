@@ -37,6 +37,10 @@ router.post("/deletarCluster", function (req, res) {
 });
 
 // Node
+router.post("/listarComponentes", function (req, res) {
+    hpcController.listarComponentes(req, res);
+});
+
 router.post("/listarNodes", function (req, res) {
     hpcController.listarNodes(req, res);
 })

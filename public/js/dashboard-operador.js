@@ -4,6 +4,11 @@ if (sessionStorage.NOME_USUARIO) {
 
 const fkEmpresaUsuario = sessionStorage.ID_EMPRESA;
 const htmlSeletor = document.getElementById("seletor");
+const htmlListaSeletor = document.getElementById("lista-seletor");
+const htmlBusca = document.getElementById("ipt-busca-seletor");
+const htmlTituloSeletor = document.getElementById("titulo-seletor");
+const htmlSubtituloSeletor = document.getElementById("subtitulo-seletor");
+const htmlVoltarSeletor = document.getElementById("btn-voltar-seletor");
 const htmlDashboard = document.getElementById("dashboard");
 const mobileSidebar = document.getElementById("mobileSidebar");
 
@@ -13,6 +18,10 @@ let memoriaClusters = [];
 let clusterSelecionado = null;
 let memoriaNodes = [];
 let nodeSelecionado = null;
+let nivelSeletor = "hpc";
+let painelTelemetria = null;
+let sequenciaTelemetria = 0;
+let controladorTelemetria = null;
 
 window.onload = function () {
     validarSessao();
@@ -45,7 +54,56 @@ function classeStatus(status) {
         : "badge-inativo";
 }
 
+function normalizarTexto(valor) {
+    return String(valor ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
+
+function filtrarLista(lista, campos) {
+    const termo = normalizarTexto(htmlBusca.value.trim());
+
+    if (!termo) {
+        return lista;
+    }
+
+    return lista.filter(item =>
+        campos.some(campo => normalizarTexto(item[campo]).includes(termo))
+    );
+}
+
+function redesenharSeletor() {
+    if (nivelSeletor === "node") {
+        desenharTabelaNodes(memoriaNodes);
+    } else if (nivelSeletor === "cluster") {
+        desenharTabelaClusters(memoriaClusters);
+    } else {
+        desenharTabelaHPC(memoriaHPCs);
+    }
+}
+
+function definirCabecalho(titulo, subtitulo, mostrarVoltar) {
+    htmlTituloSeletor.textContent = titulo;
+    htmlSubtituloSeletor.textContent = subtitulo;
+    htmlVoltarSeletor.classList.toggle("none", !mostrarVoltar);
+}
+
+function voltarSeletor() {
+    if (nivelSeletor === "node") {
+        listarClusters(hpcSelecionado.id);
+    } else if (nivelSeletor === "cluster") {
+        listarHPC();
+    }
+}
+
 function mostrarSeletor() {
+    sequenciaTelemetria++;
+    if (controladorTelemetria) {
+        controladorTelemetria.abort();
+        controladorTelemetria = null;
+    }
+
     htmlSeletor.classList.remove("none");
     htmlDashboard.classList.add("none");
 }
@@ -67,6 +125,8 @@ function mostrarDashboard() {
 function listarHPC() {
     mostrarSeletor();
 
+    htmlBusca.value = "";
+    nivelSeletor = "hpc";
     hpcSelecionado = null;
     clusterSelecionado = null;
     nodeSelecionado = null;
@@ -89,14 +149,17 @@ function listarHPC() {
 }
 
 function desenharTabelaHPC(lista) {
-    let html = `
-        <div style="margin-bottom: 20px;">
-            <h2 style="margin: 0; color: #0F172A;">Ambientes HPC</h2>
-            <p class="page-subtitle" style="margin: 5px 0 0 0;">
-                Selecione um ambiente para visualizar seus clusters
-            </p>
-        </div>
+    const visiveis = filtrarLista(lista, ["nome", "localizacao"]);
+    const buscando = htmlBusca.value.trim() !== "";
 
+    htmlBusca.placeholder = "Buscar ambientes HPC...";
+    definirCabecalho(
+        "Ambientes HPC",
+        "Selecione um ambiente para visualizar seus clusters",
+        false
+    );
+
+    let html = `
         <div class="panel-card">
             <div class="tabela-wrap">
                 <table class="tabela">
@@ -111,16 +174,16 @@ function desenharTabelaHPC(lista) {
                     <tbody>
     `;
 
-    if (lista.length === 0) {
+    if (visiveis.length === 0) {
         html += `
             <tr>
                 <td colspan="4" class="vazio">
-                    Nenhum ambiente HPC encontrado.
+                    ${buscando ? "Nenhum ambiente HPC encontrado para a busca." : "Nenhum ambiente HPC encontrado."}
                 </td>
             </tr>
         `;
     } else {
-        for (let hpc of lista) {
+        for (let hpc of visiveis) {
             html += `
                 <tr class="clicavel"
                     onclick="listarClusters(${hpc.id})">
@@ -146,12 +209,14 @@ function desenharTabelaHPC(lista) {
         </div>
     `;
 
-    htmlSeletor.innerHTML = html;
+    htmlListaSeletor.innerHTML = html;
 }
 
 // CLUSTERS
 
 function listarClusters(idHpc) {
+    htmlBusca.value = "";
+    nivelSeletor = "cluster";
     hpcSelecionado = memoriaHPCs.find(h => h.id === idHpc);
 
     if (!hpcSelecionado) {
@@ -177,25 +242,17 @@ function listarClusters(idHpc) {
 }
 
 function desenharTabelaClusters(lista) {
+    const visiveis = filtrarLista(lista, ["nome"]);
+    const buscando = htmlBusca.value.trim() !== "";
+
+    htmlBusca.placeholder = "Buscar clusters...";
+    definirCabecalho(
+        "Clusters de: " + hpcSelecionado.nome,
+        "Selecione um cluster para visualizar seus nodes",
+        true
+    );
+
     let html = `
-        <div style="display: flex; justify-content: space-between;
-                    align-items: center; margin-bottom: 20px;">
-
-            <div>
-                <h2 style="margin: 0; color: #0F172A;">
-                    Clusters de: ${hpcSelecionado.nome}
-                </h2>
-
-                <p class="page-subtitle" style="margin: 5px 0 0 0;">
-                    Selecione um cluster para visualizar seus nodes
-                </p>
-            </div>
-
-            <button class="btn" onclick="listarHPC()">
-                Voltar
-            </button>
-        </div>
-
         <div class="panel-card">
             <div class="tabela-wrap">
                 <table class="tabela">
@@ -209,16 +266,16 @@ function desenharTabelaClusters(lista) {
                     <tbody>
     `;
 
-    if (lista.length === 0) {
+    if (visiveis.length === 0) {
         html += `
             <tr>
                 <td colspan="3" class="vazio">
-                    Nenhum cluster encontrado.
+                    ${buscando ? "Nenhum cluster encontrado para a busca." : "Nenhum cluster encontrado."}
                 </td>
             </tr>
         `;
     } else {
-        for (let cluster of lista) {
+        for (let cluster of visiveis) {
             html += `
                 <tr class="clicavel"
                     onclick="listarNodes(${cluster.id})">
@@ -243,12 +300,14 @@ function desenharTabelaClusters(lista) {
         </div>
     `;
 
-    htmlSeletor.innerHTML = html;
+    htmlListaSeletor.innerHTML = html;
 }
 
 // NODES
 
 function listarNodes(idCluster) {
+    htmlBusca.value = "";
+    nivelSeletor = "node";
     clusterSelecionado = memoriaClusters.find(c => c.id === idCluster);
 
     if (!clusterSelecionado) {
@@ -274,26 +333,17 @@ function listarNodes(idCluster) {
 }
 
 function desenharTabelaNodes(lista) {
+    const visiveis = filtrarLista(lista, ["hostname", "ip", "sistemaOperacional"]);
+    const buscando = htmlBusca.value.trim() !== "";
+
+    htmlBusca.placeholder = "Buscar nodes...";
+    definirCabecalho(
+        "Nodes de: " + clusterSelecionado.nome,
+        "Selecione um node para acessar o monitoramento",
+        true
+    );
+
     let html = `
-        <div style="display: flex; justify-content: space-between;
-                    align-items: center; margin-bottom: 20px;">
-
-            <div>
-                <h2 style="margin: 0; color: #0F172A;">
-                    Nodes de: ${clusterSelecionado.nome}
-                </h2>
-
-                <p class="page-subtitle" style="margin: 5px 0 0 0;">
-                    Selecione um node para acessar o monitoramento
-                </p>
-            </div>
-
-            <button class="btn"
-                onclick="listarClusters(${hpcSelecionado.id})">
-                Voltar
-            </button>
-        </div>
-
         <div class="panel-card">
             <div class="tabela-wrap">
                 <table class="tabela">
@@ -309,16 +359,16 @@ function desenharTabelaNodes(lista) {
                     <tbody>
     `;
 
-    if (lista.length === 0) {
+    if (visiveis.length === 0) {
         html += `
             <tr>
                 <td colspan="5" class="vazio">
-                    Nenhum node encontrado.
+                    ${buscando ? "Nenhum node encontrado para a busca." : "Nenhum node encontrado."}
                 </td>
             </tr>
         `;
     } else {
-        for (let node of lista) {
+        for (let node of visiveis) {
             html += `
                 <tr class="clicavel"
                     onclick="abrirDash(${node.id})">
@@ -345,35 +395,115 @@ function desenharTabelaNodes(lista) {
         </div>
     `;
 
-    htmlSeletor.innerHTML = html;
+    htmlListaSeletor.innerHTML = html;
 }
 
 // DASHBOARD DO NODE
 
-function abrirDash(idNode) {
-    nodeSelecionado = memoriaNodes.find(n => n.id === idNode);
+function numeroPercentual(valor) {
+    const numero = typeof valor === "string" && valor.trim() === "" ? NaN : Number(valor);
+    return Number.isFinite(numero) && numero >= 0 && numero <= 100 ? numero : null;
+}
 
-    if (!nodeSelecionado) {
+function ultimoValor(lista) {
+    if (!Array.isArray(lista)) return null;
+
+    for (let indice = lista.length - 1; indice >= 0; indice--) {
+        const valor = numeroPercentual(lista[indice]);
+        if (valor !== null) return valor;
+    }
+
+    return null;
+}
+
+function formatarHora(valor) {
+    if (valor === null || valor === undefined || valor === "") return "";
+
+    const data = new Date(valor);
+    if (Number.isFinite(data.getTime())) {
+        return new Intl.DateTimeFormat("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "America/Sao_Paulo"
+        }).format(data);
+    }
+
+    const texto = String(valor);
+    return /^\d{2}:\d{2}/.test(texto.slice(11)) ? texto.slice(11, 16) : texto;
+}
+
+function mediasValidas(nodeTelemetria) {
+    const resumo = nodeTelemetria?.medias_semana;
+    if (!resumo || !resumo.valores) return null;
+
+    const inicio = Date.parse(resumo.inicio);
+    const fim = Date.parse(resumo.fim);
+    if (!Number.isFinite(inicio) || !Number.isFinite(fim) || inicio > fim || fim > Date.now()) {
+        return null;
+    }
+
+    return resumo.valores;
+}
+
+function dadosDoNode() {
+    if (!painelTelemetria || !nodeSelecionado) return null;
+
+    return painelTelemetria.telemetria?.nodes?.find(
+        node => node.hostname === nodeSelecionado.hostname
+    ) || null;
+}
+
+function serieDoConsumo(nodeTelemetria) {
+    const consumo = nodeTelemetria?.consumo;
+    if (!consumo || !Array.isArray(consumo.datas) || consumo.datas.length === 0) return null;
+
+    const cpu = Array.isArray(consumo.cpuObserved) ? consumo.cpuObserved : [];
+    const ram = Array.isArray(consumo.ramObserved) ? consumo.ramObserved : [];
+    if (!cpu.some(numeroPercentual) && !ram.some(numeroPercentual)) return null;
+
+    return {
+        labels: consumo.datas.map(formatarHora),
+        cpu: consumo.datas.map((_, indice) => numeroPercentual(cpu[indice])),
+        ram: consumo.datas.map((_, indice) => numeroPercentual(ram[indice]))
+    };
+}
+
+function serieDoCalor(nodeTelemetria, componente) {
+    const calor = nodeTelemetria?.calor;
+    if (!calor || !Array.isArray(calor.leituras) || calor.leituras.length === 0) return null;
+
+    const ultimaLinha = calor.leituras[calor.leituras.length - 1];
+    if (!Array.isArray(ultimaLinha) || ultimaLinha.length === 0) return null;
+
+    const chave = Object.keys(ultimaLinha[0] || {}).find(
+        nome => nome.toUpperCase() === componente.toUpperCase()
+    );
+    if (!chave) return null;
+
+    const dados = ultimaLinha.map(leitura => numeroPercentual(leitura?.[chave]));
+    if (!dados.some(valor => valor !== null)) return null;
+
+    return {
+        labels: dados.map((_, indice) => String(indice).padStart(2, "0") + ":00"),
+        dados: dados
+    };
+}
+
+function serieDaMedia(valor, tamanho) {
+    if (valor === null) return [];
+    return Array.from({ length: tamanho }, () => valor);
+}
+
+function definirGrafico(id, labels, dados) {
+    const existente = Chart.getChart(id);
+    if (existente) {
+        existente.data.labels = labels;
+        existente.data.datasets[0].data = dados;
+        existente.update();
         return;
     }
 
-    mostrarDashboard();
-}
-
-
-const labels = [
-    "15:10", "15:11", "15:12", "15:13", "15:14",
-    "15:15", "15:16", "15:17", "15:18", "15:19",
-    "15:20", "15:21", "15:22", "15:23", "15:24",
-    "15:25", "15:26", "15:27", "15:28", "15:29",
-    "15:30", "15:31", "15:32", "15:33", "15:34",
-    "15:35", "15:36", "15:37", "15:38", "15:39"
-];
-
-function configurarGrafico(id, dados) {
-    const canvas = document.getElementById(id);
-
-    new Chart(canvas, {
+    new Chart(document.getElementById(id), {
         type: "line",
         data: {
             labels: labels,
@@ -444,29 +574,199 @@ function configurarGrafico(id, dados) {
     });
 }
 
-configurarGrafico("graficoCpu", [
-    38, 41, 44, 43, 47, 45, 48, 46, 51, 47,
-    53, 55, 52, 57, 54, 58, 56, 61, 59, 64,
-    67, 65, 70, 69, 73, 70, 74, 71, 76, 69.9
-]);
+function definirStatus(id, situacao, texto) {
+    const elemento = document.getElementById(id);
+    elemento.className = "operador-status " + (situacao === "atencao" ? "atencao" : "normal");
+    elemento.innerHTML = "<span>•</span> " + texto;
+}
 
-configurarGrafico("graficoRam", [
-    98, 99, 97, 100, 98, 96, 97, 94, 92, 90,
-    87, 85, 87, 84, 86, 82, 84, 80, 78, 74,
-    71, 74, 73, 76, 75, 78, 77, 81, 80, 79.8
-]);
+function situacaoDoComponente(componente, hostname, nome) {
+    if (!componente || componente.hostname !== hostname) return null;
+    if (String(componente.componente || "").toUpperCase() !== nome.toUpperCase()) return null;
 
-configurarGrafico("graficoDisco", [
-    83, 82, 81, 83, 82, 85, 87, 89, 88, 90,
-    88, 91, 89, 90, 92, 90, 88, 86, 85, 87,
-    86, 85, 87, 84, 86, 84, 85, 84, 83, 83.4
-]);
+    const situacao = String(componente.status_uso || "").toLowerCase();
+    if (["atencao", "alerta", "ruim"].includes(situacao)) return "atencao";
+    if (situacao === "bom") return "normal";
+    return null;
+}
 
-configurarGrafico("graficoSwap", [
-    31, 29, 30, 27, 25, 26, 23, 22, 24, 23,
-    24, 25, 27, 28, 30, 27, 29, 28, 25, 23,
-    24, 22, 24, 23, 26, 25, 28, 30, 32, 30.7
-]);
+function definirKpi(valorId, statusId, valor, situacao) {
+    document.getElementById(valorId).textContent = valor === null ? "—" : valor.toFixed(1);
+
+    if (!situacao) {
+        definirStatus(statusId, "normal", "Sem referência");
+        return;
+    }
+
+    definirStatus(statusId, situacao, situacao === "atencao" ? "Atenção" : "Normal");
+}
+
+function definirRodapes(periodos, painel) {
+    const coleta = painel?.telemetria?.metadados?.telemetria_ate;
+
+    document.querySelectorAll("#dashboard .operador-grafico-footer").forEach((rodape, indice) => {
+        rodape.querySelector("span").textContent = periodos[indice];
+        rodape.querySelector("span:last-child").textContent = coleta
+            ? "Coleta: " + formatarHora(coleta)
+            : "Sem coleta informada";
+    });
+}
+
+function definirAviso(mensagens) {
+    const aviso = document.getElementById("avisoTelemetria");
+    const filtradas = [...new Set(mensagens.filter(Boolean))];
+    aviso.hidden = filtradas.length === 0;
+    aviso.textContent = filtradas.join(" ");
+}
+
+function limparKpisEgraficos() {
+    [
+        "kpiCpuValor", "kpiRamValor", "kpiDiscoValor", "kpiAlertasValor",
+        "valorGraficoCpu", "valorGraficoRam", "valorGraficoDisco", "valorGraficoSwap"
+    ].forEach(id => {
+        document.getElementById(id).textContent = "—";
+    });
+
+    ["kpiCpuStatus", "kpiRamStatus", "kpiDiscoStatus", "kpiAlertasStatus"].forEach(id => {
+        definirStatus(id, "normal", "Carregando");
+    });
+
+    ["graficoCpu", "graficoRam", "graficoDisco", "graficoSwap"].forEach(id => {
+        definirGrafico(id, [], []);
+    });
+
+    definirRodapes(["Últimas 24 h", "Últimas 24 h", "Últimas 24 h", "Últimas 24 h"], null);
+}
+
+function quantidadeAlertasDoNode(painel, hostname) {
+    const observado = painel?.alertas?.observados?.find(item => item.node === hostname);
+    if (!observado) return 0;
+    return (Number(observado.criticos) || 0) + (Number(observado.atencao) || 0);
+}
+
+function aplicarTelemetria(erro) {
+    const painel = painelTelemetria;
+    const hostname = nodeSelecionado?.hostname;
+    const node = dadosDoNode();
+    const medias = mediasValidas(node);
+    const serie = serieDoConsumo(node);
+    const serieDisco = serieDoCalor(node, "Disco");
+    const serieSwap = serieDoCalor(node, "Swap");
+    const componente = painel?.componente;
+    const labelsPadrao = serie?.labels.length
+        ? serie.labels
+        : Array.from({ length: 24 }, (_, indice) => String(indice).padStart(2, "0") + ":00");
+
+    const avisos = painel?.avisos ? painel.avisos.slice() : [];
+    if (erro) avisos.push(erro);
+    if (!node) avisos.push("Nenhuma telemetria publicada para este node no S3.");
+
+    const cpu = serie ? ultimoValor(serie.cpu) : numeroPercentual(medias?.CPU);
+    const ram = serie ? ultimoValor(serie.ram) : numeroPercentual(medias?.RAM);
+    const disco = numeroPercentual(medias?.Disco);
+    const swap = numeroPercentual(medias?.Swap);
+    const situacaoCpu = situacaoDoComponente(componente, hostname, "CPU");
+    const situacaoRam = situacaoDoComponente(componente, hostname, "RAM");
+    const situacaoDisco = situacaoDoComponente(componente, hostname, "Disco");
+
+    definirKpi("kpiCpuValor", "kpiCpuStatus", cpu, situacaoCpu);
+    definirKpi("kpiRamValor", "kpiRamStatus", ram, situacaoRam);
+    definirKpi("kpiDiscoValor", "kpiDiscoStatus", disco, situacaoDisco);
+
+    document.getElementById("valorGraficoCpu").textContent = cpu === null ? "—" : cpu.toFixed(1);
+    document.getElementById("valorGraficoRam").textContent = ram === null ? "—" : ram.toFixed(1);
+    document.getElementById("valorGraficoDisco").textContent = disco === null ? "—" : disco.toFixed(1);
+    document.getElementById("valorGraficoSwap").textContent = swap === null ? "—" : swap.toFixed(1);
+
+    const quantidadeAlertas = painel ? quantidadeAlertasDoNode(painel, hostname) : null;
+    document.getElementById("kpiAlertasValor").textContent =
+        quantidadeAlertas === null ? "—" : String(quantidadeAlertas);
+    definirStatus(
+        "kpiAlertasStatus",
+        quantidadeAlertas > 0 ? "atencao" : "normal",
+        quantidadeAlertas === null ? "Sem dados" : quantidadeAlertas > 0 ? "Atenção" : "Normal"
+    );
+
+    definirGrafico("graficoCpu", labelsPadrao, serie ? serie.cpu : []);
+    definirGrafico("graficoRam", labelsPadrao, serie ? serie.ram : []);
+    definirGrafico(
+        "graficoDisco",
+        serieDisco ? serieDisco.labels : labelsPadrao,
+        serieDisco ? serieDisco.dados : serieDaMedia(disco, labelsPadrao.length)
+    );
+    definirGrafico(
+        "graficoSwap",
+        serieSwap ? serieSwap.labels : labelsPadrao,
+        serieSwap ? serieSwap.dados : serieDaMedia(swap, labelsPadrao.length)
+    );
+
+    definirRodapes([
+        "Últimas 24 h",
+        "Últimas 24 h",
+        serieDisco ? "Últimas 24 h" : "Média semanal",
+        serieSwap ? "Últimas 24 h" : "Média semanal"
+    ], painel);
+
+    definirAviso(avisos);
+}
+
+async function buscarPainelDoCluster(idCluster, signal) {
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
+        location.href = "./login.html";
+        throw new Error("Entre novamente.");
+    }
+
+    const resposta = await fetch(
+        "/dashcluster/clusters/" + encodeURIComponent(idCluster) +
+            "/dados?idUsuario=" + encodeURIComponent(idUsuario),
+        { signal: signal, cache: "no-store" }
+    );
+
+    if (resposta.status === 401) {
+        location.href = "./login.html";
+        throw new Error("Entre novamente.");
+    }
+
+    const dados = await resposta.json();
+    if (!resposta.ok) {
+        throw new Error(dados.erro || "Não foi possível carregar a telemetria do node.");
+    }
+
+    return dados;
+}
+
+async function abrirDash(idNode) {
+    nodeSelecionado = memoriaNodes.find(node => node.id === idNode);
+    if (!nodeSelecionado || !clusterSelecionado) return;
+
+    document.getElementById("tituloNode").textContent = nodeSelecionado.hostname;
+    definirAviso(["Carregando telemetria do S3..."]);
+    limparKpisEgraficos();
+    mostrarDashboard();
+
+    const sequencia = ++sequenciaTelemetria;
+    if (controladorTelemetria) controladorTelemetria.abort();
+    controladorTelemetria = new AbortController();
+
+    try {
+        const painel = await buscarPainelDoCluster(
+            clusterSelecionado.id,
+            controladorTelemetria.signal
+        );
+        if (sequencia !== sequenciaTelemetria) return;
+
+        painelTelemetria = painel;
+        aplicarTelemetria();
+    } catch (erro) {
+        if (erro.name === "AbortError" || sequencia !== sequenciaTelemetria) return;
+
+        painelTelemetria = null;
+        aplicarTelemetria(erro.message);
+    } finally {
+        if (sequencia === sequenciaTelemetria) controladorTelemetria = null;
+    }
+}
 
 
 // SIDEBAR MOBILE
@@ -485,3 +785,5 @@ document.getElementById("sidebar-overlay").onclick = function () {
     mobileSidebar.classList.remove("active");
     document.getElementById("sidebar-overlay").classList.remove("active");
 };
+
+htmlBusca.addEventListener("input", redesenharSeletor);

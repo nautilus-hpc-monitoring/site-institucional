@@ -1,5 +1,5 @@
 var dashClusterModel = require("../models/dashClusterModel");
-var s3Service = require("../services/s3Service");
+var awsService = require("../services/awsService");
 var clusterCalculos = require("../services/clusterCalculos");
 
 // Consulta a empresa do usuário para limitar os clusters que ele pode acessar.
@@ -76,8 +76,8 @@ async function dados(req, res) {
         const prefixo = pastaGold.replace(/\/+$/, "");
         const caminhoArquivo = `${prefixo}/cluster=${idCluster}/dashboard.json`;
 
-        // As três consultas são independentes, então podem carregar ao mesmo tempo.
-        const [nodes, alertas, arquivo] = await Promise.all([
+        // Consultas independentes carregam ao mesmo tempo.
+        const [nodes, alertas, arquivo, limites] = await Promise.all([
             dashClusterModel.nodes(idCluster, usuario.idEmpresa),
             dashClusterModel.alertas(
                 idCluster,
@@ -85,7 +85,8 @@ async function dados(req, res) {
                 formatarDataParaBanco(inicioDaConsulta),
                 formatarDataParaBanco(agora)
             ),
-            s3Service.lerJson(caminhoArquivo)
+            awsService.lerJson(caminhoArquivo),
+            dashClusterModel.limites(idCluster, usuario.idEmpresa)
         ]);
 
         const telemetria = clusterCalculos.normalizarGold(
@@ -111,7 +112,7 @@ async function dados(req, res) {
                 usuario.slaMinutos
             ),
             telemetria: telemetria,
-            componente: clusterCalculos.componenteMaiorMedia(telemetria.nodes, agora),
+            componente: clusterCalculos.componenteMaiorMedia(telemetria.nodes, agora, limites),
             avisos: avisos
         });
     } catch (erro) {
