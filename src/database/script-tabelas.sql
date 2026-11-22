@@ -1,4 +1,4 @@
-CREATE DATABASE	nautilus;
+CREATE DATABASE IF NOT EXISTS nautilus;
 USE nautilus;
 
 CREATE TABLE aws_credentials (
