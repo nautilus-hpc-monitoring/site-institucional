@@ -21,12 +21,12 @@ Docker: `docker compose -f docker/docker-compose.yml up -d --build` → `http://
 - `.env` and `.env.dev` are gitignored. `app.js` loads `./.env` for `AMBIENTE_PROCESSO=producao`, `./.env.dev` otherwise. It reads the variable **before** dotenv runs, so to switch files it must be set in the shell: `$env:AMBIENTE_PROCESSO="desenvolvimento"; npm run dev`.
 - `src/database/config.js` rejects every query unless `AMBIENTE_PROCESSO` is exactly `producao` or `desenvolvimento` in the loaded env file.
 - Required env: `DB_HOST DB_DATABASE DB_USER DB_PASSWORD DB_PORT APP_PORT APP_HOST`; email uses `RESEND_API_KEY`.
-- AWS/S3 vars are often absent locally: `BUCKET_NAME`, `AWS_REGION` (default `us-east-1`), `AWS_CREDENTIAL_SOURCE=database`, `AWS_CREDENTIAL_SYNC_ENABLED=true`, `CLUSTER_GOLD_PREFIX` (default `03-gold/gestor`), `DB_UTC_OFFSET` (default `-03:00`), and `AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_SESSION_TOKEN` (gestor dashboard only). Without `BUCKET_NAME`, S3 endpoints return `{ dados: null, aviso }` instead of failing.
+- AWS/S3 vars are often absent locally: `BUCKET_NAME`, `AWS_REGION` (default `us-east-1`), `AWS_CREDENTIAL_SOURCE=database`, `AWS_CREDENTIAL_SYNC_ENABLED=true`, `CLUSTER_GOLD_PREFIX` (default `03-gold/gestor`), `S3_KEY` (chave completa do JSON da dashboard analista; default `03-gold/dashboard-categorica/dashboard.json`), `ANALISTA_GOLD_LOCAL_DIR` (analyst dashboard reads `cluster=<id>/dashboard.json` from disk instead of S3; for local testing), `DB_UTC_OFFSET` (default `-03:00`), and `AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_SESSION_TOKEN` (gestor dashboard only). Without `BUCKET_NAME`, S3 endpoints return `{ dados: null, aviso }` instead of failing.
 - Schema lives only in `src/database/script-tabelas.sql`; no migrations or seeds. Apply manually to a fresh DB.
 
 ## Architecture
 
-Request flow: `app.js` mounts routers (`src/routes`) → controllers (`src/controllers`) → models (`src/models`), with `src/services` for S3, email, and AWS credentials. Mounted prefixes: `/usuarios`, `/empresas`, `/auth`, `/hpc`, `/dashgestor`, `/dashcluster`, `/alertas`.
+Request flow: `app.js` mounts routers (`src/routes`) → controllers (`src/controllers`) → models (`src/models`), with `src/services` for S3, email, and AWS credentials. Mounted prefixes: `/usuarios`, `/empresas`, `/auth`, `/hpc`, `/dashgestor`, `/dashcluster`, `/dashanalista`, `/alertas`.
 
 - `src/database/config.js` exports only `executar(sql, params)` and opens a new connection per query. Do not call `query()` on it (see gotchas).
 - Prefer `?` placeholders (`alertaModel`, `dashClusterModel` do this). `hpcModel` and parts of `usuarioModel` interpolate values into SQL strings; don't add new interpolation.
@@ -42,7 +42,7 @@ Request flow: `app.js` mounts routers (`src/routes`) → controllers (`src/contr
 - `src/routes/index.js` calls `res.render("index")` with no view engine, but static middleware serves `public/index.html` first. That router is effectively dead — don't copy its pattern.
 - `dashGestorController.buscarDadosGold` calls `conexao.query(...)`, which `config.js` doesn't export; the error is swallowed and the dashboard silently falls back to zero KPIs.
 - Relatórios page is unwired: `app.js` never mounts `src/routes/relatorios.js`, that router requires a missing `relatorioController`, and `relatorios.html` calls a GET where the router defines POST.
-- Dashboards are partly mock data: `public/js/dashboard-gestor.js` has `USAR_DADOS_MOCKADOS = true`, and `dashboard-analista.js` is entirely hardcoded arrays. Only `dashboard-cluster` and `dashboard-operador` call real APIs.
+- Dashboards are partly mock data: `public/js/dashboard-gestor.js` has `USAR_DADOS_MOCKADOS = true`. `dashboard-cluster`, `dashboard-operador` and `dashboard-analista` call real APIs (`/dashcluster`, `/dashanalista`).
 - `login.js` saves `ID_NIVEL_ACESSO` from `fk_nivel_acesso`, which `/usuarios/autenticar` does not return, so it is stored as `undefined`.
 
 ## Repo facts

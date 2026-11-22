@@ -37,6 +37,7 @@ app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
 app.use("/dashcategorica", dashCategoricaRouter);
 app.use("/dashcluster", require("./src/routes/dashCluster"));
+app.use("/dashanalista", require("./src/routes/dashAnalista"));
 app.use("/alertas", require("./src/routes/alertas"));
 
 if (process.env.AWS_CREDENTIAL_SYNC_ENABLED === 'true') {

@@ -1,19 +1,43 @@
-/* ---------- Sessão e sidebar mobile ---------- */
+/* Dashboard do analista: consome /dashanalista e desenha a tela.
+ *
+ * MAPA DO ARQUIVO
+ *  1. Sessão e sidebar.
+ *  2. Configuração visual e utilidades de formatação.
+ *  3. Estado da página.
+ *  4. Comunicação com a API.
+ *  5. Carga de cluster, node e período.
+ *  6. KPIs.
+ *  7. Percentis.
+ *  8. Gráficos semanais.
+ *  9. Correlação (cartão e modal).
+ * 10. Rodapé, estado vazio e modais.
+ * 11. Inicialização.
+ *
+ * De onde vêm os números: silver2goldAnalista.py publica
+ * 03-gold/analista/cluster=<id>/dashboard.json; o controller do Node lê esse
+ * arquivo e devolve apenas o node selecionado. Esta página não calcula medições:
+ * ela apenas formata e desenha o que recebeu.
+ */
 
+/* ---------- 1. SESSÃO E SIDEBAR ---------- */
+
+// protegerPagina() está em sessao.js: se não houver ID_USUARIO, vai para o login.
+protegerPagina();
+
+// Mostra o nome do usuário no topo (desktop e menu mobile).
 if (sessionStorage.NOME_USUARIO) {
     const nomeUsuario = document.getElementById("b_usuario");
-
     if (nomeUsuario) {
         nomeUsuario.innerHTML = sessionStorage.NOME_USUARIO;
     }
 
     const usuarioMobile = document.getElementById("b_usuario_mobile");
-
     if (usuarioMobile) {
         usuarioMobile.innerHTML = sessionStorage.NOME_USUARIO;
     }
 }
 
+// Abre e fecha o menu lateral no celular.
 const mobileSidebar = document.getElementById("mobileSidebar");
 const sidebarOverlay = document.getElementById("sidebar-overlay");
 
@@ -32,51 +56,19 @@ sidebarOverlay.onclick = function () {
     sidebarOverlay.classList.remove("active");
 };
 
-/* ---------- Dados (mock) ---------- */
+/* ---------- 2. CONFIGURAÇÃO E UTILIDADES ---------- */
 
-const SEMANAS = [
-    "07 abr", "14 abr", "21 abr", "28 abr",
-    "05 mai", "12 mai", "19 mai", "26 mai",
-    "02 jun", "09 jun", "16 jun", "23 jun",
-    "30 jun", "07 jul", "14 jul", "21 jul",
-    "28 jul", "04 ago", "11 ago", "18 ago",
-    "25 ago", "01 set", "08 set", "15 set"
-];
+// Atalho para buscar elementos pelo id (evita repetir document.getElementById).
+const elemento = (id) => document.getElementById(id);
 
+// true apenas para números de verdade (descarta null, undefined, NaN e texto).
+const numero = (valor) => typeof valor === "number" && Number.isFinite(valor);
+
+// Cada componente tem nome e cor próprios, iguais aos usados na ETL e no CSS.
 const COMPONENTES = {
-    cpu: {
-        nome: "CPU",
-        cor: "#2f7fe0",
-        corSuave: "rgba(47, 127, 224, 0.35)",
-        valores: [
-            45, 48, 47, 50, 44, 82, 46, 43,
-            49, 45, 85, 46, 47, 44, 84, 50,
-            46, 43, 88, 49, 45, 50, 46, 97.8
-        ],
-        percentis: { p50: 51, p90: 73, p95: 81, p99: 94 }
-    },
-    ram: {
-        nome: "RAM",
-        cor: "#7c6cd6",
-        corSuave: "rgba(124, 108, 214, 0.35)",
-        valores: [
-            47, 45, 42, 46, 44, 83, 46, 44,
-            41, 45, 43, 86, 44, 42, 46, 43,
-            45, 41, 85, 44, 42, 45, 43, 44
-        ],
-        percentis: { p50: 48, p90: 71, p95: 84, p99: 92 }
-    },
-    disco: {
-        nome: "Disco",
-        cor: "#f08a3c",
-        corSuave: "rgba(240, 138, 60, 0.35)",
-        valores: [
-            47, 48, 44, 49, 47, 48, 46, 49,
-            47, 49, 48, 47, 49, 46, 48, 47,
-            49, 46, 48, 82, 47, 49, 48, 48
-        ],
-        percentis: { p50: 49, p90: 66, p95: 78, p99: 90 }
-    }
+    cpu: { nome: "CPU", cor: "#2f7fe0", corSuave: "rgba(47, 127, 224, 0.35)" },
+    ram: { nome: "RAM", cor: "#7c6cd6", corSuave: "rgba(124, 108, 214, 0.35)" },
+    disco: { nome: "Disco", cor: "#f08a3c", corSuave: "rgba(240, 138, 60, 0.35)" }
 };
 
 const CORES_GRAFICO = {
@@ -85,201 +77,602 @@ const CORES_GRAFICO = {
     residuo: "#d64545"
 };
 
+// Mesmo limite usado pela ETL em ANALISTA_LIMITE_PICO.
 const LIMITE_PICO = 80;
 
-/* ---------- Cálculos auxiliares ---------- */
+// Quantas semanas exibir em cada opção do seletor de período.
+// 6 meses equivale ao padrão publicado pela ETL (ANALISTA_SEMANAS=24).
+const SEMANAS_POR_PERIODO = { "1": 5, "3": 13, "6": 24 };
 
-function calcularMedia(valores) {
-    const soma = valores.reduce((total, valor) => total + valor, 0);
-    return soma / valores.length;
-}
-
-function calcularRegressao(valores) {
-    const n = valores.length;
-    const mediaX = (n - 1) / 2;
-    const mediaY = calcularMedia(valores);
-
-    let numerador = 0;
-    let denominador = 0;
-
-    valores.forEach((valor, indice) => {
-        numerador += (indice - mediaX) * (valor - mediaY);
-        denominador += Math.pow(indice - mediaX, 2);
-    });
-
-    const inclinacao = denominador === 0 ? 0 : numerador / denominador;
-
-    return {
-        inclinacao: inclinacao,
-        intercepto: mediaY - inclinacao * mediaX
-    };
-}
-
-function preverRegressao(regressao, indice) {
-    return regressao.intercepto + regressao.inclinacao * indice;
-}
-
-function pontosDePico(valores) {
-    return valores
-        .map((valor, indice) => ({ valor: valor, indice: indice }))
-        .filter(item => item.valor > LIMITE_PICO)
-        .map(item => ({ x: SEMANAS[item.indice], y: item.valor }));
-}
-
-function pontosDeResiduo(valores, regressao) {
-    const candidatos = valores
-        .map((valor, indice) => ({
-            indice: indice,
-            valor: valor,
-            residuo: Math.abs(valor - preverRegressao(regressao, indice))
-        }))
-        .filter(item => item.valor <= LIMITE_PICO && item.residuo > 5)
-        .sort((a, b) => b.residuo - a.residuo)
-        .slice(0, 3);
-
-    return candidatos.map(item => ({ x: SEMANAS[item.indice], y: item.valor }));
-}
-
-function formatarPorcentagem(valor) {
+// Formata porcentagem no padrão brasileiro: 55.7 -> "55,7%".
+function formatarPorcentagem(valor, casas = 1) {
+    if (!numero(valor)) {
+        return "—";
+    }
     return valor.toLocaleString("pt-BR", {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
     }) + "%";
 }
 
-function formatarNumero(valor, casas) {
+// Formata número comum: 96.6 -> "96,6".
+function formatarNumero(valor, casas = 1) {
+    if (!numero(valor)) {
+        return "—";
+    }
     return valor.toLocaleString("pt-BR", {
         minimumFractionDigits: casas,
         maximumFractionDigits: casas
     });
 }
 
-/* ---------- Gráficos semanais ---------- */
+// Formata data/hora local de São Paulo.
+function formatarDataHora(valor) {
+    if (!valor) {
+        return "—";
+    }
+    const data = new Date(valor);
+    if (!Number.isFinite(data.getTime())) {
+        return "—";
+    }
+    return data.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+}
 
-function criarSerieSemestreAnterior(valores) {
-    const base = calcularMedia(valores) * 0.9;
+// Nome curto do mês, para rótulos do tipo "07 abr".
+const MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun",
+    "jul", "ago", "set", "out", "nov", "dez"];
 
-    return valores.map((valor, indice) => {
-        const oscilacao = Math.sin(indice / 2.3) * 2.6 + Math.cos(indice / 1.7) * 1.4;
-        return Math.round((base + oscilacao) * 10) / 10;
+// "2026-11-16" -> "16 nov" (usado para achar o rótulo de uma anomalia).
+function rotuloDaData(iso) {
+    const partes = String(iso || "").split("-");
+    if (partes.length !== 3) {
+        return "";
+    }
+    const dia = Number(partes[2]);
+    const mes = Number(partes[1]) - 1;
+    return String(dia).padStart(2, "0") + " " + (MESES_CURTOS[mes] || "");
+}
+
+// Escreve textContent em um elemento pelo id, sem quebrar se ele não existir.
+function texto(id, valor) {
+    const alvo = elemento(id);
+    if (alvo) {
+        alvo.textContent = valor;
+    }
+}
+
+// Escreve em um <em class="delta..."> e escolhe a cor.
+// valor null/undefined limpa o texto e esconde a marcação.
+function escreverDelta(id, textoDelta, classe) {
+    const alvo = elemento(id);
+    if (!alvo) {
+        return;
+    }
+    alvo.textContent = textoDelta || "";
+    alvo.className = "delta " + (classe || "delta-neutral");
+}
+
+// Média simples de uma lista, ignorando posições vazias.
+function media(valores) {
+    const validos = valores.filter(numero);
+    if (!validos.length) {
+        return null;
+    }
+    return validos.reduce((total, item) => total + item, 0) / validos.length;
+}
+
+/* ---------- 3. ESTADO ---------- */
+
+let clusters = [];        // lista devolvida por /dashanalista/clusters
+let nodes = [];           // hostnames do cluster selecionado
+let painel = null;        // resposta completa do último /dados
+let metadados = null;     // quando o JSON foi gerado
+let avisos = [];          // mensagens de configuração/falha do S3
+let periodoAtual = "6";   // opção do seletor de período
+let carregando = false;   // evita pedidos simultâneos
+const graficos = {};      // instâncias do Chart.js por componente
+
+// Quantas semanas o gráfico deve mostrar agora (limitado ao que existe).
+function semanasVisiveis() {
+    const disponiveis = painel && painel.node && painel.node.semanas
+        ? painel.node.semanas.datas.length
+        : 0;
+    const pedidas = SEMANAS_POR_PERIODO[periodoAtual] || 24;
+    return Math.min(pedidas, disponiveis);
+}
+
+/* ---------- 4. COMUNICAÇÃO COM A API ---------- */
+
+// Toda chamada anexa ?idUsuario= porque o servidor autoriza por ele.
+async function api(caminho) {
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
+        location.href = "./login.html";
+        throw new Error("Sessão expirada.");
+    }
+
+    const separador = caminho.includes("?") ? "&" : "?";
+    const resposta = await fetch(
+        caminho + separador + "idUsuario=" + encodeURIComponent(idUsuario),
+        { cache: "no-store" }
+    );
+
+    // 401 significa que o servidor recusou a sessão.
+    if (resposta.status === 401) {
+        location.href = "./login.html";
+        throw new Error("Sessão expirada.");
+    }
+
+    const dados = await resposta.json();
+    if (!resposta.ok) {
+        throw new Error(dados.erro || "Falha ao consultar dados.");
+    }
+    return dados;
+}
+
+/* ---------- 5. CARGA DE CLUSTER, NODE E PERÍODO ---------- */
+
+// Preenche um <select> com uma lista de valores.
+function preencherSelect(select, itens) {
+    if (!select) {
+        return;
+    }
+    // new Option(texto, valor) cria as opções uma a uma.
+    select.replaceChildren(...itens.map(function (item) {
+        return new Option(item.texto, String(item.valor));
+    }));
+    select.disabled = itens.length === 0;
+}
+
+// Busca os clusters do usuário e inicia pela primeira opção.
+async function iniciar() {
+    try {
+        clusters = await api("/dashanalista/clusters");
+
+        if (!clusters.length) {
+            mostrarEstado("Nenhum cluster disponível para este usuário.");
+            return;
+        }
+
+        preencherSelect(elemento("seletor-cluster"), clusters.map(function (cluster) {
+            return {
+                valor: cluster.cluster_id,
+                texto: cluster.hpc_nome + " • " + cluster.cluster_nome
+            };
+        }));
+
+        await carregarCluster(clusters[0].cluster_id);
+    } catch (erro) {
+        mostrarEstado(erro.message);
+    }
+}
+
+// Lê o JSON da Gold para um cluster e já carrega o primeiro node.
+async function carregarCluster(idCluster) {
+    if (carregando) {
+        return;
+    }
+    carregando = true;
+
+    try {
+        painel = await api("/dashanalista/clusters/" + encodeURIComponent(idCluster) + "/dados");
+        metadados = painel.metadados;
+        avisos = painel.avisos || [];
+        nodes = painel.nodes || [];
+
+        preencherSelect(elemento("seletor-node"), nodes.map(function (nome) {
+            return { valor: nome, texto: nome };
+        }));
+
+        if (painel.selecionado) {
+            elemento("seletor-node").value = painel.selecionado;
+        }
+
+        renderizar(painel.node);
+    } catch (erro) {
+        mostrarEstado(erro.message);
+    } finally {
+        // finally roda mesmo com erro, liberando a próxima troca de cluster.
+        carregando = false;
+    }
+}
+
+// Troca de node: busca o mesmo cluster passando ?node=<hostname>.
+async function carregarNode(nome) {
+    const idCluster = elemento("seletor-cluster").value;
+    if (!idCluster || carregando) {
+        return;
+    }
+    carregando = true;
+
+    try {
+        painel = await api(
+            "/dashanalista/clusters/" + encodeURIComponent(idCluster) +
+            "/dados?node=" + encodeURIComponent(nome)
+        );
+        metadados = painel.metadados;
+        avisos = painel.avisos || [];
+        renderizar(painel.node);
+    } catch (erro) {
+        mostrarEstado(erro.message);
+    } finally {
+        carregando = false;
+    }
+}
+
+/* ---------- 6. KPIs ---------- */
+
+// Indica se os deltas podem ser calculados: precisa do período completo
+// (6 meses) e da comparação publicada pela ETL.
+function podeComparar(node) {
+    return periodoAtual === "6" && Boolean(node.comparacao && node.comparacao.disponivel);
+}
+
+// Variação percentual entre dois valores: (atual - anterior) / anterior * 100.
+function variacaoPercentual(atual, anterior) {
+    if (!numero(atual) || !numero(anterior) || anterior === 0) {
+        return null;
+    }
+    return (atual - anterior) / anterior * 100;
+}
+
+// Texto com sinal: 9 -> "+9", -3 -> "-3".
+function comSinal(valor) {
+    return (valor > 0 ? "+" : "") + valor;
+}
+// Preenche os quatro cartões de KPI.
+function renderizarKpis(node) {
+    const kpis = node.kpis || {};
+    const anterior = kpis.periodo_anterior || {};
+    const comparavel = podeComparar(node);
+
+    /* Maior pico: componente, valor e instante. */
+    const pico = kpis.maior_pico;
+    if (pico && numero(pico.valor)) {
+        texto("kpi-pico-sub", pico.texto || pico.componente_nome);
+        texto("kpi-pico-valor", formatarPorcentagem(pico.valor));
+
+        const delta = comparavel
+            ? variacaoPercentual(pico.valor, (anterior.maior_pico || {}).valor)
+            : null;
+        escreverDelta(
+            "kpi-pico-delta",
+            numero(delta) ? comSinal(Math.round(delta)) + "%" : "",
+            delta > 0 ? "delta-orange" : "delta-neutral"
+        );
+    } else {
+        texto("kpi-pico-sub", "Nenhum pico acima de " + LIMITE_PICO + "%");
+        texto("kpi-pico-valor", "0%");
+        escreverDelta("kpi-pico-delta", "", "delta-neutral");
+    }
+
+    /* Maior anomalia: resíduo da média semanal em relação à reta. */
+    const anomalia = kpis.maior_anomalia;
+    if (anomalia && numero(anomalia.residuo)) {
+        texto("kpi-anomalia-sub", anomalia.componente_nome + " • semana de " + anomalia.rotulo);
+        texto("kpi-anomalia-valor", formatarNumero(anomalia.residuo, 1) + " pp");
+    } else {
+        texto("kpi-anomalia-sub", "Sem anomalias");
+        texto("kpi-anomalia-valor", "0 pp");
+    }
+
+    /* Quantidade de picos e tempo acumulado. */
+    const quantidadePicos = numero(kpis.quantidade_picos) ? kpis.quantidade_picos : 0;
+    texto("kpi-picos-total", quantidadePicos + (quantidadePicos === 1 ? " pico" : " picos"));
+    texto("kpi-picos-desc", (kpis.duracao_acumulada_picos_texto || "0min") + " acumulados de picos");
+    const deltaPicos = comparavel && numero(anterior.quantidade_picos)
+        ? quantidadePicos - anterior.quantidade_picos
+        : null;
+    escreverDelta(
+        "kpi-picos-delta",
+        numero(deltaPicos) ? comSinal(deltaPicos) + (Math.abs(deltaPicos) === 1 ? " pico" : " picos") : "",
+        deltaPicos > 0 ? "delta-orange" : "delta-neutral"
+    );
+
+    /* Quantidade de anomalias. */
+    const quantidadeAnomalias = numero(kpis.quantidade_anomalias) ? kpis.quantidade_anomalias : 0;
+    texto(
+        "kpi-anomalias-valor",
+        quantidadeAnomalias === 0 ? "Sem anomalias" : quantidadeAnomalias + (quantidadeAnomalias === 1 ? " anomalia" : " anomalias")
+    );
+    texto(
+        "kpi-anomalias-desc",
+        quantidadeAnomalias === 0
+            ? "Nenhuma anomalia no período"
+            : "Desvios acima de 5 pp da tendência semanal"
+    );
+
+    /* Duração do pico mais longo. */
+    texto("kpi-duracao-valor", kpis.duracao_pico_mais_longo_texto || "0min");
+
+    const deltaDuracao = comparavel && numero(anterior.duracao_pico_mais_longo_segundos)
+        ? (kpis.duracao_pico_mais_longo_segundos - anterior.duracao_pico_mais_longo_segundos) / 60
+        : null;
+    escreverDelta(
+        "kpi-duracao-delta",
+        numero(deltaDuracao) ? comSinal(Math.round(deltaDuracao)) + " min" : "",
+        deltaDuracao > 0 ? "delta-orange" : "delta-neutral"
+    );
+
+    /* Componente mais instável. */
+    const instavel = kpis.componente_mais_instavel;
+    if (instavel) {
+        texto("kpi-instavel-valor", instavel.componente_nome);
+        texto(
+            "kpi-instavel-desc",
+            numero(instavel.variacao_percentual)
+                ? formatarPorcentagem(instavel.variacao_percentual) + " de variação no período"
+                : formatarNumero(instavel.amplitude, 1) + " pp de amplitude no período"
+        );
+    } else {
+        texto("kpi-instavel-valor", "—");
+        texto("kpi-instavel-desc", "Semanas insuficientes para comparar");
+    }
+
+    /* Cartão de variação geral (média dos componentes).
+     * A ETL só publica a comparação para a janela de 6 meses
+     * (ANALISTA_SEMANAS=24). Nos outros períodos do seletor, mostramos "—"
+     * e explicamos o motivo, em vez de comparar recortes diferentes. */
+    const comparacao = node.comparacao || {};
+    const variacaoGeral = comparavel
+        ? media(Object.values(comparacao.variacao_percentual || {}))
+        : null;
+
+    if (numero(variacaoGeral)) {
+        texto("variation-valor", comSinal(formatarNumero(variacaoGeral, 1)) + "%");
+
+        // Abaixo de meio por cento a diferença é ruído: dizemos "estável".
+        let frase;
+        if (Math.abs(variacaoGeral) < 0.5) {
+            frase = "Média geral de utilização praticamente estável em relação aos 6 meses anteriores.";
+        } else if (variacaoGeral > 0) {
+            frase = "Média geral de utilização aumentou em relação aos 6 meses anteriores.";
+        } else {
+            frase = "Média geral de utilização diminuiu em relação aos 6 meses anteriores.";
+        }
+        texto("variation-info", frase);
+    } else {
+        texto("variation-valor", "—");
+        texto(
+            "variation-info",
+            periodoAtual === "6"
+                ? (comparacao.motivo || "Sem dados do período anterior para comparar.")
+                : "A comparação com o período anterior está disponível apenas para os últimos 6 meses."
+        );
+    }
+}
+
+/* ---------- 7. PERCENTIS ---------- */
+
+// Preenche o bloco de percentis do componente da aba clicada.
+function renderizarPercentis(node, chave) {
+    const dados = (node.componentes || {})[chave] || {};
+    const percentis = dados.percentis || {};
+
+    document.querySelectorAll("#percentis [data-percentil]").forEach(function (item) {
+        const valor = percentis[item.dataset.percentil];
+        item.textContent = numero(valor) ? formatarPorcentagem(valor, 1) : "—";
     });
 }
 
-function criarGraficoComponente(chave, componente) {
-    const canvas = document.getElementById("chart-" + chave);
+// Liga as abas CPU/RAM/Disco.
+function ligarAbas() {
+    const abas = document.querySelectorAll("#component-tabs .tab");
 
-    if (!canvas) {
+    abas.forEach(function (aba) {
+        aba.addEventListener("click", function () {
+            // Remove o estado ativo de todas e aplica só na clicada.
+            abas.forEach(function (outra) {
+                outra.classList.remove("active");
+                outra.setAttribute("aria-selected", "false");
+            });
+            aba.classList.add("active");
+            aba.setAttribute("aria-selected", "true");
+
+            if (painel && painel.node) {
+                renderizarPercentis(painel.node, aba.dataset.componente);
+            }
+        });
+    });
+}
+
+/* ---------- 8. GRÁFICOS SEMANAIS ---------- */
+
+// Remove o gráfico anterior antes de desenhar outro no mesmo canvas.
+function destruirGrafico(chave) {
+    if (graficos[chave]) {
+        graficos[chave].destroy();
+        delete graficos[chave];
+    }
+}
+
+// Coloca uma mensagem no lugar do canvas quando não há dados.
+function semDados(chave, mensagem) {
+    destruirGrafico(chave);
+
+    // O CSS .chart-vazio esconde o canvas e centraliza o texto.
+    const caixa = elemento("chart-" + chave).parentElement;
+    caixa.classList.add("chart-vazio");
+
+    // Cria (uma única vez) o elemento de texto dentro da caixa.
+    let aviso = caixa.querySelector(".chart-vazio-texto");
+    if (!aviso) {
+        aviso = document.createElement("span");
+        aviso.className = "chart-vazio-texto";
+        caixa.appendChild(aviso);
+    }
+    aviso.textContent = mensagem || "Sem dados para o período.";
+}
+
+// Desfaz o estado vazio antes de desenhar um gráfico.
+function limparEstadoVazio(chave) {
+    const caixa = elemento("chart-" + chave).parentElement;
+    caixa.classList.remove("chart-vazio");
+    const aviso = caixa.querySelector(".chart-vazio-texto");
+    if (aviso) {
+        aviso.remove();
+    }
+}
+
+// Monta um gráfico de um componente (CPU, RAM ou Disco).
+function criarGraficoComponente(node, chave) {
+    const componente = COMPONENTES[chave];
+    const dados = (node.componentes || {})[chave] || {};
+    const quantidade = semanasVisiveis();
+
+    if (quantidade === 0) {
+        semDados(chave, "Sem semanas publicadas para este node.");
         return;
     }
 
-    const valores = componente.valores;
-    const regressao = calcularRegressao(valores);
-    const linhaRegressao = valores.map((valor, indice) => {
-        const previsto = preverRegressao(regressao, indice);
-        return Math.min(100, Math.max(0, Math.round(previsto * 10) / 10));
+    // .slice(-quantidade) pega as últimas N posições, mantendo a ordem.
+    // Os "|| []" protegem contra campos ausentes no JSON.
+    const rotulos = (node.semanas.rotulos || []).slice(-quantidade);
+    const medias = (dados.medias || []).slice(-quantidade);
+    const linhaRegressao = dados.regressao && Array.isArray(dados.regressao.linha)
+        ? dados.regressao.linha.slice(-quantidade)
+        : [];
+
+    // Média exibida no cabeçalho do cartão.
+    const mediaVisivel = media(medias);
+    texto("media-" + chave, formatarPorcentagem(mediaVisivel));
+
+    // Pontos de pico: semanas cuja média passou de 80%.
+    const pontosPico = medias
+        .map(function (valor, indice) {
+            return { x: rotulos[indice], y: valor };
+        })
+        .filter(function (ponto) {
+            return numero(ponto.y) && ponto.y > LIMITE_PICO;
+        });
+
+    // Anomalias publicadas pela ETL, restritas ao período visível.
+    const primeiroDia = node.semanas.datas[node.semanas.datas.length - quantidade];
+    const pontosAnomalia = (dados.anomalias || [])
+        .filter(function (item) {
+            return String(item.semana) >= String(primeiroDia);
+        })
+        .map(function (item) {
+            return { x: rotuloDaData(item.semana), y: item.valor };
+        });
+
+    // Texto de apoio abaixo do título do cartão.
+    // Aqui contamos semanas cuja MÉDIA passou de 80% (o KPI conta amostras
+    // pontuais, por isso os números podem ser diferentes).
+    const quantidadePicos = pontosPico.length;
+    texto(
+        "nota-" + chave,
+        quantidadePicos === 0
+            ? "Nenhuma média semanal acima de " + LIMITE_PICO + "%"
+            : quantidadePicos + (quantidadePicos === 1
+                ? " semana com média acima de " + LIMITE_PICO + "%"
+                : " semanas com média acima de " + LIMITE_PICO + "%")
+    );
+
+    // Se todas as médias são nulas, não há o que desenhar.
+    if (!medias.some(numero)) {
+        semDados(chave, "Sem médias semanais para o período selecionado.");
+        return;
+    }
+
+    limparEstadoVazio(chave);
+    destruirGrafico(chave);
+
+    // Datasets montados na ordem em que aparecem no gráfico.
+    const datasets = [];
+
+    // Série do período anterior (linha tracejada). Só existe se a ETL publicou.
+    const anteriores = node.comparacao && node.comparacao.series
+        ? node.comparacao.series[chave]
+        : null;
+
+    if (Array.isArray(anteriores) && anteriores.length) {
+        datasets.push({
+            label: "Período anterior",
+            // Alinhamento por posição: a semana i anterior fica sobre a semana i atual.
+            data: anteriores.slice(-quantidade),
+            borderColor: componente.corSuave,
+            backgroundColor: componente.corSuave,
+            borderWidth: 1.5,
+            borderDash: [4, 4],
+            tension: 0.25,
+            pointRadius: 0,
+            pointHoverRadius: 3
+        });
+    }
+
+    // Série atual.
+    datasets.push({
+        label: "Semestre atual",
+        data: medias,
+        borderColor: componente.cor,
+        backgroundColor: componente.cor,
+        borderWidth: 2,
+        tension: 0.15,
+        pointRadius: 1.6,
+        pointHoverRadius: 5,
+        pointBackgroundColor: componente.cor,
+        pointBorderColor: componente.cor
     });
 
-    const media = calcularMedia(valores);
-    const elementoMedia = document.getElementById("media-" + chave);
-
-    if (elementoMedia) {
-        elementoMedia.textContent = formatarPorcentagem(media);
+    // Reta de regressão calculada pela ETL.
+    if (linhaRegressao.some(numero)) {
+        datasets.push({
+            label: "Inclinação da Regressão linear",
+            data: linhaRegressao,
+            borderColor: CORES_GRAFICO.regressao,
+            backgroundColor: CORES_GRAFICO.regressao,
+            borderWidth: 2.4,
+            tension: 0,
+            pointRadius: 0,
+            pointHoverRadius: 0
+        });
     }
 
-    const nota = document.getElementById("nota-" + chave);
+    // Picos como pontos soltos (semanas com média acima do limite).
+    datasets.push({
+        label: "Média semanal acima de " + LIMITE_PICO + "%",
+        type: "scatter",
+        data: pontosPico,
+        backgroundColor: CORES_GRAFICO.pico,
+        borderColor: CORES_GRAFICO.pico,
+        pointRadius: 4,
+        pointHoverRadius: 6
+    });
 
-    if (nota) {
-        const quantidadePicos = valores.filter(valor => valor > LIMITE_PICO).length;
-        nota.textContent = quantidadePicos === 1
-            ? "1 pico pontual fora do padrão"
-            : quantidadePicos + " picos pontuais fora do padrão";
+    // Anomalias de resíduo como pontos soltos.
+    if (pontosAnomalia.length) {
+        datasets.push({
+            label: "Anomalia de resíduo",
+            type: "scatter",
+            data: pontosAnomalia,
+            backgroundColor: CORES_GRAFICO.residuo,
+            borderColor: CORES_GRAFICO.residuo,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        });
     }
 
-    new Chart(canvas.getContext("2d"), {
+    const canvas = elemento("chart-" + chave);
+    graficos[chave] = new Chart(canvas.getContext("2d"), {
         type: "line",
-        data: {
-            labels: SEMANAS,
-            datasets: [
-                {
-                    label: "Semestre anterior",
-                    data: criarSerieSemestreAnterior(valores),
-                    borderColor: componente.corSuave,
-                    backgroundColor: componente.corSuave,
-                    borderWidth: 1.5,
-                    borderDash: [4, 4],
-                    tension: 0.25,
-                    pointRadius: 0,
-                    pointHoverRadius: 3
-                },
-                {
-                    label: "Semestre atual",
-                    data: valores,
-                    borderColor: componente.cor,
-                    backgroundColor: componente.cor,
-                    borderWidth: 2,
-                    tension: 0.15,
-                    pointRadius: 1.6,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: componente.cor,
-                    pointBorderColor: componente.cor
-                },
-                {
-                    label: "Inclinação da Regressão linear",
-                    data: linhaRegressao,
-                    borderColor: CORES_GRAFICO.regressao,
-                    backgroundColor: CORES_GRAFICO.regressao,
-                    borderWidth: 2.4,
-                    tension: 0,
-                    pointRadius: 0,
-                    pointHoverRadius: 0
-                },
-                {
-                    label: "Pico de carga (>80%)",
-                    type: "scatter",
-                    data: pontosDePico(valores),
-                    backgroundColor: CORES_GRAFICO.pico,
-                    borderColor: CORES_GRAFICO.pico,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                },
-                {
-                    label: "Anomalia de resíduo",
-                    type: "scatter",
-                    data: pontosDeResiduo(valores, regressao),
-                    backgroundColor: CORES_GRAFICO.residuo,
-                    borderColor: CORES_GRAFICO.residuo,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }
-            ]
-        },
+        data: { labels: rotulos, datasets: datasets },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: {
-                padding: { top: 8, right: 8 }
-            },
-            interaction: {
-                mode: "nearest",
-                intersect: false
-            },
+            layout: { padding: { top: 8, right: 8 } },
+            interaction: { mode: "nearest", intersect: false },
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: function (context) {
-                            const valor = context.parsed.y;
-
+                        label: function (contexto) {
+                            const valor = contexto.parsed.y;
                             if (valor === null || valor === undefined) {
                                 return "";
                             }
-
-                            return context.dataset.label + ": " +
-                                valor.toLocaleString("pt-BR", {
-                                    maximumFractionDigits: 1
-                                }) + "%";
+                            return contexto.dataset.label + ": " +
+                                valor.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "%";
                         }
                     }
                 }
@@ -296,31 +689,21 @@ function criarGraficoComponente(chave, componente) {
                         color: "#9ca3af",
                         font: { size: 10 }
                     },
-                    grid: {
-                        color: "#f1f3f5",
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    grid: { color: "#f1f3f5", drawBorder: false },
+                    border: { display: false }
                 },
                 x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    },
+                    grid: { display: false, drawBorder: false },
+                    border: { display: false },
                     ticks: {
                         color: "#9ca3af",
                         font: { size: 10 },
                         maxRotation: 0,
                         autoSkip: false,
+                        // Mostra apenas alguns rótulos para não poluir o eixo.
                         callback: function (valor, indice) {
-                            return [0, 4, 8, 12, 16, 20, 23].includes(indice)
-                                ? this.getLabelForValue(valor)
-                                : "";
+                            const passo = Math.max(1, Math.ceil(rotulos.length / 6));
+                            return indice % passo === 0 ? this.getLabelForValue(valor) : "";
                         }
                     }
                 }
@@ -329,156 +712,112 @@ function criarGraficoComponente(chave, componente) {
     });
 }
 
-Object.keys(COMPONENTES).forEach(chave => {
-    criarGraficoComponente(chave, COMPONENTES[chave]);
-});
+/* ---------- 9. CORRELAÇÃO ---------- */
 
-/* ---------- Percentis por componente ---------- */
-
-const abasComponentes = document.querySelectorAll("#component-tabs .tab");
-
-abasComponentes.forEach(aba => {
-    aba.addEventListener("click", function () {
-        abasComponentes.forEach(outra => {
-            outra.classList.remove("active");
-            outra.setAttribute("aria-selected", "false");
-        });
-
-        aba.classList.add("active");
-        aba.setAttribute("aria-selected", "true");
-
-        const percentis = COMPONENTES[aba.dataset.componente].percentis;
-
-        document.querySelectorAll("#percentis [data-percentil]").forEach(elemento => {
-            elemento.textContent = percentis[elemento.dataset.percentil] + "%";
-        });
-    });
-});
-
-/* ---------- Correlação Disco × CPU ---------- */
-
-function gerarRegistros(quantidade) {
-    let semente = 20260915;
-
-    function aleatorio() {
-        semente = (semente * 1103515245 + 12345) % 2147483648;
-        return semente / 2147483648;
-    }
-
-    const registros = [];
-
-    for (let indice = 0; indice < quantidade; indice++) {
-        const iops = 100 + aleatorio() * 1900;
-        const ruido = (aleatorio() - 0.5) * 11;
-        const espera = 0.0162 * iops + 2.74 + ruido;
-
-        registros.push({
-            x: Math.round(iops),
-            y: Math.round(Math.max(0.6, espera) * 10) / 10
-        });
-    }
-
-    return registros;
+// Monta a equação "y = 0,0577x − 0,37" com o sinal correto no intercepto.
+// Sem isso, um intercepto negativo apareceria como "+ -0,37".
+function equacaoDaReta(inclinacao, intercepto) {
+    const sinal = intercepto < 0 ? "− " : "+ ";
+    return "y = " + formatarNumero(inclinacao, 4) + "x " + sinal +
+        formatarNumero(Math.abs(intercepto), 2);
 }
 
-function calcularCorrelacao(pontos) {
-    const n = pontos.length;
-    const mediaX = pontos.reduce((total, ponto) => total + ponto.x, 0) / n;
-    const mediaY = pontos.reduce((total, ponto) => total + ponto.y, 0) / n;
-
-    let somaXY = 0;
-    let somaXX = 0;
-    let somaYY = 0;
-
-    pontos.forEach(ponto => {
-        somaXY += (ponto.x - mediaX) * (ponto.y - mediaY);
-        somaXX += Math.pow(ponto.x - mediaX, 2);
-        somaYY += Math.pow(ponto.y - mediaY, 2);
-    });
-
-    const inclinacao = somaXY / somaXX;
-    const intercepto = mediaY - inclinacao * mediaX;
-    const r = somaXY / Math.sqrt(somaXX * somaYY);
-
-    return {
-        inclinacao: inclinacao,
-        intercepto: intercepto,
-        r: r,
-        r2: r * r
-    };
-}
-
-const registrosCorrelacao = gerarRegistros(120);
-const correlacao = calcularCorrelacao(registrosCorrelacao);
-
-const elementoR = document.getElementById("r-correlacao");
-
-if (elementoR) {
-    elementoR.textContent = formatarNumero(correlacao.r, 2);
-}
-
-let graficoCorrelacao = null;
-
-function criarGraficoCorrelacao() {
-    if (graficoCorrelacao) {
-        return;
+// Classifica o r em uma etiqueta legível.
+function classificarCorrelacao(r) {
+    if (!numero(r)) {
+        return "Sem dados";
     }
+    const forca = Math.abs(r);
+    if (forca >= 0.7) {
+        return "Gargalo de I/O Crítico";
+    }
+    if (forca >= 0.4) {
+        return "Atenção moderada";
+    }
+    return "Sem correlação relevante";
+}
 
-    const canvas = document.getElementById("chart-correlacao");
+// Atualiza o cartão de correlação (r e etiqueta).
+function renderizarCorrelacao(node) {
+    const correlacao = node.correlacao || {};
+    texto("r-correlacao", numero(correlacao.r) ? formatarNumero(correlacao.r, 2) : "—");
+    texto("correlacao-badge", classificarCorrelacao(correlacao.r));
+
+    // Estatísticas do modal (preenchidas mesmo antes de abrir).
+    texto("corr-n", numero(correlacao.n) ? correlacao.n.toLocaleString("pt-BR") : "—");
+    texto("corr-r", numero(correlacao.r) ? formatarNumero(correlacao.r, 2) : "—");
+    texto("corr-r2", numero(correlacao.r2) ? formatarNumero(correlacao.r2, 2) : "—");
+    texto(
+        "corr-equacao",
+        numero(correlacao.inclinacao) && numero(correlacao.intercepto)
+            ? equacaoDaReta(correlacao.inclinacao, correlacao.intercepto)
+            : "—"
+    );
+
+    // Os rótulos dos eixos também vêm do JSON (a ETL sabe o que mediu).
+    texto("modal-corr-subtitulo", (correlacao.rotulo_x || "eixo X") + " × " + (correlacao.rotulo_y || "eixo Y"));
+}
+
+// Desenha o dispersão do modal com os pontos reais.
+function criarGraficoCorrelacao(node) {
+    const correlacao = node.correlacao || {};
+    const canvas = elemento("chart-correlacao");
 
     if (!canvas) {
         return;
     }
 
-    graficoCorrelacao = new Chart(canvas.getContext("2d"), {
+    destruirGrafico("correlacao");
+
+    const pontos = Array.isArray(correlacao.pontos) ? correlacao.pontos : [];
+    const maximoY = Math.max(5, Math.ceil(Math.max(...pontos.map(function (ponto) {
+        return numero(ponto.y) ? ponto.y : 0;
+    }), 0) * 1.2));
+
+    const conjuntos = [{
+        label: "Registros",
+        data: pontos,
+        backgroundColor: "#2d8ea8",
+        borderColor: "#2d8ea8",
+        pointRadius: 2.4,
+        pointHoverRadius: 4
+    }];
+
+    // Reta: usa a inclinação/intercepto calculados pela ETL.
+    if (numero(correlacao.inclinacao) && numero(correlacao.intercepto)) {
+        conjuntos.push({
+            label: "Regressão linear",
+            type: "line",
+            data: [
+                { x: 0, y: correlacao.intercepto },
+                { x: 100, y: correlacao.intercepto + correlacao.inclinacao * 100 }
+            ],
+            borderColor: "#0f3f4d",
+            backgroundColor: "#0f3f4d",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0
+        });
+    }
+
+    graficos.correlacao = new Chart(canvas.getContext("2d"), {
         type: "scatter",
-        data: {
-            datasets: [
-                {
-                    label: "Registros",
-                    data: registrosCorrelacao,
-                    backgroundColor: "#2d8ea8",
-                    borderColor: "#2d8ea8",
-                    pointRadius: 2.4,
-                    pointHoverRadius: 4
-                },
-                {
-                    label: "Regressão linear",
-                    type: "line",
-                    data: [
-                        { x: 0, y: correlacao.intercepto },
-                        { x: 2000, y: correlacao.intercepto + correlacao.inclinacao * 2000 }
-                    ],
-                    borderColor: "#0f3f4d",
-                    backgroundColor: "#0f3f4d",
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0
-                }
-            ]
-        },
+        data: { datasets: conjuntos },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                mode: "nearest",
-                intersect: false
-            },
+            interaction: { mode: "nearest", intersect: false },
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: function (context) {
-                            const ponto = context.parsed;
-
-                            if (context.dataset.type === "line") {
+                        label: function (contexto) {
+                            if (contexto.dataset.type === "line") {
                                 return "Regressão linear";
                             }
-
-                            return "IOPS: " + ponto.x.toLocaleString("pt-BR") +
-                                " • espera: " + formatarNumero(ponto.y, 1) + "%";
+                            const ponto = contexto.parsed;
+                            return "Disco: " + formatarNumero(ponto.x, 1) + "% • IO wait: " +
+                                formatarNumero(ponto.y, 2) + "%";
                         }
                     }
                 }
@@ -486,44 +825,26 @@ function criarGraficoCorrelacao() {
             scales: {
                 x: {
                     min: 0,
-                    max: 2000,
-                    ticks: {
-                        stepSize: 500,
-                        color: "#9ca3af",
-                        font: { size: 10 }
-                    },
-                    grid: {
-                        color: "#eceff2",
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    },
+                    max: 100,
+                    ticks: { stepSize: 25, color: "#9ca3af", font: { size: 10 } },
+                    grid: { color: "#eceff2", drawBorder: false },
+                    border: { display: false },
                     title: {
                         display: true,
-                        text: "Leitura + escrita em disco (IOPS)",
+                        text: correlacao.rotulo_x || "Uso do disco (%)",
                         color: "#6b7480",
                         font: { size: 10, weight: "600" }
                     }
                 },
                 y: {
                     min: 0,
-                    max: 40,
-                    ticks: {
-                        stepSize: 10,
-                        color: "#9ca3af",
-                        font: { size: 10 }
-                    },
-                    grid: {
-                        color: "#eceff2",
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    },
+                    max: maximoY,
+                    ticks: { color: "#9ca3af", font: { size: 10 } },
+                    grid: { color: "#eceff2", drawBorder: false },
+                    border: { display: false },
                     title: {
                         display: true,
-                        text: "Tempo de espera da CPU • IO wait (%)",
+                        text: correlacao.rotulo_y || "IO wait da CPU (%)",
                         color: "#6b7480",
                         font: { size: 10, weight: "600" }
                     }
@@ -531,40 +852,133 @@ function criarGraficoCorrelacao() {
             }
         }
     });
-
-    const elementoR2 = document.getElementById("corr-r2");
-    const elementoRModal = document.getElementById("corr-r");
-    const elementoEquacao = document.getElementById("corr-equacao");
-
-    if (elementoR2) {
-        elementoR2.textContent = formatarNumero(correlacao.r2, 2);
-    }
-
-    if (elementoRModal) {
-        elementoRModal.textContent = formatarNumero(correlacao.r, 2);
-    }
-
-    if (elementoEquacao) {
-        elementoEquacao.textContent = "y = " +
-            formatarNumero(correlacao.inclinacao, 4) + "x + " +
-            formatarNumero(correlacao.intercepto, 2);
-    }
 }
 
-/* ---------- Modais ---------- */
+/* ---------- 10. RODAPÉ, ESTADO VAZIO E MODAIS ---------- */
 
+// Escreve o rodapé e o subtítulo do gráfico com os dados do período.
+function renderizarRodape(node) {
+    // .slice(-quantidade) pega as últimas semanas visíveis do gráfico.
+    const quantidade = semanasVisiveis();
+    const rotulos = (node.semanas.rotulos || []).slice(-quantidade);
+    const inicio = rotulos[0] || "—";
+    const fim = rotulos[rotulos.length - 1] || "—";
+
+    texto("grafico-subtitulo", "Médias semanais e picos pontuais • " + inicio + " — " + fim);
+
+    const kpis = node.kpis || {};
+    const comparacao = node.comparacao || {};
+
+    // As médias de comparação também valem só para a janela de 6 meses.
+    const comparavel = podeComparar(node);
+    const atual = comparavel ? media(Object.values(comparacao.medias_atuais || {})) : null;
+    const anterior = comparavel ? media(Object.values(comparacao.medias_anteriores || {})) : null;
+    const variacao = comparavel ? media(Object.values(comparacao.variacao_percentual || {})) : null;
+
+    const partes = [
+        "Telemetria agregada • " + inicio + " — " + fim +
+        " • " + formatarNumero(node.amostras, 0) + " leituras no total"
+    ];
+
+    if (numero(atual)) {
+        partes.push(
+            "Média geral: " + formatarPorcentagem(atual) +
+            (numero(anterior) ? " atual × " + formatarPorcentagem(anterior) + " anterior" : "") +
+            (numero(variacao) ? " (" + comSinal(formatarNumero(variacao, 1)) + "%)" : "")
+        );
+    }
+
+    // Plural correto: "1 pico de carga" e "14 picos de carga".
+    const quantidadePicos = kpis.quantidade_picos || 0;
+    partes.push(
+        quantidadePicos + (quantidadePicos === 1 ? " pico de carga" : " picos de carga") +
+        " (> " + LIMITE_PICO + "%)"
+    );
+
+    if (kpis.maior_pico && kpis.maior_pico.texto) {
+        partes.push("maior pico: " + kpis.maior_pico.texto);
+    }
+
+    // Segunda linha do rodapé (o CSS usa white-space: pre-line para respeitar o \n).
+    const notaPercentis = "Percentis e durações referem-se às amostras pontuais, não às médias semanais.";
+
+    texto("rodape-telemetria", partes.join(" • ") + "\n" + notaPercentis);
+
+    // Status no cabeçalho: quando o JSON foi gerado e até quando há telemetria.
+    const gerado = metadados ? formatarDataHora(metadados.gerado_em) : "—";
+    const ate = metadados ? formatarDataHora(metadados.telemetria_ate) : "—";
+    let status = "Atualizado em " + gerado + " • telemetria até " + ate;
+
+    if (avisos.length) {
+        status += " • " + avisos[0];
+    }
+    texto("status-analista", status);
+}
+
+// Limpa a tela e mostra uma mensagem única (usado quando não há dados).
+function mostrarEstado(mensagem) {
+    texto("status-analista", mensagem);
+    texto("rodape-telemetria", mensagem);
+
+    Object.keys(COMPONENTES).forEach(function (chave) {
+        semDados(chave, mensagem);
+        texto("media-" + chave, "—");
+        texto("nota-" + chave, "—");
+    });
+
+    texto("kpi-pico-sub", "—");
+    texto("kpi-pico-valor", "—");
+    texto("kpi-anomalia-sub", "—");
+    texto("kpi-anomalia-valor", "—");
+    texto("kpi-picos-total", "—");
+    texto("kpi-picos-desc", "—");
+    texto("kpi-anomalias-valor", "—");
+    texto("kpi-anomalias-desc", "—");
+    texto("kpi-duracao-valor", "—");
+    texto("kpi-instavel-valor", "—");
+    texto("kpi-instavel-desc", "—");
+    texto("variation-valor", "—");
+    texto("variation-info", mensagem);
+    texto("r-correlacao", "—");
+    texto("correlacao-badge", "Sem dados");
+}
+
+// Desenha a página inteira para o node recebido.
+function renderizar(node) {
+    if (!node) {
+        mostrarEstado(avisos[0] || "Nenhum node com telemetria publicada para este cluster.");
+        return;
+    }
+
+    renderizarKpis(node);
+    renderizarPercentis(node, "cpu");
+    renderizarCorrelacao(node);
+
+    // Garante que a aba CPU esteja ativa ao trocar de node.
+    document.querySelectorAll("#component-tabs .tab").forEach(function (aba) {
+        const ativa = aba.dataset.componente === "cpu";
+        aba.classList.toggle("active", ativa);
+        aba.setAttribute("aria-selected", String(ativa));
+    });
+
+    Object.keys(COMPONENTES).forEach(function (chave) {
+        criarGraficoComponente(node, chave);
+    });
+
+    renderizarRodape(node);
+}
+
+// Modais: mesma lógica de abrir/fechar que a página já tinha.
 const modais = document.querySelectorAll(".dash-modal-overlay");
 
 function abrirModal(modal) {
     if (!modal) {
         return;
     }
-
     modal.classList.add("active");
     document.body.style.overflow = "hidden";
 
     const botaoFechar = modal.querySelector(".dash-modal-close");
-
     if (botaoFechar) {
         botaoFechar.focus();
     }
@@ -574,29 +988,31 @@ function fecharModal(modal) {
     if (!modal) {
         return;
     }
-
     modal.classList.remove("active");
-
     if (!document.querySelector(".dash-modal-overlay.active")) {
         document.body.style.overflow = "";
     }
 }
 
 function fecharTodosOsModais() {
-    modais.forEach(modal => modal.classList.remove("active"));
+    modais.forEach(function (modal) {
+        modal.classList.remove("active");
+    });
     document.body.style.overflow = "";
 }
 
-document.getElementById("btn-ajuda").addEventListener("click", function () {
-    abrirModal(document.getElementById("modal-ajuda"));
+elemento("btn-ajuda").addEventListener("click", function () {
+    abrirModal(elemento("modal-ajuda"));
 });
 
-document.getElementById("btn-correlacao").addEventListener("click", function () {
-    criarGraficoCorrelacao();
-    abrirModal(document.getElementById("modal-correlacao"));
+elemento("btn-correlacao").addEventListener("click", function () {
+    if (painel && painel.node) {
+        criarGraficoCorrelacao(painel.node);
+    }
+    abrirModal(elemento("modal-correlacao"));
 });
 
-modais.forEach(modal => {
+modais.forEach(function (modal) {
     modal.addEventListener("click", function (evento) {
         if (evento.target === modal) {
             fecharModal(modal);
@@ -604,7 +1020,7 @@ modais.forEach(modal => {
     });
 });
 
-document.querySelectorAll("[data-fechar-modal]").forEach(botao => {
+document.querySelectorAll("[data-fechar-modal]").forEach(function (botao) {
     botao.addEventListener("click", function () {
         fecharModal(botao.closest(".dash-modal-overlay"));
     });
@@ -615,3 +1031,26 @@ document.addEventListener("keydown", function (evento) {
         fecharTodosOsModais();
     }
 });
+
+/* ---------- 11. INICIALIZAÇÃO ---------- */
+
+// Troca de cluster: recarrega a lista de nodes e o primeiro node.
+elemento("seletor-cluster").addEventListener("change", function (evento) {
+    carregarCluster(evento.target.value);
+});
+
+// Troca de node: busca apenas aquele node.
+elemento("seletor-node").addEventListener("change", function (evento) {
+    carregarNode(evento.target.value);
+});
+
+// Troca de período: não chama a API, só redesenha com outro recorte.
+elemento("seletor-periodo").addEventListener("change", function (evento) {
+    periodoAtual = evento.target.value;
+    if (painel && painel.node) {
+        renderizar(painel.node);
+    }
+});
+
+ligarAbas();
+iniciar();
