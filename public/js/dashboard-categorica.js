@@ -1,25 +1,61 @@
 // Ordem = ordem das colunas da tabela.
 const CATEGORIAS = [
-    { id: 1, rotulo: "Pressão de processamento",  cor: "#00747f" },
-    { id: 2, rotulo: "Degradação de memória", cor: "#25a0a8" },
-    { id: 3, rotulo: "Degradação de disco",             cor: "#e0a84a" },
-    { id: 4, rotulo: "Pressão combinada", cor: "#b8606a" }
+    { id: 1, rotulo: "Pressão de processamento", cor: "#00747f", chaves: ["pressao de processamento", "pressao processamento", "pressao_processamento", "processamento"] },
+    { id: 2, rotulo: "Degradação de memória", cor: "#25a0a8", chaves: ["degradacao de memoria", "degradacao memoria", "degradacao_memoria", "memoria"] },
+    { id: 3, rotulo: "Degradação de disco", cor: "#e0a84a", chaves: ["degradacao de disco", "degradacao disco", "degradacao_disco", "disco"] },
+    { id: 4, rotulo: "Pressão combinada", cor: "#b8606a", chaves: ["pressao combinada", "pressao_combinada", "combinada"] }
 ];
 const NODES_VAZIOS = 6; // linhas exibidas na tabela enquanto não há dados
+const TODOS = "Todos os nodes";
 
-// Rotas da API (ajuste quando o endpoint do S3 estiver pronto).
+// Rotas da API — o id do usuário e os ids de escopo fazem parte do path.
 const ROTAS = {
-    catalogo: "/dashcategorica/clusters",
-    dados: (id) => "/dashcategorica/clusters/" + encodeURIComponent(id) + "/dados"
+    filtros: (idUsuario) =>
+        "/dashcategorica/buscarFiltros/" + encodeURIComponent(idUsuario),
+    todos: (idUsuario) =>
+        "/dashcategorica/buscarNodes/" + encodeURIComponent(idUsuario),
+    porHpc: (idUsuario, idHpc) =>
+        "/dashcategorica/buscarPorHpc/" + encodeURIComponent(idUsuario) + "/" +
+        encodeURIComponent(idHpc),
+    porCluster: (idUsuario, idCluster) =>
+        "/dashcategorica/buscarPorCluster/" + encodeURIComponent(idUsuario) + "/" +
+        encodeURIComponent(idCluster)
 };
-
-const MODO_ESTRUTURA = true;
 
 const elemento = (id) => document.getElementById(id);
 const numero = (v) => typeof v === "number" && Number.isFinite(v);
 const formatar = (v) =>
     numero(v) ? v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—";
 const ouTraco = (v) => (v === null || v === undefined ? "—" : v);
+
+// Compara nomes de categoria do S3 com os rótulos das colunas fixas.
+function chaveCategoria(nome) {
+    return String(nome ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[_/-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+function categoriaPorNome(nome) {
+    const chave = chaveCategoria(nome);
+    return (
+        CATEGORIAS.find((c) =>
+            [c.rotulo, ...c.chaves].some((alias) => chaveCategoria(alias) === chave)
+        ) || null
+    );
+}
+function idCategoria(nome, indice, avisos) {
+    const encontrada = categoriaPorNome(nome);
+    if (encontrada) return encontrada.id;
+    if (indice < CATEGORIAS.length) {
+        avisos.push('Categoria "' + nome + '" exibida como "' + CATEGORIAS[indice].rotulo + '".');
+        return CATEGORIAS[indice].id;
+    }
+    avisos.push('Categoria "' + nome + '" sem coluna correspondente.');
+    return null;
+}
 
 // Distingue a atualização dos dados da hora em que a página os consultou.
 function formatarDataHora(valor) {
@@ -31,7 +67,8 @@ function formatarDataHora(valor) {
 let catalogo = [],
     painel = null,
     requisicao = null,
-    versao = 0;
+    versao = 0,
+    escopo = TODOS;
 
 // Escreve um valor em um elemento da página.
 function texto(id, valor) {
@@ -67,28 +104,56 @@ function dadosVazios() {
     };
 }
 
-// Garante o formato esperado: números inválidos viram 0 e textos ausentes viram null.
-function normalizar(bruto) {
+// Converte o catálogo de filtros do banco para o formato usado nos selects.
+function normalizarCatalogo(linhas) {
+    return (linhas || []).map((c) => ({
+        hpc_id: c.id_ambiente_hpc,
+        hpc_nome: c.nome_hpc,
+        cluster_id: c.id_cluster,
+        cluster_nome: c.nome_cluster
+    }));
+}
+function rotuloDoCatalogo(campoId, campoNome, id) {
+    return (
+        catalogo.find((c) => String(c[campoId]) === String(id))?.[campoNome] || TODOS
+    );
+}
+
+// Converte o payload agregado do backend para o formato da tela.
+function normalizar(bruto, rotulo) {
     const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
     const str = (v) => (v === undefined || v === null ? null : String(v));
     if (!bruto) return dadosVazios();
+
+    const avisos = Array.isArray(bruto.avisos) ? bruto.avisos.map(String) : [];
+    const categorias = Array.isArray(bruto.categorias) ? bruto.categorias : [];
+    const matriz = bruto.matriz_categoria_node || {};
+    const ids = new Map(
+        categorias.map((c, i) => [c?.nome, idCategoria(c?.nome, i, avisos)])
+    );
+    const nodes = (bruto.nodes || []).map((n) => {
+        const contagem = categoriasVazias();
+        categorias.forEach((c) => {
+            const id = ids.get(c?.nome);
+            if (id !== null && id !== undefined) {
+                contagem[id] += num(matriz[c?.nome]?.[n?.hostname]);
+            }
+        });
+        const soma = CATEGORIAS.reduce((s, c) => s + contagem[c.id], 0);
+        return {
+            hostname: str(n?.hostname),
+            cluster_nome: str(rotulo),
+            total: num(n?.quantidade_episodios) || soma,
+            categorias: contagem
+        };
+    });
+    const metadados = bruto.metadados || {};
     return {
-        gerado_em: str(bruto.gerado_em),
-        coleta_ate: str(bruto.coleta_ate),
-        avisos: Array.isArray(bruto.avisos) ? bruto.avisos : [],
-        nodes: (bruto.nodes || []).map((n) => {
-            const categorias = categoriasVazias();
-            CATEGORIAS.forEach((c) => {
-                categorias[c.id] = num(n.categorias?.[c.id]);
-            });
-            const soma = CATEGORIAS.reduce((s, c) => s + categorias[c.id], 0);
-            return {
-                hostname: str(n.hostname),
-                cluster_nome: str(n.cluster_nome),
-                total: num(n.total) || soma,
-                categorias
-            };
-        })
+        gerado_em: str(bruto.gerado_em ?? metadados.gerado_em),
+        coleta_ate: str(bruto.coleta_ate ?? metadados.coleta_ate),
+        avisos,
+        indicadores: bruto.indicadores || {},
+        nodes
     };
 }
 
@@ -121,80 +186,89 @@ async function api(url, signal) {
         location.href = "./login.html";
         throw new Error("Entre novamente.");
     }
-    const separador = url.includes("?") ? "&" : "?";
-    const r = await fetch(
-        url + separador + "idUsuario=" + encodeURIComponent(idUsuario),
-        { signal, cache: "no-store" }
-    );
+    const r = await fetch(url, { signal, cache: "no-store" });
     if (r.status === 401) {
         location.href = "./login.html";
         throw Error("Entre novamente.");
     }
     const data = await r.json();
-    if (!r.ok) throw Error(data.erro || "Falha ao consultar dados.");
+    if (!r.ok) throw Error(data.erro || data.mensagem || "Falha ao consultar dados.");
     return data;
 }
 
-// PONTOS DE INTEGRAÇÃO — trocam a estrutura vazia pela API/S3.
-async function buscarCatalogo() {
-    if (MODO_ESTRUTURA)
-        return [{ hpc_id: null, hpc_nome: null, cluster_id: null, cluster_nome: null }];
-    return api(ROTAS.catalogo);
-}
-async function buscarDados(idCluster, signal) {
-    if (MODO_ESTRUTURA) return dadosVazios();
-    return api(ROTAS.dados(idCluster), signal);
+async function buscarFiltros() {
+    return api(ROTAS.filtros(sessionStorage.getItem("ID_USUARIO")));
 }
 
-// Preenche os seletores de HPC e cluster.
+// Escolhe a rota conforme os filtros: cluster > HPC > todos os nodes da empresa.
+async function buscarDados(signal) {
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    const idCluster = elemento("cluster-select").value;
+    const idHpc = elemento("hpc-select").value;
+
+    if (idCluster) {
+        escopo = rotuloDoCatalogo("cluster_id", "cluster_nome", idCluster);
+        return api(ROTAS.porCluster(idUsuario, idCluster), signal);
+    }
+    if (idHpc) {
+        escopo = rotuloDoCatalogo("hpc_id", "hpc_nome", idHpc);
+        return api(ROTAS.porHpc(idUsuario, idHpc), signal);
+    }
+    escopo = TODOS;
+    return api(ROTAS.todos(idUsuario), signal);
+}
+
+// Preenche os seletores, mantendo a opção de não aplicar filtro.
 function opcoes(select, lista) {
     select.replaceChildren(
+        new Option(TODOS, ""),
         ...lista.map((v) => new Option(ouTraco(v.nome), String(v.id ?? "")))
     );
-    select.disabled = !lista.length;
+    select.disabled = false;
 }
 
-// Mostra os clusters do HPC selecionado.
+// Mostra os clusters do HPC selecionado (todos quando não há HPC escolhido).
 function atualizarClusters() {
+    const idHpc = elemento("hpc-select").value;
     opcoes(
         elemento("cluster-select"),
         catalogo
-            .filter((c) => String(c.hpc_id ?? "") === elemento("hpc-select").value)
+            .filter((c) => !idHpc || String(c.hpc_id ?? "") === idHpc)
             .map((c) => ({ id: c.cluster_id, nome: c.cluster_nome }))
     );
-    carregarCluster();
+    elemento("cluster-select").value = "";
+    carregarDados();
 }
 
-// KPIs: node mais problemático e categoria mais comum.
 // KPIs: node mais problemático, categoria mais comum e categoria mais severa.
 function cards(data) {
+    const indicadores = data.indicadores || {};
     const soma = somarCategorias(data.nodes);
-    const total = CATEGORIAS.reduce((s, c) => s + soma[c.id], 0);
-    const n = [...data.nodes].sort((a, b) => b.total - a.total)[0];
-    const cat =
-        total > 0
-            ? CATEGORIAS.reduce((a, b) => (soma[b.id] > soma[a.id] ? b : a))
-            : null;
+    const total = indicadores.total_episodios ?? CATEGORIAS.reduce((s, c) => s + soma[c.id], 0);
+    const piorNode = indicadores.node_mais_problematico || null;
+    const comum = indicadores.categoria_mais_comum || null;
+    const severa = indicadores.categoria_mais_severa || null;
+    const comumCat = comum ? categoriaPorNome(comum.nome) : null;
+    const severaCat = severa ? categoriaPorNome(severa.nome) : null;
+    const pontos = severa && numero(severa.pontos_max) ? severa.pontos_max : NaN;
 
-    texto("top-node-name", ouTraco(n?.hostname));
-    texto("top-node-count", formatar(n ? n.total : 0));
+    texto("top-node-name", ouTraco(piorNode ? piorNode.hostname : data.nodes[0]?.hostname));
+    texto(
+        "top-node-count",
+        formatar(piorNode ? piorNode.quantidade_episodios : data.nodes[0]?.total ?? 0)
+    );
 
-    texto("top-category-name", cat ? cat.rotulo : "—");
-    texto("top-category-count", formatar(cat ? soma[cat.id] : 0));
+    texto("top-category-name", comum ? comumCat?.rotulo || comum.nome : "—");
+    texto("top-category-count", formatar(comum ? comum.quantidade_episodios : 0));
     texto("cat-total", formatar(total) + " episódios");
 
-    // Severidade = episódios da categoria × peso da categoria.
-    const severidade = CATEGORIAS.map((c) => ({ ...c, pontos: soma[c.id] * c.peso }));
-    const pontosTotal = severidade.reduce((s, c) => s + c.pontos, 0);
-    const grave =
-        pontosTotal > 0
-            ? severidade.reduce((a, b) => (b.pontos > a.pontos ? b : a))
-            : null;
-    const pontos = grave ? grave.pontos : 0;
-
-    texto("top-severity-name", grave ? grave.rotulo : "—");
+    texto("top-severity-name", severa ? severaCat?.rotulo || severa.nome : "—");
     texto("top-severity-points", formatar(pontos));
-    texto("top-severity-label", pontos === 1 ? "ponto de severidade" : "pontos de severidade");
+    texto(
+        "top-severity-label",
+        (severa?.classificacao ? severa.classificacao.toLowerCase() + " • " : "")
+            + (pontos === 1 ? "ponto de severidade" : "pontos de severidade")
+    );
 }
 
 // TABELA — Cabeçalho com uma coluna por categoria.
@@ -270,20 +344,16 @@ function renderizarTotais(nodes) {
 }
 
 // CARREGAMENTO — Busca os dados, preenche KPIs e monta a tabela.
-async function carregarCluster() {
+async function carregarDados() {
     requisicao?.abort();
     requisicao = new AbortController();
     const atual = ++versao;
     limparTela();
-    const select = elemento("cluster-select");
-    if (!select.options.length) {
-        estado("Nenhum cluster disponível.", true);
-        return;
-    }
     estado("Carregando dados…", true);
     try {
-        const data = normalizar(await buscarDados(select.value, requisicao.signal));
+        const bruto = await buscarDados(requisicao.signal);
         if (atual !== versao) return;
+        const data = normalizar(bruto, escopo);
         painel = data;
         cards(data);
         renderizarCabecalho();
@@ -312,25 +382,23 @@ async function carregarCluster() {
 
 // EVENTOS — Seletores e botão de nova tentativa.
 elemento("hpc-select").addEventListener("change", atualizarClusters);
-elemento("cluster-select").addEventListener("change", carregarCluster);
+elemento("cluster-select").addEventListener("change", carregarDados);
 elemento("restore-cluster").addEventListener("click", () =>
-    catalogo.length ? carregarCluster() : iniciar()
+    catalogo.length ? carregarDados() : iniciar()
 );
 
 // INÍCIO — Busca os HPCs e clusters disponíveis ao abrir a página.
 async function iniciar() {
     estado("Carregando ambientes…", true);
     try {
-        catalogo = await buscarCatalogo();
+        catalogo = normalizarCatalogo(await buscarFiltros());
         const ambientes = [
             ...new Map(
-                catalogo.map((c) => [
-                    c.hpc_id ?? "",
-                    { id: c.hpc_id, nome: c.hpc_nome }
-                ])
+                catalogo.map((c) => [String(c.hpc_id), { id: c.hpc_id, nome: c.hpc_nome }])
             ).values()
         ];
         opcoes(elemento("hpc-select"), ambientes);
+        elemento("hpc-select").value = "";
         atualizarClusters();
     } catch (e) {
         estado(e.message, true);
