@@ -57,13 +57,20 @@
           <span>Operador</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a href="./dashboard-analista.html">
-          <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-          <span>Analista</span>
-        </a>
-      </li>
       <li class="nav-item active admin-item">
+        <details>
+          <summary>
+            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+            <span>Analista</span>
+            <span class="admin-seta" aria-hidden="true"></span>
+          </summary>
+          <ul class="admin-submenu">
+            <li><a href="./dashboard-analista.html">Dash preditiva</a></li>
+            <li><a href="./dashboard-categorica.html" aria-current="page">Dash categórica</a></li>
+          </ul>
+        </details>
+      </li>
+      <li class="nav-item admin-item">
         <details>
           <summary>
             <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
@@ -72,7 +79,7 @@
           </summary>
           <ul class="admin-submenu">
             <li><a href="./dashboard-gestor.html">Dash geral</a></li>
-            <li><a href="./dashboard-cluster.html" aria-current="page">Dash clusters</a></li>
+            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
           </ul>
         </details>
       </li>
@@ -131,7 +138,7 @@
             </ul>
           </details>
         </li>
-        <li class="side-item active admin-item">
+        <li class="side-item admin-item">
           <details>
             <summary>
               <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
@@ -140,7 +147,7 @@
             </summary>
             <ul class="admin-submenu">
               <li><a href="./dashboard-gestor.html">Dash geral</a></li>
-              <li><a href="./dashboard-cluster.html" aria-current="page">Dash clusters</a></li>
+              <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
             </ul>
           </details>
         </li>
