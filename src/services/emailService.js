@@ -5,7 +5,7 @@ require("dotenv").config();
 
 
 async function enviarEmail(email, token) {
-    var link = `http://localhost:3000/usuarios/verificarEmail?token=${token}`;
+    var link = `http://localhost:8080/usuarios/verificarEmail?token=${token}`;
 
     var resultado = await resend.emails.send({
 
