@@ -167,3 +167,27 @@ CREATE TABLE alerta (
         FOREIGN KEY (fk_componente_node)
         REFERENCES componente_node(id_componente_node)
 );
+
+CREATE TABLE billing_node_horario (
+    id_billing_node_horario INT PRIMARY KEY AUTO_INCREMENT,
+    dt_hora DATETIME NOT NULL,
+    media_cpu_pct DECIMAL(5,2) NOT NULL,
+    consumo_kwh DECIMAL(10,4) NOT NULL,
+    tarifa_kwh DECIMAL(10,4) NOT NULL,
+    custo_estimado DECIMAL(10,2) NOT NULL,
+    fk_node INT NOT NULL,
+
+    CONSTRAINT unqBillingNodeHora
+        UNIQUE (fk_node, dt_hora),
+    CONSTRAINT ckBillingCpuPct
+        CHECK (media_cpu_pct >= 0 AND media_cpu_pct <= 100),
+    CONSTRAINT ckBillingConsumoKwh
+        CHECK (consumo_kwh >= 0),
+    CONSTRAINT ckBillingTarifaKwh
+        CHECK (tarifa_kwh >= 0),
+    CONSTRAINT ckBillingCustoEstimado
+        CHECK (custo_estimado >= 0),
+    CONSTRAINT cFkBillingNode
+        FOREIGN KEY (fk_node)
+        REFERENCES node(id_node)
+);
