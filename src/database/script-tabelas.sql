@@ -170,6 +170,29 @@ CREATE TABLE alerta (
         REFERENCES componente_node(id_componente_node)
 );
 
+CREATE TABLE billing_node_horario (
+    id_billing_node_horario INT PRIMARY KEY AUTO_INCREMENT,
+    dt_hora DATETIME NOT NULL,
+    media_cpu_pct DECIMAL(5,2) NOT NULL,
+    consumo_kwh DECIMAL(10,4) NOT NULL,
+    tarifa_kwh DECIMAL(10,4) NOT NULL,
+    custo_estimado DECIMAL(10,2) NOT NULL,
+    fk_node INT NOT NULL,
+
+    CONSTRAINT unqBillingNodeHora
+        UNIQUE (fk_node, dt_hora),
+    CONSTRAINT ckBillingCpuPct
+        CHECK (media_cpu_pct >= 0 AND media_cpu_pct <= 100),
+    CONSTRAINT ckBillingConsumoKwh
+        CHECK (consumo_kwh >= 0),
+    CONSTRAINT ckBillingTarifaKwh
+        CHECK (tarifa_kwh >= 0),
+    CONSTRAINT ckBillingCustoEstimado
+        CHECK (custo_estimado >= 0),
+    CONSTRAINT cFkBillingNode
+        FOREIGN KEY (fk_node)
+        REFERENCES node(id_node)
+);
 
 INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
 ('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
@@ -222,6 +245,3 @@ INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster) VALUES
 ('gamma-node03', '10.0.3.12', 'Ubuntu Server 22.04 LTS', 'ativo', 3),
 ('gamma-node04', '10.0.3.13', 'Ubuntu Server 22.04 LTS', 'ativo', 3),
 ('gamma-node05', '10.0.3.14', 'Ubuntu Server 22.04 LTS', 'ativo', 3);e
-
-	
-
