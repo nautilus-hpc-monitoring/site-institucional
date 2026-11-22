@@ -17,7 +17,7 @@
 
     <script src="./js/sessao.js"></script>
 
-    <title>Nautilus - Dashboard Gestor</title>
+    <title>Nautilus - Billing</title>
     <link rel="icon" href="./assets/icon/logo.png">
 </head>
 
@@ -48,7 +48,7 @@
 
         <ul class="mobile-sidebar-items">
 
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a href="./alertas.html">
                     <i class="fa-solid fa-bell"></i>
                     <span>Alertas</span>
@@ -77,18 +77,18 @@
                 </li>
 
             <li class="nav-item active admin-item">
-                    <details>
-                        <summary>
-                            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
-                            <span>Administrador</span>
-                            <span class="admin-seta" aria-hidden="true"></span>
-                        </summary>
-                        <ul class="admin-submenu">
-                            <li><a href="./dashboard-gestor.html" aria-current="page">Dash geral</a></li>
-                            <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
-                        </ul>
-                    </details>
-                </li>
+                <details open>
+                    <summary>
+                        <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                        <span>Administrador</span>
+                        <span class="admin-seta" aria-hidden="true"></span>
+                    </summary>
+                    <ul class="admin-submenu">
+                        <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                        <li><a href="./dashboard-billing.html" aria-current="page">Billing</a></li>
+                    </ul>
+                </details>
+            </li>
 
             <li class="nav-item">
                 <a href="./cadastro-hpc.html">
@@ -126,7 +126,7 @@
 
             <ul id="side_items">
 
-                <li class="side-item ">
+                <li class="side-item">
                     <a href="./alertas.html">
                         <i class="fa-solid fa-bell"></i>
                         <span class="item-description">
@@ -159,15 +159,15 @@
                 </li>
 
                 <li class="side-item active admin-item">
-                    <details>
+                    <details open>
                         <summary>
                             <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
                             <span class="item-description">Administrador</span>
                             <span class="admin-seta" aria-hidden="true"></span>
                         </summary>
                         <ul class="admin-submenu">
-                            <li><a href="./dashboard-gestor.html" aria-current="page">Dash geral</a></li>
                             <li><a href="./dashboard-cluster.html">Dash clusters</a></li>
+                            <li><a href="./dashboard-billing.html" aria-current="page">Billing</a></li>
                         </ul>
                     </details>
                 </li>
@@ -187,7 +187,7 @@
 
         <ul id="side_bottom">
 
-             <li class="side-item">
+            <li class="side-item">
                 <a href="#">
                     <i class="fa-regular fa-user"></i>
                     <span class="item-description" id="b_usuario"></span>
@@ -212,176 +212,155 @@
         <main class="page-content dashboard-page">
 
             <h1 class="page-title">
-                Dashboard Gestor
+                Billing
             </h1>
 
             <p class="page-subtitle">
-                Visão histórica e preditiva para identificar problemas,
-                riscos e prioridades da infraestrutura
+                Acompanhamento mensal de custos e projeção de fechamento dos nodes, com base no consumo e tarifa de energia
             </p>
 
-
-            <!-- KPIs -->
-             
+            <!-- 4 KPIs -->
             <section class="kpi-grid">
 
+                <!-- KPI 1: Custo Acumulado no Mês -->
                 <div class="kpi-card">
-
                     <div class="kpi-top">
-
                         <span class="kpi-label">
-                            Saúde dos nodes
+                            Custo Acumulado (Mês)
                         </span>
-
-                        <div class="kpi-icon tone-teal">
-                            <i class="fa-solid fa-heart-pulse"></i>
-                        </div>
-
-                    </div>
-
-                    <span class="kpi-value" id="kpiSaudeOk">
-                        N/A
-                    </span>
-
-                    <span class="kpi-trend neutral" id="kpiSaudeDetalhe">
-                    </span>
-
-                </div>
-
-                <div class="kpi-card">
-
-                    <div class="kpi-top">
-
-                        <span class="kpi-label">
-                            Disponibilidade
-                        </span>
-
                         <div class="kpi-icon tone-blue">
-                            <i class="fa-solid fa-signal"></i>
+                            <i class="fa-solid fa-sack-dollar"></i>
                         </div>
-
                     </div>
-
-                    <span class="kpi-value" id="kpiDisponibilidade">
+                    <span class="kpi-value" id="kpiCustoAcumulado">
                         N/A
                     </span>
-
-                    <span class="kpi-trend neutral" id="kpiDisponibilidadeDetalhe">
+                    <span class="kpi-trend neutral" id="kpiCustoAcumuladoDetalhe">
                     </span>
-
                 </div>
 
+                <!-- KPI 2: Projeção de Fechamento do Mês -->
                 <div class="kpi-card">
-
                     <div class="kpi-top">
-
                         <span class="kpi-label">
-                            Disco cheio em
+                            Projeção de Fechamento (Mês)
                         </span>
-
                         <div class="kpi-icon tone-red">
-                            <i class="fa-solid fa-hard-drive"></i>
+                            <i class="fa-solid fa-arrow-trend-up"></i>
                         </div>
-
                     </div>
-
-                    <span class="kpi-value" id="kpiDisco">
+                    <span class="kpi-value" id="kpiProjecaoFechamento">
                         N/A
                     </span>
-
-                    <span class="kpi-trend neutral" id="kpiDiscoDetalhe">
+                    <span class="kpi-trend neutral" id="kpiProjecaoFechamentoDetalhe">
                     </span>
-
                 </div>
 
+                <!-- KPI 3: Consumo de Energia Total -->
                 <div class="kpi-card">
-
                     <div class="kpi-top">
-
                         <span class="kpi-label">
-                            Alertas nas 24h
+                            Consumo de Energia Total
                         </span>
-
-                        <div class="kpi-icon tone-red">
-                            <i class="fa-solid fa-bell"></i>
+                        <div class="kpi-icon tone-teal">
+                            <i class="fa-solid fa-bolt"></i>
                         </div>
-
                     </div>
-
-                    <span class="kpi-value" id="kpiAlertas24h">
+                    <span class="kpi-value" id="kpiConsumoKwh">
                         N/A
                     </span>
-
-                    <span class="kpi-trend neutral" id="kpiAlertasDetalhe">
+                    <span class="kpi-trend neutral" id="kpiConsumoKwhDetalhe">
                     </span>
+                </div>
 
+                <!-- KPI 4: Tarifa Média de Energia -->
+                <div class="kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-label">
+                            Tarifa Média de Energia
+                        </span>
+                        <div class="kpi-icon tone-blue">
+                            <i class="fa-solid fa-plug-circle-bolt"></i>
+                        </div>
+                    </div>
+                    <span class="kpi-value" id="kpiTarifaMedia">
+                        N/A
+                    </span>
+                    <span class="kpi-trend neutral" id="kpiTarifaMediaDetalhe">
+                    </span>
+                </div>
+
+            </section>
+
+            <!-- GRÁFICO 1 FULL-WIDTH: EVOLUÇÃO DIÁRIA DO CUSTO + REGRESSÃO LINEAR -->
+            <section class="charts-grid-full" style="margin-bottom: 24px;">
+                <div class="chart-card" style="width: 100%;">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                Evolução Diária do Custo e Projeção Linear
+                            </div>
+                            <div class="chart-subtitle">
+                                Histórico diário realizado no mês (R$) com continuação projetada até o fim do mês
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="chart-badge past">Realizado</span>
+                            <span class="chart-badge forecast">Projeção</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-canvas-wrapper" style="height: 310px;">
+                        <canvas id="chartCustoDiarioProjecao"></canvas>
+                    </div>
                 </div>
             </section>
 
+            <!-- GRÁFICOS 2 E 3 (LADO A LADO) -->
             <section class="charts-grid">
 
-
-                <!-- GRÁFICO 1 -->
+                <!-- GRÁFICO 2: TARIFA DE ENERGIA POR DIA -->
                 <div class="chart-card">
-
                     <div class="chart-header">
-
                         <div>
-
                             <div class="chart-title">
-                                Incidentes por Node
+                                Tarifa Média de Energia por Dia
                             </div>
-
                             <div class="chart-subtitle">
-                                Total de incidentes registrados nos últimos 30 dias
+                                Variação diária do preço do kWh (R$/kWh) ao longo do mês
                             </div>
-
                         </div>
-
                         <span class="chart-badge past">
-                            Histórico
+                            Energia
                         </span>
-
                     </div>
 
-                    <div class="chart-canvas-wrapper">
-
-                        <canvas id="chartHistorico"></canvas>
-
+                    <div class="chart-canvas-wrapper" style="height: 280px;">
+                        <canvas id="chartTarifaDiaria"></canvas>
                     </div>
-
                 </div>
 
-
-                <!-- GRÁFICO 2 -->
+                <!-- GRÁFICO 3: CUSTO ESTIMADO POR NODE -->
                 <div class="chart-card">
-
                     <div class="chart-header">
-
                         <div>
-
                             <div class="chart-title">
-                                Nodes em Piora (Projeção)
+                                Custo Estimado por Node
                             </div>
-
-                            <div class="chart-subtitle" id="subtituloVariacao">
-                                Calculando projeção...
+                            <div class="chart-subtitle">
+                                Ranking dos nodes com maior impacto no billing do mês
                             </div>
-
                         </div>
-
-                        <span class="chart-badge forecast">
-                            Projeção
+                        <span class="chart-badge past">
+                            Nodes
                         </span>
-
                     </div>
 
-                    <div class="chart-canvas-wrapper">
-
-                        <canvas id="chartVariacao"></canvas>
-
+                    <div class="chart-canvas-wrapper chart-scrollable">
+                        <div class="chart-scroll-area">
+                            <canvas id="chartCustoPorNode"></canvas>
+                        </div>
                     </div>
-
                 </div>
 
             </section>
@@ -390,13 +369,12 @@
 
     </div>
 
-
     <!-- CHART.JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"
         onerror="document.querySelectorAll('.chart-load-error').forEach(el => el.style.display = 'flex')">
     </script>
 
-    <script src="js/dashboard-gestor.js"></script>
+    <script src="js/dashboard-billing.js"></script>
 
 </body>
 
