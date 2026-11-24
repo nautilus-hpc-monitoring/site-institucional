@@ -316,6 +316,7 @@ module.exports = {
     calcularAlertas,
     normalizarGold,
     componenteMaiorMedia,
+    inicioDaSemana,
     meiaNoite,
     DIA
 };

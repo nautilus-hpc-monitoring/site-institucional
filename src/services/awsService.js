@@ -93,8 +93,12 @@ if (process.env.AWS_CREDENTIAL_SOURCE === "database") {
 // Sem database, o SDK usa a cadeia padrão: ambiente, perfil ou função IAM.
 var clienteS3 = new S3Client(configuracaoS3);
 
-function listarArquivos(bucket, prefixo) {
-    return clienteS3.send(new ListObjectsV2Command({ Bucket: bucket, Prefix: prefixo }));
+function listarArquivos(bucket, prefixo, continuarDe) {
+    return clienteS3.send(new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefixo,
+        ContinuationToken: continuarDe
+    }));
 }
 
 function lerArquivo(bucket, chave) {
@@ -121,4 +125,45 @@ async function lerJson(caminhoArquivo) {
     }
 }
 
-module.exports = { obter, atualizar, iniciar, parar, listarArquivos, lerArquivo, lerJson };
+// Pega o JSON mais recente de um prefixo da Gold, percorrendo todas as páginas.
+async function lerUltimoJson(prefixo) {
+    if (!process.env.BUCKET_NAME) {
+        return { dados: null, aviso: "Configure BUCKET_NAME no servidor para carregar telemetria." };
+    }
+    try {
+        var bucket = process.env.BUCKET_NAME;
+        var continuarDe = null;
+        var maisRecente = null;
+
+        do {
+            var pagina = await listarArquivos(bucket, prefixo, continuarDe);
+            var candidatos = (pagina.Contents || []).filter(function (objeto) {
+                return objeto.Key && objeto.Key.toLowerCase().endsWith(".json");
+            });
+            for (var candidato of candidatos) {
+                if (!maisRecente || new Date(candidato.LastModified) > new Date(maisRecente.LastModified)) {
+                    maisRecente = candidato;
+                }
+            }
+            continuarDe = pagina.IsTruncated ? pagina.NextContinuationToken : null;
+        } while (continuarDe);
+
+        if (!maisRecente) {
+            return { dados: null, aviso: "Arquivo ainda não publicado no S3." };
+        }
+
+        var resposta = await lerArquivo(bucket, maisRecente.Key);
+        var textoArquivo = await resposta.Body.transformToString();
+        return { dados: JSON.parse(textoArquivo), chave: maisRecente.Key };
+    } catch (erro) {
+        var arquivoNaoEncontrado = erro.name === "NoSuchKey"
+            || (erro.$metadata && erro.$metadata.httpStatusCode === 404);
+        if (arquivoNaoEncontrado) {
+            return { dados: null, aviso: "Arquivo ainda não publicado no S3." };
+        }
+        console.error("Último JSON do S3 indisponível:", erro.name);
+        return { dados: null, aviso: "Não foi possível ler a telemetria do S3. Verifique configuração e permissões." };
+    }
+}
+
+module.exports = { obter, atualizar, iniciar, parar, listarArquivos, lerArquivo, lerJson, lerUltimoJson };

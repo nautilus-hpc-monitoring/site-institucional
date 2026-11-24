@@ -13,47 +13,7 @@ const htmlDashboard = document.getElementById("dashboard");
 const htmlKpisSeletor = document.getElementById("kpis-seletor");
 const mobileSidebar = document.getElementById("mobileSidebar");
 
-const USAR_DADOS_MOCKADOS = true;
-
-const kpisCampeoesMockados = [
-    {
-        chave: "cpu",
-        hostname: "alpha-node04",
-        valor: 92,
-        status: "atencao",
-        hpcId: 1,
-        clusterId: 1,
-        nodeId: 4
-    },
-    {
-        chave: "ram",
-        hostname: "beta-node02",
-        valor: 88,
-        status: "atencao",
-        hpcId: 2,
-        clusterId: 2,
-        nodeId: 7
-    },
-    {
-        chave: "disco",
-        hostname: "gamma-node01",
-        valor: 81,
-        status: "atencao",
-        hpcId: 2,
-        clusterId: 3,
-        nodeId: 11
-    },
-    {
-        chave: "alertas",
-        hostname: "beta-node03",
-        valor: 12,
-        status: "atencao",
-        hpcId: 2,
-        clusterId: 2,
-        nodeId: 8
-    }
-];
-
+let kpisCampeoes = [];
 let memoriaHPCs = [];
 let hpcSelecionado = null;
 let memoriaClusters = [];
@@ -67,7 +27,6 @@ let controladorTelemetria = null;
 
 window.onload = function () {
     validarSessao();
-    renderizarKpisSeletor();
     listarHPC();
 };
 
@@ -132,13 +91,41 @@ function definirCabecalho(titulo, subtitulo, mostrarVoltar) {
     htmlVoltarSeletor.classList.toggle("none", !mostrarVoltar);
 }
 
-function renderizarKpisSeletor() {
-    if (!USAR_DADOS_MOCKADOS) {
+async function buscarCampeoes() {
+    const idUsuario = sessionStorage.getItem("ID_USUARIO");
+    if (!idUsuario) {
         return;
     }
 
-    for (let kpi of kpisCampeoesMockados) {
-        const sufixo = kpi.chave.charAt(0).toUpperCase() + kpi.chave.slice(1);
+    try {
+        const resposta = await fetch(
+            "/dashoperador/campeoes?idUsuario=" + encodeURIComponent(idUsuario),
+            { cache: "no-store" }
+        );
+
+        if (resposta.status === 401) {
+            location.href = "./login.html";
+            return;
+        }
+
+        const dados = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(dados.erro || "Não foi possível carregar os campeões.");
+        }
+
+        kpisCampeoes = Object.values(dados.campeoes || {});
+        desenharKpisSeletor();
+    } catch (erro) {
+        kpisCampeoes = [];
+        desenharKpisSeletor();
+        console.error(erro);
+    }
+}
+
+function desenharKpisSeletor() {
+    for (const chave of ["cpu", "ram", "disco", "alertas"]) {
+        const kpi = kpisCampeoes.find(item => item && item.chave === chave);
+        const sufixo = chave.charAt(0).toUpperCase() + chave.slice(1);
         const valor = document.getElementById("kpiTop" + sufixo + "Valor");
         const node = document.getElementById("kpiTop" + sufixo + "Node");
         const status = document.getElementById("kpiTop" + sufixo + "Status");
@@ -147,32 +134,36 @@ function renderizarKpisSeletor() {
             continue;
         }
 
-        valor.textContent = String(kpi.valor);
-        node.textContent = kpi.hostname;
-        status.className = "operador-status " + (kpi.status || "normal");
-        status.innerHTML = "<span>•</span> " + (kpi.status === "atencao" ? "Atenção" : "Normal");
+        const temDado = Boolean(kpi && kpi.hostname && kpi.valor !== null);
+        valor.textContent = temDado
+            ? (chave === "alertas" ? String(kpi.valor) : Number(kpi.valor).toFixed(1))
+            : "—";
+        node.textContent = temDado ? kpi.hostname : "Sem dados";
+        definirStatus(
+            status.id,
+            temDado ? kpi.status : "normal",
+            temDado ? (kpi.status === "atencao" ? "Atenção" : "Normal") : "Sem dados"
+        );
     }
 }
 
 async function abrirNodeCampeao(chave) {
-    const kpi = kpisCampeoesMockados.find(item => item.chave === chave);
-    if (!kpi || memoriaHPCs.length === 0) {
+    const kpi = kpisCampeoes.find(item => item && item.chave === chave);
+    if (!kpi || !kpi.hpcId || !kpi.clusterId || !kpi.nodeId) {
         return;
     }
 
-    const hpc = memoriaHPCs.find(item => item.id === kpi.hpcId) || memoriaHPCs[0];
-    await listarClusters(hpc.id);
+    await listarClusters(kpi.hpcId);
 
-    const cluster = memoriaClusters.find(item => item.id === kpi.clusterId) || memoriaClusters[0];
+    const cluster = memoriaClusters.find(item => item.id === kpi.clusterId);
     if (!cluster) {
         return;
     }
 
-    await listarNodes(cluster.id);
+    await listarNodes(kpi.clusterId);
 
     const node = memoriaNodes.find(item => item.id === kpi.nodeId)
-        || memoriaNodes.find(item => item.hostname === kpi.hostname)
-        || memoriaNodes[0];
+        || memoriaNodes.find(item => item.hostname === kpi.hostname);
     if (!node) {
         return;
     }
@@ -216,6 +207,7 @@ function mostrarDashboard() {
 function listarHPC() {
     mostrarSeletor();
     htmlKpisSeletor.classList.remove("none");
+    buscarCampeoes();
 
     htmlBusca.value = "";
     nivelSeletor = "hpc";

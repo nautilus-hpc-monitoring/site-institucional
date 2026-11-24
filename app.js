@@ -37,6 +37,7 @@ app.use("/hpc", hpcRouter);
 app.use("/dashgestor", dashGestorRouter);
 app.use("/dashcategorica", dashCategoricaRouter);
 app.use("/dashcluster", require("./src/routes/dashCluster"));
+app.use("/dashoperador", require("./src/routes/dashOperador"));
 app.use("/dashanalista", require("./src/routes/dashAnalista"));
 app.use("/alertas", require("./src/routes/alertas"));
 
