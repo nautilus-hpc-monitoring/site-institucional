@@ -260,12 +260,15 @@ async function carregarCluster(idCluster) {
         avisos = painel.avisos || [];
         nodes = painel.nodes || [];
 
-        preencherSelect(elemento("seletor-node"), nodes.map(function (nome) {
+        const seletorNode = elemento("seletor-node");
+        preencherSelect(seletorNode, nodes.map(function (nome) {
             return { valor: nome, texto: nome };
         }));
 
-        if (painel.selecionado) {
-            elemento("seletor-node").value = painel.selecionado;
+        if (nodes.length === 0) {
+            seletorNode.replaceChildren(new Option("Nenhum node cadastrado", ""));
+        } else if (painel.selecionado) {
+            seletorNode.value = painel.selecionado;
         }
 
         renderizar(painel.node);
@@ -919,6 +922,7 @@ function renderizarRodape(node) {
 function mostrarEstado(mensagem) {
     texto("status-analista", mensagem);
     texto("rodape-telemetria", mensagem);
+    renderizarPercentis({}, "cpu");
 
     Object.keys(COMPONENTES).forEach(function (chave) {
         semDados(chave, mensagem);

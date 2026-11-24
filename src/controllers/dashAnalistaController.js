@@ -4,7 +4,7 @@
 //   1. valida ?idUsuario= e :id;
 //   2. confirma, no MySQL, que o cluster pertence à empresa do usuário;
 //   3. lê o JSON do analista para o cluster no S3 ou em ANALISTA_GOLD_LOCAL_DIR;
-//   4. devolve só o node pedido, mais a lista de nodes para o seletor.
+//   4. devolve os nodes do cadastro e a telemetria do node selecionado.
 //
 // Reaproveitamos o modelo da dashboard de cluster porque as consultas de
 // usuário/empresa/clusters são exatamente as mesmas. Assim não duplicamos SQL.
@@ -116,8 +116,11 @@ async function dados(req, res) {
             return res.status(404).json({ erro: "Cluster não disponível para este usuário." });
         }
 
-        // 3. Leitura do arquivo publicado pela ETL (S3 ou pasta local).
-        var arquivo = await lerPainel(idCluster);
+        // 3. Cadastro dos nodes e telemetria publicada pela ETL.
+        var [cadastro, arquivo] = await Promise.all([
+            dashClusterModel.nodes(idCluster, resultado.idEmpresa),
+            lerPainel(idCluster)
+        ]);
         var painel = arquivo.dados;
 
         // Avisos explicam à página por que não há dados (BUCKET_NAME, S3, etc.).
@@ -129,16 +132,29 @@ async function dados(req, res) {
             avisos.push.apply(avisos, painel.avisos); // equivalente a avisos.push(...)
         }
 
-        // 4. Lista de nodes e escolha do node pedido.
-        var nodes = painel && Array.isArray(painel.nodes) ? painel.nodes : [];
-        var nomes = nodes.map(function (node) {
+        // 4. Cruza os nodes cadastrados com a telemetria pelo hostname.
+        var telemetria = painel && Array.isArray(painel.nodes) ? painel.nodes : [];
+        var porHostname = new Map();
+        for (var node of telemetria) {
+            if (node && typeof node.hostname === "string") {
+                porHostname.set(node.hostname, node);
+            }
+        }
+        var nomes = cadastro.map(function (node) {
             return node.hostname;
         });
 
         var pedido = typeof req.query.node === "string" ? req.query.node : "";
-        var selecionado = nodes.find(function (node) {
-            return node.hostname === pedido;
-        }) || nodes[0] || null;
+        var escolhido = nomes.includes(pedido) ? pedido : nomes.find(function (nome) {
+            return porHostname.has(nome);
+        }) || nomes[0] || null;
+        var selecionado = porHostname.get(escolhido) || null;
+
+        if (nomes.length === 0) {
+            avisos.unshift("Nenhum node cadastrado para este cluster.");
+        } else if (!selecionado && !arquivo.aviso) {
+            avisos.unshift("Sem telemetria publicada para o node " + escolhido + ".");
+        }
 
         res.set("Cache-Control", "no-store");
 
@@ -152,7 +168,7 @@ async function dados(req, res) {
                 total_nodes: cluster.total_nodes
             },
             nodes: nomes,
-            selecionado: selecionado ? selecionado.hostname : null,
+            selecionado: escolhido,
             metadados: painel ? painel.metadados : null,
             node: selecionado,
             avisos: avisos
