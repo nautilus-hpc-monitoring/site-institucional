@@ -282,6 +282,58 @@
     color: #64748B;
 }
 
+.kpis-seletor {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.kpis-seletor .operador-kpi {
+    min-height: 155px;
+}
+
+.operador-kpi-clicavel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    width: 100%;
+    font-family: inherit;
+    text-align: left;
+    color: inherit;
+
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.operador-kpi-clicavel:hover {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.operador-kpi-clicavel:focus-visible {
+    outline: 2px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+.operador-kpi-descricao {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+}
+
+.operador-kpi-node {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cor-secundaria);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* =========================================================
    GRÁFICOS
 ========================================================= */

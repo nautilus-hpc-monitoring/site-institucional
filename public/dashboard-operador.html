@@ -225,6 +225,90 @@
                     </div>
                 </div>
 
+                <section class="operador-kpis kpis-seletor none" id="kpis-seletor">
+
+                    <button type="button" class="operador-kpi operador-kpi-clicavel"
+                        onclick="abrirNodeCampeao('cpu')">
+                        <span class="operador-kpi-topo">
+                            <span class="operador-kpi-icone">
+                                <i class="fa-solid fa-microchip"></i>
+                            </span>
+                            <span class="operador-status normal" id="kpiTopCpuStatus">
+                                <span>•</span> Normal
+                            </span>
+                        </span>
+
+                        <span class="operador-kpi-valor">
+                            <strong id="kpiTopCpuValor">—</strong>
+                            <span>%</span>
+                        </span>
+
+                        <span class="operador-kpi-descricao">Node com maior uso de CPU</span>
+                        <span class="operador-kpi-node" id="kpiTopCpuNode">—</span>
+                    </button>
+
+                    <button type="button" class="operador-kpi operador-kpi-clicavel"
+                        onclick="abrirNodeCampeao('ram')">
+                        <span class="operador-kpi-topo">
+                            <span class="operador-kpi-icone">
+                                <i class="fa-solid fa-memory"></i>
+                            </span>
+                            <span class="operador-status atencao" id="kpiTopRamStatus">
+                                <span>•</span> Atenção
+                            </span>
+                        </span>
+
+                        <span class="operador-kpi-valor">
+                            <strong id="kpiTopRamValor">—</strong>
+                            <span>%</span>
+                        </span>
+
+                        <span class="operador-kpi-descricao">Node com maior uso de RAM</span>
+                        <span class="operador-kpi-node" id="kpiTopRamNode">—</span>
+                    </button>
+
+                    <button type="button" class="operador-kpi operador-kpi-clicavel"
+                        onclick="abrirNodeCampeao('disco')">
+                        <span class="operador-kpi-topo">
+                            <span class="operador-kpi-icone">
+                                <i class="fa-solid fa-hard-drive"></i>
+                            </span>
+                            <span class="operador-status atencao" id="kpiTopDiscoStatus">
+                                <span>•</span> Atenção
+                            </span>
+                        </span>
+
+                        <span class="operador-kpi-valor">
+                            <strong id="kpiTopDiscoValor">—</strong>
+                            <span>%</span>
+                        </span>
+
+                        <span class="operador-kpi-descricao">Node com maior uso de disco</span>
+                        <span class="operador-kpi-node" id="kpiTopDiscoNode">—</span>
+                    </button>
+
+                    <button type="button" class="operador-kpi operador-kpi-clicavel"
+                        onclick="abrirNodeCampeao('alertas')">
+                        <span class="operador-kpi-topo">
+                            <span class="operador-kpi-icone">
+                                <i class="fa-solid fa-bell"></i>
+                            </span>
+                            <span class="operador-status normal" id="kpiTopAlertasStatus">
+                                <span>•</span> Normal
+                            </span>
+                        </span>
+
+                        <span class="operador-kpi-valor">
+                            <strong id="kpiTopAlertasValor">—</strong>
+                            <span>alertas</span>
+                        </span>
+
+                        <span class="operador-kpi-descricao">Node com mais alertas</span>
+                        <span class="operador-kpi-node" id="kpiTopAlertasNode">—</span>
+                    </button>
+
+                </section>
+
                 <div id="lista-seletor"></div>
             </div>
 
