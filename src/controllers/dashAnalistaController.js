@@ -3,8 +3,8 @@
 // Fluxo de cada requisição:
 //   1. valida ?idUsuario= e :id;
 //   2. confirma, no MySQL, que o cluster pertence à empresa do usuário;
-//   3. lê o JSON do analista para o cluster no S3 ou em ANALISTA_GOLD_LOCAL_DIR;
-//   4. devolve os nodes do cadastro e a telemetria do node selecionado.
+//   3. lista os nodes cadastrados no MySQL;
+//   4. para um node do cadastro, devolve a telemetria publicada na Gold.
 //
 // Reaproveitamos o modelo da dashboard de cluster porque as consultas de
 // usuário/empresa/clusters são exatamente as mesmas. Assim não duplicamos SQL.
@@ -87,40 +87,75 @@ async function listar(req, res) {
     }
 }
 
+async function autorizarCluster(req, res) {
+    var idUsuario = inteiroPositivo(req.query.idUsuario);
+    if (!idUsuario) {
+        res.status(400).json({ erro: "Usuário não informado ou inválido." });
+        return null;
+    }
+
+    var idCluster = inteiroPositivo(req.params.id);
+    if (!idCluster) {
+        res.status(400).json({ erro: "Cluster inválido." });
+        return null;
+    }
+
+    var resultado = await clustersDoUsuario(idUsuario);
+    if (!resultado) {
+        res.status(404).json({ erro: "Usuário não encontrado." });
+        return null;
+    }
+
+    var cluster = resultado.clusters.find(function (item) {
+        return Number(item.cluster_id) === idCluster;
+    });
+    if (!cluster) {
+        res.status(404).json({ erro: "Cluster não disponível para este usuário." });
+        return null;
+    }
+
+    return { idCluster: idCluster, idEmpresa: resultado.idEmpresa, cluster: cluster };
+}
+
+// GET /dashanalista/clusters/3/nodes?idUsuario=1
+async function listarNodes(req, res) {
+    try {
+        var acesso = await autorizarCluster(req, res);
+        if (!acesso) {
+            return;
+        }
+
+        var cadastro = await dashClusterModel.nodes(acesso.idCluster, acesso.idEmpresa);
+        res.set("Cache-Control", "no-store");
+        return res.status(200).json(cadastro);
+    } catch (erro) {
+        console.error("Analista - listagem de nodes:", erro.code || erro.name);
+        return res.status(503).json({ erro: "Não foi possível consultar os nodes do cluster." });
+    }
+}
+
 // GET /dashanalista/clusters/3/dados?idUsuario=1&node=node01
-// Devolve o bloco de um node do JSON da Gold.
 async function dados(req, res) {
     try {
-        // 1. Validação dos parâmetros vindos da URL.
-        var idUsuario = inteiroPositivo(req.query.idUsuario);
-        if (!idUsuario) {
-            return res.status(400).json({ erro: "Usuário não informado ou inválido." });
+        var acesso = await autorizarCluster(req, res);
+        if (!acesso) {
+            return;
         }
 
-        var idCluster = inteiroPositivo(req.params.id);
-        if (!idCluster) {
-            return res.status(400).json({ erro: "Cluster inválido." });
-        }
-
-        // 2. Autorização: o cluster precisa pertencer à empresa do usuário.
-        var resultado = await clustersDoUsuario(idUsuario);
-        if (!resultado) {
-            return res.status(404).json({ erro: "Usuário não encontrado." });
-        }
-
-        // find percorre a lista e devolve o primeiro item que passar no teste.
-        var cluster = resultado.clusters.find(function (item) {
-            return Number(item.cluster_id) === idCluster;
+        var { idCluster, idEmpresa, cluster } = acesso;
+        var cadastro = await dashClusterModel.nodes(idCluster, idEmpresa);
+        var nomes = cadastro.map(function (node) {
+            return node.hostname;
         });
-        if (!cluster) {
-            return res.status(404).json({ erro: "Cluster não disponível para este usuário." });
+        var pedido = req.query.node || "";
+        if (typeof pedido !== "string") {
+            return res.status(400).json({ erro: "Node inválido." });
+        }
+        if (pedido && !nomes.includes(pedido)) {
+            return res.status(404).json({ erro: "Node não cadastrado neste cluster." });
         }
 
-        // 3. Cadastro dos nodes e telemetria publicada pela ETL.
-        var [cadastro, arquivo] = await Promise.all([
-            dashClusterModel.nodes(idCluster, resultado.idEmpresa),
-            lerPainel(idCluster)
-        ]);
+        var arquivo = nomes.length ? await lerPainel(idCluster) : { dados: null };
         var painel = arquivo.dados;
 
         // Avisos explicam à página por que não há dados (BUCKET_NAME, S3, etc.).
@@ -140,12 +175,7 @@ async function dados(req, res) {
                 porHostname.set(node.hostname, node);
             }
         }
-        var nomes = cadastro.map(function (node) {
-            return node.hostname;
-        });
-
-        var pedido = typeof req.query.node === "string" ? req.query.node : "";
-        var escolhido = nomes.includes(pedido) ? pedido : nomes.find(function (nome) {
+        var escolhido = pedido || nomes.find(function (nome) {
             return porHostname.has(nome);
         }) || nomes[0] || null;
         var selecionado = porHostname.get(escolhido) || null;
@@ -181,5 +211,6 @@ async function dados(req, res) {
 
 module.exports = {
     listar,
+    listarNodes,
     dados
 };

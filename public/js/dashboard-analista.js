@@ -164,12 +164,11 @@ function media(valores) {
 /* ---------- 3. ESTADO ---------- */
 
 let clusters = [];        // lista devolvida por /dashanalista/clusters
-let nodes = [];           // hostnames do cluster selecionado
 let painel = null;        // resposta completa do último /dados
 let metadados = null;     // quando o JSON foi gerado
 let avisos = [];          // mensagens de configuração/falha do S3
 let periodoAtual = "6";   // opção do seletor de período
-let carregando = false;   // evita pedidos simultâneos
+let consultaAtual = 0;   // permite descartar respostas de seleções anteriores
 const graficos = {};      // instâncias do Chart.js por componente
 
 // Quantas semanas o gráfico deve mostrar agora (limitado ao que existe).
@@ -247,59 +246,66 @@ async function iniciar() {
     }
 }
 
-// Lê o JSON da Gold para um cluster e já carrega o primeiro node.
+// Preenche o seletor com o cadastro e consulta a telemetria do primeiro node.
 async function carregarCluster(idCluster) {
-    if (carregando) {
-        return;
-    }
-    carregando = true;
+    const consulta = ++consultaAtual;
+    const seletorNode = elemento("seletor-node");
+    seletorNode.replaceChildren(new Option("Carregando…", ""));
+    seletorNode.disabled = true;
+    painel = null;
+    mostrarEstado("Carregando nodes do cluster…");
 
     try {
-        painel = await api("/dashanalista/clusters/" + encodeURIComponent(idCluster) + "/dados");
-        metadados = painel.metadados;
-        avisos = painel.avisos || [];
-        nodes = painel.nodes || [];
-
-        const seletorNode = elemento("seletor-node");
-        preencherSelect(seletorNode, nodes.map(function (nome) {
-            return { valor: nome, texto: nome };
-        }));
-
-        if (nodes.length === 0) {
-            seletorNode.replaceChildren(new Option("Nenhum node cadastrado", ""));
-        } else if (painel.selecionado) {
-            seletorNode.value = painel.selecionado;
+        const cadastro = await api("/dashanalista/clusters/" + encodeURIComponent(idCluster) + "/nodes");
+        if (consulta !== consultaAtual) {
+            return;
         }
 
-        renderizar(painel.node);
+        preencherSelect(seletorNode, cadastro.map(function (node) {
+            return { valor: node.hostname, texto: node.hostname };
+        }));
+
+        if (!cadastro.length) {
+            seletorNode.replaceChildren(new Option("Nenhum node cadastrado", ""));
+            mostrarEstado("Nenhum node cadastrado para este cluster.");
+            return;
+        }
+
+        await carregarNode(idCluster, cadastro[0].hostname);
     } catch (erro) {
-        mostrarEstado(erro.message);
-    } finally {
-        // finally roda mesmo com erro, liberando a próxima troca de cluster.
-        carregando = false;
+        if (consulta === consultaAtual) {
+            seletorNode.replaceChildren(new Option("Nodes indisponíveis", ""));
+            mostrarEstado(erro.message);
+        }
     }
 }
 
-// Troca de node: busca o mesmo cluster passando ?node=<hostname>.
-async function carregarNode(nome) {
-    const idCluster = elemento("seletor-cluster").value;
-    if (!idCluster || carregando) {
+async function carregarNode(idCluster, hostname) {
+    if (!idCluster || !hostname) {
         return;
     }
-    carregando = true;
+
+    const consulta = ++consultaAtual;
+    painel = null;
+    mostrarEstado("Carregando telemetria do node…");
 
     try {
-        painel = await api(
+        const dados = await api(
             "/dashanalista/clusters/" + encodeURIComponent(idCluster) +
-            "/dados?node=" + encodeURIComponent(nome)
+            "/dados?node=" + encodeURIComponent(hostname)
         );
-        metadados = painel.metadados;
-        avisos = painel.avisos || [];
-        renderizar(painel.node);
+        if (consulta !== consultaAtual) {
+            return;
+        }
+
+        painel = dados;
+        metadados = dados.metadados;
+        avisos = dados.avisos || [];
+        renderizar(dados.node);
     } catch (erro) {
-        mostrarEstado(erro.message);
-    } finally {
-        carregando = false;
+        if (consulta === consultaAtual) {
+            mostrarEstado(erro.message);
+        }
     }
 }
 
@@ -1045,7 +1051,7 @@ elemento("seletor-cluster").addEventListener("change", function (evento) {
 
 // Troca de node: busca apenas aquele node.
 elemento("seletor-node").addEventListener("change", function (evento) {
-    carregarNode(evento.target.value);
+    carregarNode(elemento("seletor-cluster").value, evento.target.value);
 });
 
 // Troca de período: não chama a API, só redesenha com outro recorte.
