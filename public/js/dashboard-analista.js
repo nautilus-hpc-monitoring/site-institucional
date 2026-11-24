@@ -77,12 +77,9 @@ const CORES_GRAFICO = {
     residuo: "#d64545"
 };
 
-// Mesmo limite usado pela ETL em ANALISTA_LIMITE_PICO.
-const LIMITE_PICO = 80;
-
-// Quantas semanas exibir em cada opção do seletor de período.
-// 6 meses equivale ao padrão publicado pela ETL (ANALISTA_SEMANAS=24).
-const SEMANAS_POR_PERIODO = { "1": 5, "3": 13, "6": 24 };
+function limitePico() {
+    return numero(metadados?.limite_pico) ? metadados.limite_pico : 80;
+}
 
 // Formata porcentagem no padrão brasileiro: 55.7 -> "55,7%".
 function formatarPorcentagem(valor, casas = 1) {
@@ -171,13 +168,8 @@ let periodoAtual = "6";   // opção do seletor de período
 let consultaAtual = 0;   // permite descartar respostas de seleções anteriores
 const graficos = {};      // instâncias do Chart.js por componente
 
-// Quantas semanas o gráfico deve mostrar agora (limitado ao que existe).
-function semanasVisiveis() {
-    const disponiveis = painel && painel.node && painel.node.semanas
-        ? painel.node.semanas.datas.length
-        : 0;
-    const pedidas = SEMANAS_POR_PERIODO[periodoAtual] || 24;
-    return Math.min(pedidas, disponiveis);
+function dadosDoPeriodo(node) {
+    return periodoAtual === "6" ? node : node?.periodos?.[periodoAtual];
 }
 
 /* ---------- 4. COMUNICAÇÃO COM A API ---------- */
@@ -311,8 +303,7 @@ async function carregarNode(idCluster, hostname) {
 
 /* ---------- 6. KPIs ---------- */
 
-// Indica se os deltas podem ser calculados: precisa do período completo
-// (6 meses) e da comparação publicada pela ETL.
+// Os deltas precisam da janela completa e da comparação publicada pela ETL.
 function podeComparar(node) {
     return periodoAtual === "6" && Boolean(node.comparacao && node.comparacao.disponivel);
 }
@@ -323,6 +314,23 @@ function variacaoPercentual(atual, anterior) {
         return null;
     }
     return (atual - anterior) / anterior * 100;
+}
+
+function resumirComparacao(comparacao) {
+    const atuais = [];
+    const anteriores = [];
+    for (const chave of Object.keys(COMPONENTES)) {
+        const atual = comparacao.medias_atuais?.[chave];
+        const anterior = comparacao.medias_anteriores?.[chave];
+        if (numero(atual) && numero(anterior)) {
+            atuais.push(atual);
+            anteriores.push(anterior);
+        }
+    }
+
+    const atual = media(atuais);
+    const anterior = media(anteriores);
+    return { atual, anterior, variacao: variacaoPercentual(atual, anterior) };
 }
 
 // Texto com sinal: 9 -> "+9", -3 -> "-3".
@@ -350,7 +358,7 @@ function renderizarKpis(node) {
             delta > 0 ? "delta-orange" : "delta-neutral"
         );
     } else {
-        texto("kpi-pico-sub", "Nenhum pico acima de " + LIMITE_PICO + "%");
+        texto("kpi-pico-sub", "Nenhum pico acima de " + limitePico() + "%");
         texto("kpi-pico-valor", "0%");
         escreverDelta("kpi-pico-delta", "", "delta-neutral");
     }
@@ -388,7 +396,7 @@ function renderizarKpis(node) {
         "kpi-anomalias-desc",
         quantidadeAnomalias === 0
             ? "Nenhuma anomalia no período"
-            : "Desvios acima de 5 pp da tendência semanal"
+            : "Desvios acima de " + (metadados?.limite_residuo ?? 5) + " pp da tendência semanal"
     );
 
     /* Duração do pico mais longo. */
@@ -418,26 +426,21 @@ function renderizarKpis(node) {
         texto("kpi-instavel-desc", "Semanas insuficientes para comparar");
     }
 
-    /* Cartão de variação geral (média dos componentes).
-     * A ETL só publica a comparação para a janela de 6 meses
-     * (ANALISTA_SEMANAS=24). Nos outros períodos do seletor, mostramos "—"
-     * e explicamos o motivo, em vez de comparar recortes diferentes. */
+    /* Variação média dos componentes na janela completa. */
     const comparacao = node.comparacao || {};
-    const variacaoGeral = comparavel
-        ? media(Object.values(comparacao.variacao_percentual || {}))
-        : null;
+    const variacaoGeral = comparavel ? resumirComparacao(comparacao).variacao : null;
 
     if (numero(variacaoGeral)) {
-        texto("variation-valor", comSinal(formatarNumero(variacaoGeral, 1)) + "%");
+        texto("variation-valor", (variacaoGeral > 0 ? "+" : "") + formatarNumero(variacaoGeral, 1) + "%");
 
         // Abaixo de meio por cento a diferença é ruído: dizemos "estável".
         let frase;
         if (Math.abs(variacaoGeral) < 0.5) {
-            frase = "Média geral de utilização praticamente estável em relação aos 6 meses anteriores.";
+            frase = "Média geral de utilização praticamente estável em relação ao período anterior.";
         } else if (variacaoGeral > 0) {
-            frase = "Média geral de utilização aumentou em relação aos 6 meses anteriores.";
+            frase = "Média geral de utilização aumentou em relação ao período anterior.";
         } else {
-            frase = "Média geral de utilização diminuiu em relação aos 6 meses anteriores.";
+            frase = "Média geral de utilização diminuiu em relação ao período anterior.";
         }
         texto("variation-info", frase);
     } else {
@@ -446,7 +449,7 @@ function renderizarKpis(node) {
             "variation-info",
             periodoAtual === "6"
                 ? (comparacao.motivo || "Sem dados do período anterior para comparar.")
-                : "A comparação com o período anterior está disponível apenas para os últimos 6 meses."
+                : "A comparação com o período anterior está disponível na janela completa."
         );
     }
 }
@@ -478,8 +481,9 @@ function ligarAbas() {
             aba.classList.add("active");
             aba.setAttribute("aria-selected", "true");
 
-            if (painel && painel.node) {
-                renderizarPercentis(painel.node, aba.dataset.componente);
+            const node = dadosDoPeriodo(painel?.node);
+            if (node) {
+                renderizarPercentis(node, aba.dataset.componente);
             }
         });
     });
@@ -527,62 +531,46 @@ function limparEstadoVazio(chave) {
 function criarGraficoComponente(node, chave) {
     const componente = COMPONENTES[chave];
     const dados = (node.componentes || {})[chave] || {};
-    const quantidade = semanasVisiveis();
+    const rotulos = node.semanas?.rotulos || [];
+    const medias = dados.medias || [];
+    const linhaRegressao = dados.regressao?.linha || [];
+    const mediaVisivel = numero(dados.media_geral) ? dados.media_geral : media(medias);
+    texto("media-" + chave, formatarPorcentagem(mediaVisivel));
 
-    if (quantidade === 0) {
-        semDados(chave, "Sem semanas publicadas para este node.");
+    if (!medias.some(numero)) {
+        texto("nota-" + chave, "—");
+        const usaCoberturaAntiga = metadados?.cobertura_minima > 0 && dados.amostras?.some((n) => n > 0);
+        semDados(chave, usaCoberturaAntiga
+            ? "Este JSON aplicou a cobertura antiga. Reprocesse a Gold com a ETL atualizada."
+            : "Sem médias semanais para o período selecionado.");
         return;
     }
 
-    // .slice(-quantidade) pega as últimas N posições, mantendo a ordem.
-    // Os "|| []" protegem contra campos ausentes no JSON.
-    const rotulos = (node.semanas.rotulos || []).slice(-quantidade);
-    const medias = (dados.medias || []).slice(-quantidade);
-    const linhaRegressao = dados.regressao && Array.isArray(dados.regressao.linha)
-        ? dados.regressao.linha.slice(-quantidade)
-        : [];
-
-    // Média exibida no cabeçalho do cartão.
-    const mediaVisivel = media(medias);
-    texto("media-" + chave, formatarPorcentagem(mediaVisivel));
-
-    // Pontos de pico: semanas cuja média passou de 80%.
+    // Pontos de pico: semanas cuja média passou do limite publicado.
     const pontosPico = medias
         .map(function (valor, indice) {
             return { x: rotulos[indice], y: valor };
         })
         .filter(function (ponto) {
-            return numero(ponto.y) && ponto.y > LIMITE_PICO;
+            return numero(ponto.y) && ponto.y > limitePico();
         });
 
-    // Anomalias publicadas pela ETL, restritas ao período visível.
-    const primeiroDia = node.semanas.datas[node.semanas.datas.length - quantidade];
-    const pontosAnomalia = (dados.anomalias || [])
-        .filter(function (item) {
-            return String(item.semana) >= String(primeiroDia);
-        })
-        .map(function (item) {
-            return { x: rotuloDaData(item.semana), y: item.valor };
-        });
+    const pontosAnomalia = (dados.anomalias || []).map(function (item) {
+        return { x: rotuloDaData(item.semana), y: item.valor };
+    });
 
     // Texto de apoio abaixo do título do cartão.
-    // Aqui contamos semanas cuja MÉDIA passou de 80% (o KPI conta amostras
+    // Aqui contamos semanas cuja média passou do limite (o KPI conta amostras
     // pontuais, por isso os números podem ser diferentes).
     const quantidadePicos = pontosPico.length;
     texto(
         "nota-" + chave,
         quantidadePicos === 0
-            ? "Nenhuma média semanal acima de " + LIMITE_PICO + "%"
+            ? "Nenhuma média semanal acima de " + limitePico() + "%"
             : quantidadePicos + (quantidadePicos === 1
-                ? " semana com média acima de " + LIMITE_PICO + "%"
-                : " semanas com média acima de " + LIMITE_PICO + "%")
+                ? " semana com média acima de " + limitePico() + "%"
+                : " semanas com média acima de " + limitePico() + "%")
     );
-
-    // Se todas as médias são nulas, não há o que desenhar.
-    if (!medias.some(numero)) {
-        semDados(chave, "Sem médias semanais para o período selecionado.");
-        return;
-    }
 
     limparEstadoVazio(chave);
     destruirGrafico(chave);
@@ -599,7 +587,7 @@ function criarGraficoComponente(node, chave) {
         datasets.push({
             label: "Período anterior",
             // Alinhamento por posição: a semana i anterior fica sobre a semana i atual.
-            data: anteriores.slice(-quantidade),
+            data: anteriores,
             borderColor: componente.corSuave,
             backgroundColor: componente.corSuave,
             borderWidth: 1.5,
@@ -612,7 +600,7 @@ function criarGraficoComponente(node, chave) {
 
     // Série atual.
     datasets.push({
-        label: "Semestre atual",
+        label: "Período selecionado",
         data: medias,
         borderColor: componente.cor,
         backgroundColor: componente.cor,
@@ -640,7 +628,7 @@ function criarGraficoComponente(node, chave) {
 
     // Picos como pontos soltos (semanas com média acima do limite).
     datasets.push({
-        label: "Média semanal acima de " + LIMITE_PICO + "%",
+        label: "Média semanal acima de " + limitePico() + "%",
         type: "scatter",
         data: pontosPico,
         backgroundColor: CORES_GRAFICO.pico,
@@ -738,10 +726,10 @@ function classificarCorrelacao(r) {
     }
     const forca = Math.abs(r);
     if (forca >= 0.7) {
-        return "Gargalo de I/O Crítico";
+        return "Correlação forte";
     }
     if (forca >= 0.4) {
-        return "Atenção moderada";
+        return "Correlação moderada";
     }
     return "Sem correlação relevante";
 }
@@ -867,22 +855,16 @@ function criarGraficoCorrelacao(node) {
 
 // Escreve o rodapé e o subtítulo do gráfico com os dados do período.
 function renderizarRodape(node) {
-    // .slice(-quantidade) pega as últimas semanas visíveis do gráfico.
-    const quantidade = semanasVisiveis();
-    const rotulos = (node.semanas.rotulos || []).slice(-quantidade);
-    const inicio = rotulos[0] || "—";
-    const fim = rotulos[rotulos.length - 1] || "—";
+    const rotulos = node.semanas?.rotulos || [];
+    const inicio = node.inicio ? formatarDataHora(node.inicio) : rotulos[0] || "—";
+    const fim = node.fim ? formatarDataHora(node.fim) : rotulos.at(-1) || "—";
 
-    texto("grafico-subtitulo", "Médias semanais e picos pontuais • " + inicio + " — " + fim);
+    texto("grafico-subtitulo", "Médias semanais • " + inicio + " — " + fim);
 
     const kpis = node.kpis || {};
     const comparacao = node.comparacao || {};
 
-    // As médias de comparação também valem só para a janela de 6 meses.
-    const comparavel = podeComparar(node);
-    const atual = comparavel ? media(Object.values(comparacao.medias_atuais || {})) : null;
-    const anterior = comparavel ? media(Object.values(comparacao.medias_anteriores || {})) : null;
-    const variacao = comparavel ? media(Object.values(comparacao.variacao_percentual || {})) : null;
+    const { atual, anterior, variacao } = podeComparar(node) ? resumirComparacao(comparacao) : {};
 
     const partes = [
         "Telemetria agregada • " + inicio + " — " + fim +
@@ -893,7 +875,7 @@ function renderizarRodape(node) {
         partes.push(
             "Média geral: " + formatarPorcentagem(atual) +
             (numero(anterior) ? " atual × " + formatarPorcentagem(anterior) + " anterior" : "") +
-            (numero(variacao) ? " (" + comSinal(formatarNumero(variacao, 1)) + "%)" : "")
+            (numero(variacao) ? " (" + (variacao > 0 ? "+" : "") + formatarNumero(variacao, 1) + "%)" : "")
         );
     }
 
@@ -901,7 +883,7 @@ function renderizarRodape(node) {
     const quantidadePicos = kpis.quantidade_picos || 0;
     partes.push(
         quantidadePicos + (quantidadePicos === 1 ? " pico de carga" : " picos de carga") +
-        " (> " + LIMITE_PICO + "%)"
+        " (> " + limitePico() + "%)"
     );
 
     if (kpis.maior_pico && kpis.maior_pico.texto) {
@@ -911,22 +893,17 @@ function renderizarRodape(node) {
     // Segunda linha do rodapé (o CSS usa white-space: pre-line para respeitar o \n).
     const notaPercentis = "Percentis e durações referem-se às amostras pontuais, não às médias semanais.";
 
-    texto("rodape-telemetria", partes.join(" • ") + "\n" + notaPercentis);
+    texto("rodape-telemetria", [partes.join(" • "), notaPercentis, ...avisos].join("\n"));
 
-    // Status no cabeçalho: quando o JSON foi gerado e até quando há telemetria.
-    const gerado = metadados ? formatarDataHora(metadados.gerado_em) : "—";
-    const ate = metadados ? formatarDataHora(metadados.telemetria_ate) : "—";
-    let status = "Atualizado em " + gerado + " • telemetria até " + ate;
-
-    if (avisos.length) {
-        status += " • " + avisos[0];
-    }
-    texto("status-analista", status);
+    const gerado = formatarDataHora(metadados?.gerado_em);
+    const ate = formatarDataHora(node.telemetria_ate || metadados?.telemetria_ate);
+    texto("status-analista", "Atualizado em " + gerado + " • telemetria até " + ate);
 }
 
 // Limpa a tela e mostra uma mensagem única (usado quando não há dados).
 function mostrarEstado(mensagem) {
     texto("status-analista", mensagem);
+    texto("grafico-subtitulo", "Médias semanais de uso");
     texto("rodape-telemetria", mensagem);
     renderizarPercentis({}, "cpu");
 
@@ -949,14 +926,30 @@ function mostrarEstado(mensagem) {
     texto("kpi-instavel-desc", "—");
     texto("variation-valor", "—");
     texto("variation-info", mensagem);
-    texto("r-correlacao", "—");
-    texto("correlacao-badge", "Sem dados");
+    renderizarCorrelacao({});
+    destruirGrafico("correlacao");
 }
 
 // Desenha a página inteira para o node recebido.
-function renderizar(node) {
-    if (!node) {
+function renderizar(nodePublicado) {
+    if (!nodePublicado) {
         mostrarEstado(avisos[0] || "Nenhum node com telemetria publicada para este cluster.");
+        return;
+    }
+
+    const semanas = nodePublicado.semanas?.datas?.length;
+    if (semanas) {
+        const opcao = elemento("seletor-periodo").querySelector('option[value="6"]');
+        opcao.textContent = semanas === 1 ? "Última semana" : "Últimas " + semanas + " semanas";
+    }
+
+    const node = dadosDoPeriodo(nodePublicado);
+    if (!node) {
+        mostrarEstado("O JSON publicado ainda não inclui este recorte. Reprocesse a Gold com a ETL atualizada.");
+        return;
+    }
+    if (node.amostras === 0) {
+        mostrarEstado("Sem leituras para este node no período selecionado.");
         return;
     }
 
@@ -1016,8 +1009,9 @@ elemento("btn-ajuda").addEventListener("click", function () {
 });
 
 elemento("btn-correlacao").addEventListener("click", function () {
-    if (painel && painel.node) {
-        criarGraficoCorrelacao(painel.node);
+    const node = dadosDoPeriodo(painel?.node);
+    if (node && node.amostras !== 0) {
+        criarGraficoCorrelacao(node);
     }
     abrirModal(elemento("modal-correlacao"));
 });

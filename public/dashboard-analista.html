@@ -234,7 +234,7 @@
                         <select id="seletor-periodo" aria-label="Período">
                             <option value="1">Últimos 30 dias</option>
                             <option value="3">Últimos 3 meses</option>
-                            <option value="6" selected>Últimos 6 meses</option>
+                            <option value="6" selected>Últimas 24 semanas</option>
                         </select>
                     </div>
                 </div>
@@ -353,8 +353,7 @@
                 aria-controls="modal-correlacao" title="Ver detalhes da correlação">
                 <div class="correlation-top">
                     <span class="insight-badge"><i class="fa-solid fa-triangle-exclamation"></i></span>
-                    <span class="insight-title">Correlação entre tempo de espera de CPU e Leitura/escrita do
-                        armazenamento</span>
+                    <span class="insight-title">Correlação entre espera de CPU por I/O e uso do disco</span>
                     <i class="fa-solid fa-up-right-from-square correlation-link" aria-hidden="true"></i>
                 </div>
 
@@ -375,9 +374,9 @@
                 <div class="custom-legend">
                     <span class="legend-item"><span class="legend-line legend-regressao"></span>Inclinação da
                         Regressão linear</span>
-                    <span class="legend-item"><span class="legend-line legend-atual"></span>Semestre atual</span>
-                    <span class="legend-item"><span class="legend-line legend-anterior"></span>Semestre anterior</span>
-                    <span class="legend-item"><span class="legend-dot dot-pico"></span>Pico de carga (&gt;80%)</span>
+                    <span class="legend-item"><span class="legend-line legend-atual"></span>Período selecionado</span>
+                    <span class="legend-item"><span class="legend-line legend-anterior"></span>Período anterior</span>
+                    <span class="legend-item"><span class="legend-dot dot-pico"></span>Média semanal acima do limite</span>
                     <span class="legend-item"><span class="legend-dot dot-residuo"></span>Anomalia de resíduo</span>
                 </div>
             </div>
@@ -427,8 +426,7 @@
             <h3 class="ajuda-titulo" id="titulo-ajuda">Como funciona?</h3>
 
             <p class="ajuda-texto">
-                A correlação entre o tempo de espera de CPU (IO wait) e o uso do disco é um indicador forte de perda de
-                desempenho do armazenamento. Através do R, vemos o quanto esses dois valores caminham juntos.
+                O coeficiente r mede a associação linear entre o tempo de espera da CPU por I/O e o percentual de uso do disco.
             </p>
 
             <div class="ajuda-exemplo">
@@ -441,14 +439,14 @@
 
                     <div class="correlation-body">
                         <span class="correlation-value">r = 0,98</span>
-                        <span class="correlation-badge">Gargalo de I/O Crítico</span>
+                        <span class="correlation-badge">Correlação forte</span>
                     </div>
                 </div>
             </div>
 
             <p class="ajuda-texto">
-                Sendo r o nível de correlação de -1 a 1. O valor padrão é 0. Um r muito diferente de zero indica que
-                há algum tipo de comportamento anormal no disco, o que deixa a CPU mais tempo esperando I/O.
+                O valor de r varia de −1 a 1. Valores próximos de zero indicam associação linear fraca.
+                O sinal indica se as medidas tendem a subir juntas ou em sentidos opostos.
             </p>
 
             <p class="ajuda-texto ajuda-texto--final">

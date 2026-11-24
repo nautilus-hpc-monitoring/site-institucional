@@ -44,8 +44,8 @@ body {
 /* ---------- Cabeçalho ---------- */
 
 .dashboard-header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(52%, 720px));
     align-items: flex-end;
     margin-bottom: 20px;
     gap: 30px;
@@ -75,10 +75,12 @@ body {
 .title-area p {
     color: var(--analista-muted);
     font-size: 0.84rem;
+    overflow-wrap: anywhere;
 }
 
 .header-actions {
     display: flex;
+    min-width: 0;
     align-items: flex-end;
     gap: 14px;
 }
@@ -107,15 +109,17 @@ body {
 }
 
 #seletores-grafico {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+    flex: 1;
+    min-width: 0;
     gap: 10px;
 }
 
 .seletor {
     display: flex;
     flex-direction: column;
-    min-width: 150px;
+    min-width: 0;
 }
 
 .seletor span {
@@ -127,7 +131,10 @@ body {
 }
 
 .seletor select {
+    width: 100%;
+    min-width: 0;
     height: 38px;
+    text-overflow: ellipsis;
     padding: 0 32px 0 11px;
     border: 1px solid #dfe3e8;
     border-radius: 6px;
@@ -850,21 +857,12 @@ body {
     }
 
     .dashboard-header {
-        align-items: flex-start;
-        flex-direction: column;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .header-actions {
         width: 100%;
         align-items: flex-end;
-    }
-
-    #seletores-grafico {
-        flex: 1;
-    }
-
-    .seletor {
-        flex: 1;
     }
 
     .kpi-grid {
@@ -919,7 +917,7 @@ body {
     }
 
     #seletores-grafico {
-        flex-direction: column;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .seletor {
