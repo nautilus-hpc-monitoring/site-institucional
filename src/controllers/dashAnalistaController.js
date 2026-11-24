@@ -1,11 +1,9 @@
-// Dashboard do analista: autoriza o usuário e devolve o JSON da Gold apontado
-// pela chave S3_KEY.
+// Dashboard do analista: autoriza o usuário e devolve o JSON da Gold do cluster.
 //
 // Fluxo de cada requisição:
 //   1. valida ?idUsuario= e :id;
 //   2. confirma, no MySQL, que o cluster pertence à empresa do usuário;
-//   3. lê a chave S3_KEY do S3 (ou de uma pasta local, quando
-//      ANALISTA_GOLD_LOCAL_DIR está definida);
+//   3. lê o JSON do analista para o cluster no S3 ou em ANALISTA_GOLD_LOCAL_DIR;
 //   4. devolve só o node pedido, mais a lista de nodes para o seletor.
 //
 // Reaproveitamos o modelo da dashboard de cluster porque as consultas de
@@ -18,8 +16,8 @@ var path = require("path");
 // ---------------------------------------------------------------------------
 // Leitura do arquivo publicado pela ETL.
 //
-// Em produção, o arquivo está no S3 e é lido por awsService.lerJson,
-// usando S3_KEY como chave completa (não como pasta).
+// No S3, a chave usa ANALISTA_GOLD_PREFIX e o ID do cluster autorizado no banco.
+// A ETL publica por padrão em 03-gold/analista/cluster=<id>/dashboard.json.
 // Para testar sem AWS, defina ANALISTA_GOLD_LOCAL_DIR apontando para a pasta
 // onde a ETL gravou a Gold local (a mesma GOLD_LOCAL_DIR do Python). Exemplo:
 //   ANALISTA_GOLD_LOCAL_DIR=C:\temp\gold_teste
@@ -43,10 +41,9 @@ async function lerPainel(idCluster) {
         }
     }
 
-    // Caminho de produção: S3.
-    // Aqui S3_KEY é a chave completa do JSON; não acrescentamos /cluster=<id>/.
-    var chave = process.env.S3_KEY || "03-gold/dashboard-categorica/dashboard.json";
-    return awsService.lerJson(chave);
+    var pastaGold = process.env.ANALISTA_GOLD_PREFIX || "03-gold/analista";
+    var prefixo = pastaGold.replace(/\/+$/, "");
+    return awsService.lerJson(`${prefixo}/cluster=${idCluster}/dashboard.json`);
 }
 
 // Converte o parâmetro recebido em inteiro positivo, ou devolve null.
