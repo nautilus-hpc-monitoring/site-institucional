@@ -36,67 +36,232 @@ if (sidebarOverlay) {
 // false = busca os dados reais no backend
 const USAR_DADOS_MOCKADOS = true;
 
-// Dados simulados de fechamento mensal (mês de referência com 30 dias: 01/11 a 30/11)
-// Realizado até 21/11 (21 dias) + projeção linear de 22/11 a 30/11 (9 dias restantes)
-const dadosMockados = {
-    periodoMensal: {
-        rotuloAcumulado: "01/11 a 21/11",
-        comparativoAcumulado: "+8,4% vs. mesmo período do mês anterior",
-        consumoKwh: "19.240 kWh",
-        consumoDetalhe: "Acumulado no mês (01/11 a 21/11)",
-        tarifaMedia: "R$ 0,66 / kWh",
-        tarifaDetalhe: "Média mensal até 21/11 (R$ 0,51 a R$ 0,84)"
-    },
+const MESES_DISPONIVEIS = ['2026-09', '2026-10', '2026-11'];
 
-    historicoDiario: {
-        dias: [
-            "01/11", "02/11", "03/11", "04/11", "05/11", "06/11", "07/11",
-            "08/11", "09/11", "10/11", "11/11", "12/11", "13/11", "14/11",
-            "15/11", "16/11", "17/11", "18/11", "19/11", "20/11", "21/11"
-        ],
-        custos: [
-            510.00, 524.50, 518.20, 535.80, 542.10, 560.40, 548.90,
-            555.00, 572.30, 580.60, 575.40, 588.20, 602.10, 594.80,
-            615.40, 628.90, 642.00, 651.30, 668.50, 682.40, 695.10
-        ],
-        tarifas: [
-            0.55, 0.56, 0.54, 0.58, 0.59, 0.61, 0.58,
-            0.60, 0.62, 0.64, 0.63, 0.65, 0.67, 0.66,
-            0.69, 0.71, 0.73, 0.74, 0.77, 0.79, 0.82
-        ],
-        diasProjecao: [
-            "22/11", "23/11", "24/11", "25/11", "26/11",
-            "27/11", "28/11", "29/11", "30/11"
-        ]
-    },
-
-    rankingNodes: {
-        labels: [
-            "node-sismico-01",
-            "node-sismico-02",
-            "node-sismico-03",
-            "node-sismico-04",
-            "node-sismico-05",
-            "node-sismico-06"
-        ],
-        custos: [2890.40, 2540.10, 2185.70, 1870.20, 1520.60, 1244.50],
-        consumosKwh: [4520, 3980, 3410, 2920, 2380, 2030]
+function gerarRotulosDiarios(chaveMes, quantidadeDias) {
+    const mes = chaveMes.split('-')[1];
+    const rotulos = [];
+    for (let dia = 1; dia <= quantidadeDias; dia++) {
+        rotulos.push(`${String(dia).padStart(2, '0')}/${mes}`);
     }
+    return rotulos;
+}
+
+function gerarSerieCusto(quantidadeDias, base, passo, amplitude) {
+    const serie = [];
+    for (let i = 0; i < quantidadeDias; i++) {
+        const variacao = Math.sin((i + 1) * 1.4) * amplitude + ((i % 6) - 2) * (amplitude * 0.12);
+        serie.push(Number((base + passo * i + variacao).toFixed(2)));
+    }
+    return serie;
+}
+
+function gerarSerieInteira(quantidadeDias, base, amplitude, passo = 0) {
+    const serie = [];
+    for (let i = 0; i < quantidadeDias; i++) {
+        const valor = base + passo * i + Math.sin((i + 2) * 1.15) * amplitude + (i % 7 === 0 ? 1 : 0);
+        serie.push(Math.max(0, Math.round(valor)));
+    }
+    return serie;
+}
+
+function gerarDecomposicao(quantidadeDias, baseConsumo, baseTarifa, tendenciaTarifa) {
+    const impactoConsumo = [];
+    const impactoTarifa = [];
+    for (let i = 0; i < quantidadeDias; i++) {
+        const consumo = baseConsumo + Math.sin((i + 1) * 0.8) * 16 + (i % 5) * 2.8;
+        const tarifa = baseTarifa + Math.sin((i + 1) * 1.45) * 22 + i * tendenciaTarifa;
+        impactoConsumo.push(Number(consumo.toFixed(2)));
+        impactoTarifa.push(Number(tarifa.toFixed(2)));
+    }
+    return { impactoConsumo, impactoTarifa };
+}
+
+function criarMesMock(config) {
+    const dias = gerarRotulosDiarios(config.chave, config.diasRealizados);
+    const diasProjecao = gerarRotulosDiarios(config.chave, config.diasMes).slice(config.diasRealizados);
+
+    return {
+        periodoMensal: {
+            descricaoMes: formatarMesAno(config.chave),
+            rotuloAcumulado: `01/${config.chave.slice(5, 7)} a ${String(config.diasRealizados).padStart(2, '0')}/${config.chave.slice(5, 7)}`,
+            consumoKwh: config.consumoKwh,
+            consumoDetalhe: config.diasRealizados === config.diasMes
+                ? `Consumo total do mês (${config.diasRealizados} dias)`
+                : `Acumulado no mês (${config.diasRealizados} de ${config.diasMes} dias)`
+        },
+        historicoDiario: {
+            dias,
+            custos: gerarSerieCusto(config.diasRealizados, config.baseCusto, config.passoCusto, config.amplitudeCusto),
+            diasProjecao
+        },
+        alertasDiarios: {
+            aviso: gerarSerieInteira(config.diasRealizados, config.baseAviso, 1.7, 0.02),
+            critico: gerarSerieInteira(config.diasRealizados, config.baseCritico, 1.2, 0.01)
+        },
+        decomposicaoDiaria: gerarDecomposicao(config.diasRealizados, config.baseImpactoConsumo, config.baseImpactoTarifa, config.tendenciaTarifa),
+        rankingNodes: {
+            labels: [
+                'node-sismico-01',
+                'node-sismico-02',
+                'node-sismico-03',
+                'node-sismico-04',
+                'node-sismico-05',
+                'node-sismico-06'
+            ],
+            custos: config.rankingCustos,
+            consumosKwh: config.rankingConsumos
+        }
+    };
+}
+
+function formatarMesAno(chaveMes) {
+    const [ano, mes] = chaveMes.split('-').map(Number);
+    const data = new Date(ano, mes - 1, 1);
+    return data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+
+const dadosMockadosPorMes = {
+    '2026-09': criarMesMock({
+        chave: '2026-09',
+        diasMes: 30,
+        diasRealizados: 30,
+        consumoKwh: 27940,
+        baseCusto: 735,
+        passoCusto: 4.1,
+        amplitudeCusto: 29,
+        baseAviso: 3.1,
+        baseCritico: 1.5,
+        baseImpactoConsumo: 58,
+        baseImpactoTarifa: -18,
+        tendenciaTarifa: 0.25,
+        rankingCustos: [5310.55, 4880.43, 4298.77, 3820.66, 3412.92, 2874.51],
+        rankingConsumos: [7920, 7240, 6555, 5980, 5320, 4700]
+    }),
+    '2026-10': criarMesMock({
+        chave: '2026-10',
+        diasMes: 31,
+        diasRealizados: 31,
+        consumoKwh: 30280,
+        baseCusto: 770,
+        passoCusto: 4.5,
+        amplitudeCusto: 31,
+        baseAviso: 3.4,
+        baseCritico: 1.9,
+        baseImpactoConsumo: 63,
+        baseImpactoTarifa: 6,
+        tendenciaTarifa: 0.4,
+        rankingCustos: [5688.31, 5169.58, 4622.74, 4110.08, 3684.45, 3098.2],
+        rankingConsumos: [8240, 7580, 6960, 6180, 5620, 4985]
+    }),
+    '2026-11': criarMesMock({
+        chave: '2026-11',
+        diasMes: 30,
+        diasRealizados: 21,
+        consumoKwh: 19240,
+        baseCusto: 812,
+        passoCusto: 5.3,
+        amplitudeCusto: 34,
+        baseAviso: 4.2,
+        baseCritico: 2.4,
+        baseImpactoConsumo: 66,
+        baseImpactoTarifa: 20,
+        tendenciaTarifa: 0.65,
+        rankingCustos: [4230.22, 3915.18, 3499.67, 3120.53, 2785.2, 2301.86],
+        rankingConsumos: [5920, 5520, 5010, 4590, 4110, 3620]
+    })
 };
 
 let chartCustoInstancia = null;
-let chartTarifaInstancia = null;
+let chartDecomposicaoInstancia = null;
 let chartNodesInstancia = null;
+let mesSelecionadoAtual = null;
 
 function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatarNumero(valor, casas = 0) {
+    return Number(valor || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+    });
+}
+
+function formatarTarifaKwh(valor) {
+    return `${Number(valor || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4
+    })}/kWh`;
 }
 
 function somarValores(lista) {
     return lista.reduce((acc, val) => acc + Number(val || 0), 0);
 }
 
-// Calcula regressão linear simples y = a + b*x para continuar os pontos até o fim do mês
+function distribuirTotalPorPeso(total, pesos) {
+    const quantidade = pesos.length;
+    if (quantidade === 0 || total <= 0) {
+        return new Array(quantidade).fill(0);
+    }
+
+    const somaPesos = somarValores(pesos);
+    const pesosAjustados = somaPesos > 0
+        ? pesos.map((peso) => Number(peso || 0))
+        : new Array(quantidade).fill(1);
+
+    const somaAjustada = somarValores(pesosAjustados);
+    const distribuicao = pesosAjustados.map((peso) => (total * peso) / somaAjustada);
+    const inteiros = distribuicao.map((valor) => Math.floor(valor));
+
+    let restante = total - somarValores(inteiros);
+    const ordemFracoes = distribuicao
+        .map((valor, indice) => ({ indice, fracao: valor - Math.floor(valor) }))
+        .sort((a, b) => b.fracao - a.fracao);
+
+    for (let i = 0; i < ordemFracoes.length && restante > 0; i++) {
+        inteiros[ordemFracoes[i].indice] += 1;
+        restante -= 1;
+    }
+
+    return inteiros;
+}
+
+function obterAlertasPorNode(rankingNodes, alertasDiarios) {
+    const quantidadeNodes = rankingNodes.labels?.length || 0;
+
+    if (quantidadeNodes === 0) {
+        return { aviso: [], critico: [] };
+    }
+
+    const avisoNodeApi = Array.isArray(rankingNodes.alertasAvisoPorNode)
+        ? rankingNodes.alertasAvisoPorNode.map((valor) => Number(valor || 0))
+        : null;
+    const criticoNodeApi = Array.isArray(rankingNodes.alertasCriticoPorNode)
+        ? rankingNodes.alertasCriticoPorNode.map((valor) => Number(valor || 0))
+        : null;
+
+    if (avisoNodeApi && criticoNodeApi && avisoNodeApi.length === quantidadeNodes && criticoNodeApi.length === quantidadeNodes) {
+        return {
+            aviso: avisoNodeApi,
+            critico: criticoNodeApi
+        };
+    }
+
+    const totalAvisoMes = somarValores(alertasDiarios?.aviso || []);
+    const totalCriticoMes = somarValores(alertasDiarios?.critico || []);
+    const pesosPorNode = rankingNodes.custos && rankingNodes.custos.length === quantidadeNodes
+        ? rankingNodes.custos
+        : new Array(quantidadeNodes).fill(1);
+
+    return {
+        aviso: distribuirTotalPorPeso(totalAvisoMes, pesosPorNode),
+        critico: distribuirTotalPorPeso(totalCriticoMes, pesosPorNode)
+    };
+}
+
 function calcularProjecaoLinear(valoresHistoricos, qtdDiasFuturos) {
     const n = valoresHistoricos.length;
     if (n === 0 || qtdDiasFuturos <= 0) return [];
@@ -127,34 +292,96 @@ function calcularProjecaoLinear(valoresHistoricos, qtdDiasFuturos) {
     return projetados;
 }
 
-function preencherKpis(dados, custosProjetados) {
+function calcularMetricasMes(dados) {
     const acumuladoMes = somarValores(dados.historicoDiario.custos);
-    const restanteProjetado = somarValores(custosProjetados);
-    const projecaoFechamentoMes = acumuladoMes + restanteProjetado;
-    const qtdDiasRestantes = dados.historicoDiario.diasProjecao.length;
+    const custosProjetados = calcularProjecaoLinear(
+        dados.historicoDiario.custos,
+        dados.historicoDiario.diasProjecao.length
+    );
+    const projecaoFechamento = acumuladoMes + somarValores(custosProjetados);
+    const impactoTarifa = somarValores(dados.decomposicaoDiaria.impactoTarifa);
+    const tarifaMedia = dados.periodoMensal.consumoKwh > 0
+        ? acumuladoMes / dados.periodoMensal.consumoKwh
+        : 0;
 
-    const elLabelAcumulado = document.querySelector('#kpiCustoAcumulado')?.closest('.kpi-card')?.querySelector('.kpi-label');
-    if (elLabelAcumulado) elLabelAcumulado.textContent = 'Custo Acumulado (Mês)';
-
-    const elLabelProjecao = document.querySelector('#kpiProjecaoFechamento')?.closest('.kpi-card')?.querySelector('.kpi-label');
-    if (elLabelProjecao) elLabelProjecao.textContent = 'Projeção de Fechamento (Mês)';
-
-    document.getElementById('kpiCustoAcumulado').textContent = formatarMoeda(acumuladoMes);
-    document.getElementById('kpiCustoAcumuladoDetalhe').textContent =
-        `${dados.periodoMensal.rotuloAcumulado} · ${dados.periodoMensal.comparativoAcumulado}`;
-
-    document.getElementById('kpiProjecaoFechamento').textContent = formatarMoeda(projecaoFechamentoMes);
-    document.getElementById('kpiProjecaoFechamentoDetalhe').textContent =
-        `Acumulado + ${formatarMoeda(restanteProjetado)} projetados (${qtdDiasRestantes}d até 30/11)`;
-
-    document.getElementById('kpiConsumoKwh').textContent = dados.periodoMensal.consumoKwh;
-    document.getElementById('kpiConsumoKwhDetalhe').textContent = dados.periodoMensal.consumoDetalhe;
-
-    document.getElementById('kpiTarifaMedia').textContent = dados.periodoMensal.tarifaMedia;
-    document.getElementById('kpiTarifaMediaDetalhe').textContent = dados.periodoMensal.tarifaDetalhe;
+    return {
+        acumuladoMes,
+        custosProjetados,
+        projecaoFechamento,
+        consumoKwh: dados.periodoMensal.consumoKwh,
+        impactoTarifa,
+        tarifaMedia
+    };
 }
 
-function renderizarGraficoCustoProjecao(historicoDiario, custosProjetados) {
+function calcularComparativo(valorAtual, valorAnterior) {
+    if (valorAnterior === null || valorAnterior === undefined) {
+        return null;
+    }
+
+    const delta = Number(valorAtual || 0) - Number(valorAnterior || 0);
+    const percentual = valorAnterior === 0 ? null : (delta / valorAnterior) * 100;
+    return { delta, percentual };
+}
+
+function formatarPercentualComparativo(comparativo) {
+    if (!comparativo || comparativo.percentual === null) return 'n/d';
+    return `${comparativo.percentual > 0 ? '+' : ''}${comparativo.percentual.toFixed(1).replace('.', ',')}%`;
+}
+
+function aplicarClasseComparativo(elementoId, comparativo, aumentoPositivo) {
+    const el = document.getElementById(elementoId);
+    if (!el) return;
+
+    el.classList.remove('up', 'down', 'neutral');
+
+    if (!comparativo || comparativo.delta === 0) {
+        el.classList.add('neutral');
+        return;
+    }
+
+    const subiu = comparativo.delta > 0;
+    const classe = subiu === aumentoPositivo ? 'up' : 'down';
+    el.classList.add(classe);
+}
+
+function preencherKpis(dados, metricas, metricasMesAnterior) {
+    const comparativoAcumulado = calcularComparativo(metricas.acumuladoMes, metricasMesAnterior?.acumuladoMes);
+    const comparativoProjecao = calcularComparativo(metricas.projecaoFechamento, metricasMesAnterior?.projecaoFechamento);
+    const comparativoConsumo = calcularComparativo(metricas.consumoKwh, metricasMesAnterior?.consumoKwh);
+    const comparativoImpactoTarifa = calcularComparativo(metricas.impactoTarifa, metricasMesAnterior?.impactoTarifa);
+
+    document.getElementById('kpiCustoAcumulado').textContent = formatarMoeda(metricas.acumuladoMes);
+    document.getElementById('kpiCustoAcumuladoDetalhe').textContent =
+        dados.periodoMensal.rotuloAcumulado;
+    document.getElementById('kpiCustoAcumuladoComparativo').textContent =
+        formatarPercentualComparativo(comparativoAcumulado);
+
+    const detalheProjecao = `Acumulado + ${formatarMoeda(somarValores(metricas.custosProjetados))} projetados`;
+
+    document.getElementById('kpiProjecaoFechamento').textContent = formatarMoeda(metricas.projecaoFechamento);
+    document.getElementById('kpiProjecaoFechamentoDetalhe').textContent = detalheProjecao;
+    document.getElementById('kpiProjecaoFechamentoComparativo').textContent =
+        formatarPercentualComparativo(comparativoProjecao);
+
+    document.getElementById('kpiConsumoKwh').textContent = `${formatarNumero(metricas.consumoKwh, 0)} kWh`;
+    document.getElementById('kpiConsumoKwhDetalhe').textContent = dados.periodoMensal.rotuloAcumulado;
+    document.getElementById('kpiConsumoKwhComparativo').textContent =
+        formatarPercentualComparativo(comparativoConsumo);
+
+    document.getElementById('kpiImpactoTarifa').textContent = formatarMoeda(metricas.impactoTarifa);
+    document.getElementById('kpiImpactoTarifaDetalhe').textContent =
+        `Tarifa média: ${formatarTarifaKwh(metricas.tarifaMedia)}`;
+    document.getElementById('kpiImpactoTarifaComparativo').textContent =
+        formatarPercentualComparativo(comparativoImpactoTarifa);
+
+    aplicarClasseComparativo('kpiCustoAcumuladoComparativo', comparativoAcumulado, false);
+    aplicarClasseComparativo('kpiProjecaoFechamentoComparativo', comparativoProjecao, false);
+    aplicarClasseComparativo('kpiConsumoKwhComparativo', comparativoConsumo, false);
+    aplicarClasseComparativo('kpiImpactoTarifaComparativo', comparativoImpactoTarifa, false);
+}
+
+function renderizarGraficoCustoProjecao(dados, metricas) {
     const ctx = document.getElementById('chartCustoDiarioProjecao');
     if (!ctx) return;
 
@@ -162,113 +389,117 @@ function renderizarGraficoCustoProjecao(historicoDiario, custosProjetados) {
         chartCustoInstancia.destroy();
     }
 
+    const historicoDiario = dados.historicoDiario;
     const labelsTotais = [...historicoDiario.dias, ...historicoDiario.diasProjecao];
-    const valoresTotais = [...historicoDiario.custos, ...custosProjetados];
     const indiceCorte = historicoDiario.custos.length - 1;
 
-    const corRealizado = '#0078d4';
-    const corProjecao = '#f59e0b';
-
-    const coresPontos = valoresTotais.map((_, idx) =>
-        idx <= indiceCorte ? corRealizado : corProjecao
-    );
-
-    chartCustoInstancia = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labelsTotais,
-            datasets: [{
-                label: 'Custo Diário (R$)',
-                data: valoresTotais,
-                borderWidth: 3,
-                tension: 0.25,
-                fill: false,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointBackgroundColor: coresPontos,
-                pointBorderColor: coresPontos,
-                segment: {
-                    borderColor: function (context) {
-                        return context.p0DataIndex >= indiceCorte ? corProjecao : corRealizado;
-                    },
-                    borderDash: function (context) {
-                        return context.p0DataIndex >= indiceCorte ? [6, 4] : undefined;
-                    }
-                }
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const tipo = context.dataIndex <= indiceCorte ? 'Realizado' : 'Projeção Linear';
-                            return `${tipo}: ${formatarMoeda(context.parsed.y)}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    ticks: {
-                        callback: function (value) {
-                            return 'R$ ' + value;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-function renderizarGraficoTarifa(historicoDiario) {
-    const ctx = document.getElementById('chartTarifaDiaria');
-    if (!ctx) return;
-
-    if (chartTarifaInstancia) {
-        chartTarifaInstancia.destroy();
+    const custosRealizados = [...historicoDiario.custos, ...new Array(historicoDiario.diasProjecao.length).fill(null)];
+    const linhaProjecao = new Array(labelsTotais.length).fill(null);
+    if (metricas.custosProjetados.length > 0 && indiceCorte >= 0) {
+        linhaProjecao[indiceCorte] = historicoDiario.custos[indiceCorte];
+        metricas.custosProjetados.forEach((valor, idx) => {
+            linhaProjecao[indiceCorte + 1 + idx] = valor;
+        });
     }
 
-    chartTarifaInstancia = new Chart(ctx, {
-        type: 'line',
+    const alertasAviso = [...dados.alertasDiarios.aviso, ...new Array(historicoDiario.diasProjecao.length).fill(0)];
+    const alertasCritico = [...dados.alertasDiarios.critico, ...new Array(historicoDiario.diasProjecao.length).fill(0)];
+
+    chartCustoInstancia = new Chart(ctx, {
         data: {
-            labels: historicoDiario.dias,
-            datasets: [{
-                label: 'Tarifa Média (R$/kWh)',
-                data: historicoDiario.tarifas,
-                borderColor: '#006876',
-                backgroundColor: 'rgba(0, 104, 118, 0.14)',
-                borderWidth: 2.5,
-                tension: 0.25,
-                fill: true,
-                pointRadius: 3.5,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#006876'
-            }]
+            labels: labelsTotais,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Alertas de aviso',
+                    yAxisID: 'y1',
+                    data: alertasAviso,
+                    backgroundColor: 'rgba(245, 158, 11, 0.35)',
+                    borderColor: '#D97706',
+                    borderWidth: 1,
+                    barPercentage: 0.9,
+                    categoryPercentage: 0.8,
+                    stack: 'alertas'
+                },
+                {
+                    type: 'bar',
+                    label: 'Alertas críticos',
+                    yAxisID: 'y1',
+                    data: alertasCritico,
+                    backgroundColor: 'rgba(220, 38, 38, 0.35)',
+                    borderColor: '#B91C1C',
+                    borderWidth: 1,
+                    barPercentage: 0.9,
+                    categoryPercentage: 0.8,
+                    stack: 'alertas'
+                },
+                {
+                    type: 'line',
+                    label: 'Custo diário realizado',
+                    yAxisID: 'y',
+                    data: custosRealizados,
+                    borderColor: '#0078d4',
+                    backgroundColor: '#0078d4',
+                    borderWidth: 3,
+                    tension: 0.25,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                },
+                {
+                    type: 'line',
+                    label: 'Projeção linear',
+                    yAxisID: 'y',
+                    data: linhaProjecao,
+                    borderColor: '#F59E0B',
+                    backgroundColor: '#F59E0B',
+                    borderWidth: 3,
+                    tension: 0.25,
+                    spanGaps: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    borderDash: [6, 4]
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return `Tarifa média: R$ ${context.parsed.y.toFixed(2)} / kWh`;
+                            if (context.dataset.yAxisID === 'y') {
+                                return `${context.dataset.label}: ${formatarMoeda(context.parsed.y)}`;
+                            }
+                            return `${context.dataset.label}: ${formatarNumero(context.parsed.y, 0)}`;
                         }
                     }
                 }
             },
             scales: {
                 y: {
+                    position: 'left',
                     beginAtZero: false,
                     ticks: {
                         callback: function (value) {
-                            return 'R$ ' + Number(value).toFixed(2);
+                            return formatarMoeda(value);
+                        }
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        callback: function (value) {
+                            return `${formatarNumero(value, 0)}`;
                         }
                     }
                 }
@@ -277,13 +508,77 @@ function renderizarGraficoTarifa(historicoDiario) {
     });
 }
 
-function renderizarGraficoNodes(rankingNodes) {
+function renderizarGraficoDecomposicao(dados) {
+    const ctx = document.getElementById('chartDecomposicaoCusto');
+    if (!ctx) return;
+
+    if (chartDecomposicaoInstancia) {
+        chartDecomposicaoInstancia.destroy();
+    }
+
+    chartDecomposicaoInstancia = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dados.historicoDiario.dias,
+            datasets: [
+                {
+                    label: 'Impacto de consumo',
+                    data: dados.decomposicaoDiaria.impactoConsumo,
+                    backgroundColor: 'rgba(14, 116, 144, 0.8)',
+                    borderColor: '#0E7490',
+                    borderWidth: 1,
+                    stack: 'impacto'
+                },
+                {
+                    label: 'Impacto de tarifa',
+                    data: dados.decomposicaoDiaria.impactoTarifa,
+                    backgroundColor: 'rgba(245, 158, 11, 0.75)',
+                    borderColor: '#D97706',
+                    borderWidth: 1,
+                    stack: 'impacto'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `${context.dataset.label}: ${formatarMoeda(context.parsed.y)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    stacked: true,
+                    ticks: {
+                        callback: function (value) {
+                            return formatarMoeda(value);
+                        }
+                    }
+                },
+                x: {
+                    stacked: true
+                }
+            }
+        }
+    });
+}
+
+function renderizarGraficoNodes(rankingNodes, alertasPorNode) {
     const ctx = document.getElementById('chartCustoPorNode');
     if (!ctx) return;
 
     const scrollArea = ctx.closest('.chart-scroll-area');
     if (scrollArea) {
-        const alturaPorNode = 44; // ajuste fino conforme o espaçamento das barras
+        const alturaPorNode = 44;
         const alturaMinima = 280;
         const alturaCalculada = Math.max(alturaMinima, rankingNodes.labels.length * alturaPorNode);
         scrollArea.style.height = `${alturaCalculada}px`;
@@ -298,7 +593,7 @@ function renderizarGraficoNodes(rankingNodes) {
         data: {
             labels: rankingNodes.labels,
             datasets: [{
-                label: 'Custo Estimado (R$)',
+                label: 'Custo estimado (R$)',
                 data: rankingNodes.custos,
                 backgroundColor: '#1A1F71',
                 borderRadius: 6,
@@ -316,8 +611,14 @@ function renderizarGraficoNodes(rankingNodes) {
                         label: function (context) {
                             const idx = context.dataIndex;
                             const custo = formatarMoeda(rankingNodes.custos[idx]);
-                            const kwh = rankingNodes.consumosKwh[idx];
-                            return `${custo} (${kwh.toLocaleString('pt-BR')} kWh)`;
+                            const kwh = Number(rankingNodes.consumosKwh?.[idx] || 0);
+                            const aviso = alertasPorNode.aviso[idx] || 0;
+                            const critico = alertasPorNode.critico[idx] || 0;
+                            return [
+                                `${custo} (${kwh.toLocaleString('pt-BR')} kWh)`,
+                                `Alertas: ${formatarNumero(aviso, 0)}`,
+                                `Críticos: ${formatarNumero(critico, 0)}`
+                            ];
                         }
                     }
                 }
@@ -327,7 +628,7 @@ function renderizarGraficoNodes(rankingNodes) {
                     beginAtZero: true,
                     ticks: {
                         callback: function (value) {
-                            return 'R$ ' + value;
+                            return formatarMoeda(value);
                         }
                     }
                 }
@@ -336,27 +637,59 @@ function renderizarGraficoNodes(rankingNodes) {
     });
 }
 
-function processarDadosDashboard(dados) {
-    const custosProjetados = calcularProjecaoLinear(
-        dados.historicoDiario.custos,
-        dados.historicoDiario.diasProjecao.length
-    );
-
-    preencherKpis(dados, custosProjetados);
-    renderizarGraficoCustoProjecao(dados.historicoDiario, custosProjetados);
-    renderizarGraficoTarifa(dados.historicoDiario);
-    renderizarGraficoNodes(dados.rankingNodes);
+function obterMesAnterior(chaveMes) {
+    const indice = MESES_DISPONIVEIS.indexOf(chaveMes);
+    if (indice <= 0) return null;
+    return MESES_DISPONIVEIS[indice - 1];
 }
 
-async function carregarDadosDashboard() {
+function processarDadosDashboard(chaveMes, dados) {
+    const metricas = calcularMetricasMes(dados);
+    const chaveMesAnterior = obterMesAnterior(chaveMes);
+    const metricasMesAnterior = chaveMesAnterior ? calcularMetricasMes(dadosMockadosPorMes[chaveMesAnterior]) : null;
+
+    const alertasPorNode = obterAlertasPorNode(dados.rankingNodes, dados.alertasDiarios);
+
+    preencherKpis(dados, metricas, metricasMesAnterior);
+    renderizarGraficoCustoProjecao(dados, metricas);
+    renderizarGraficoDecomposicao(dados);
+    renderizarGraficoNodes(dados.rankingNodes, alertasPorNode);
+}
+
+function preencherSeletorMes() {
+    const seletorMes = document.getElementById('seletorMes');
+    if (!seletorMes) return;
+
+    seletorMes.innerHTML = '';
+    MESES_DISPONIVEIS.forEach((chaveMes) => {
+        const option = document.createElement('option');
+        option.value = chaveMes;
+        option.textContent = formatarMesAno(chaveMes);
+        seletorMes.appendChild(option);
+    });
+
+    mesSelecionadoAtual = MESES_DISPONIVEIS[MESES_DISPONIVEIS.length - 1];
+    seletorMes.value = mesSelecionadoAtual;
+}
+
+async function carregarDadosDashboard(chaveMes) {
     try {
-        const resposta = await fetch('/api/billing/resumo');
+        const resposta = await fetch(`/api/billing/resumo?mes=${encodeURIComponent(chaveMes)}`);
         if (!resposta.ok) throw new Error('Erro ao buscar dados de billing');
         const dados = await resposta.json();
-        processarDadosDashboard(dados);
+        processarDadosDashboard(chaveMes, dados);
     } catch (erro) {
         console.error('Erro ao carregar dashboard de billing:', erro);
     }
+}
+
+function atualizarDashboardPorMes(chaveMes) {
+    mesSelecionadoAtual = chaveMes;
+    if (USAR_DADOS_MOCKADOS) {
+        processarDadosDashboard(chaveMes, dadosMockadosPorMes[chaveMes]);
+        return;
+    }
+    carregarDadosDashboard(chaveMes);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -368,9 +701,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    if (USAR_DADOS_MOCKADOS) {
-        processarDadosDashboard(dadosMockados);
-    } else {
-        carregarDadosDashboard();
+    preencherSeletorMes();
+
+    const seletorMes = document.getElementById('seletorMes');
+    if (seletorMes) {
+        seletorMes.addEventListener('change', function (event) {
+            atualizarDashboardPorMes(event.target.value);
+        });
     }
+
+    atualizarDashboardPorMes(mesSelecionadoAtual);
 });

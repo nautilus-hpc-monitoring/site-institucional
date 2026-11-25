@@ -77,7 +77,7 @@
                 </li>
 
             <li class="nav-item active admin-item">
-                <details open>
+                <details>
                     <summary>
                         <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
                         <span>Administrador</span>
@@ -159,7 +159,7 @@
                 </li>
 
                 <li class="side-item active admin-item">
-                    <details open>
+                    <details>
                         <summary>
                             <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
                             <span class="item-description">Administrador</span>
@@ -211,9 +211,14 @@
 
         <main class="page-content dashboard-page">
 
-            <h1 class="page-title">
-                Billing
-            </h1>
+            <div class="billing-header-row">
+                <h1 class="page-title">Billing</h1>
+                <div class="billing-header-filter">
+                    <label for="seletorMes" class="billing-inline-label">Mês de referência</label>
+                    <select id="seletorMes" class="billing-inline-select" aria-label="Selecionar mês de referência">
+                    </select>
+                </div>
+            </div>
 
             <p class="page-subtitle">
                 Acompanhamento mensal de custos e projeção de fechamento dos nodes, com base no consumo e tarifa de energia
@@ -232,10 +237,16 @@
                             <i class="fa-solid fa-sack-dollar"></i>
                         </div>
                     </div>
-                    <span class="kpi-value" id="kpiCustoAcumulado">
-                        N/A
-                    </span>
-                    <span class="kpi-trend neutral" id="kpiCustoAcumuladoDetalhe">
+                    <div class="kpi-value-row">
+                        <span class="kpi-value" id="kpiCustoAcumulado">
+                            N/A
+                        </span>
+                        <div class="kpi-comparison-card">
+                            <span class="kpi-comparison-title">vs mês anterior</span>
+                            <span class="kpi-comparison-value neutral" id="kpiCustoAcumuladoComparativo">n/d</span>
+                        </div>
+                    </div>
+                    <span class="kpi-trend kpi-detail-text" id="kpiCustoAcumuladoDetalhe">
                     </span>
                 </div>
 
@@ -249,10 +260,16 @@
                             <i class="fa-solid fa-arrow-trend-up"></i>
                         </div>
                     </div>
-                    <span class="kpi-value" id="kpiProjecaoFechamento">
-                        N/A
-                    </span>
-                    <span class="kpi-trend neutral" id="kpiProjecaoFechamentoDetalhe">
+                    <div class="kpi-value-row">
+                        <span class="kpi-value" id="kpiProjecaoFechamento">
+                            N/A
+                        </span>
+                        <div class="kpi-comparison-card">
+                            <span class="kpi-comparison-title">vs mês anterior</span>
+                            <span class="kpi-comparison-value neutral" id="kpiProjecaoFechamentoComparativo">n/d</span>
+                        </div>
+                    </div>
+                    <span class="kpi-trend kpi-detail-text" id="kpiProjecaoFechamentoDetalhe">
                     </span>
                 </div>
 
@@ -266,10 +283,16 @@
                             <i class="fa-solid fa-bolt"></i>
                         </div>
                     </div>
-                    <span class="kpi-value" id="kpiConsumoKwh">
-                        N/A
-                    </span>
-                    <span class="kpi-trend neutral" id="kpiConsumoKwhDetalhe">
+                    <div class="kpi-value-row">
+                        <span class="kpi-value" id="kpiConsumoKwh">
+                            N/A
+                        </span>
+                        <div class="kpi-comparison-card">
+                            <span class="kpi-comparison-title">vs mês anterior</span>
+                            <span class="kpi-comparison-value neutral" id="kpiConsumoKwhComparativo">n/d</span>
+                        </div>
+                    </div>
+                    <span class="kpi-trend kpi-detail-text" id="kpiConsumoKwhDetalhe">
                     </span>
                 </div>
 
@@ -277,16 +300,22 @@
                 <div class="kpi-card">
                     <div class="kpi-top">
                         <span class="kpi-label">
-                            Tarifa Média de Energia
+                            Impacto da Tarifa no Custo (Mês)
                         </span>
-                        <div class="kpi-icon tone-blue">
-                            <i class="fa-solid fa-plug-circle-bolt"></i>
+                        <div class="kpi-icon tone-amber">
+                            <i class="fa-solid fa-scale-balanced"></i>
                         </div>
                     </div>
-                    <span class="kpi-value" id="kpiTarifaMedia">
-                        N/A
-                    </span>
-                    <span class="kpi-trend neutral" id="kpiTarifaMediaDetalhe">
+                    <div class="kpi-value-row">
+                        <span class="kpi-value" id="kpiImpactoTarifa">
+                            N/A
+                        </span>
+                        <div class="kpi-comparison-card">
+                            <span class="kpi-comparison-title">vs mês anterior</span>
+                            <span class="kpi-comparison-value neutral" id="kpiImpactoTarifaComparativo">n/d</span>
+                        </div>
+                    </div>
+                    <span class="kpi-trend kpi-detail-text" id="kpiImpactoTarifaDetalhe">
                     </span>
                 </div>
 
@@ -301,12 +330,13 @@
                                 Evolução Diária do Custo e Projeção Linear
                             </div>
                             <div class="chart-subtitle">
-                                Histórico diário realizado no mês (R$) com continuação projetada até o fim do mês
+                                Histórico diário realizado no mês (R$), projeção até o fechamento e comparação com alertas
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <span class="chart-badge past">Realizado</span>
                             <span class="chart-badge forecast">Projeção</span>
+                            <span class="chart-badge alert">Alertas</span>
                         </div>
                     </div>
 
@@ -319,24 +349,24 @@
             <!-- GRÁFICOS 2 E 3 (LADO A LADO) -->
             <section class="charts-grid">
 
-                <!-- GRÁFICO 2: TARIFA DE ENERGIA POR DIA -->
+                <!-- GRÁFICO 2: DECOMPOSIÇÃO DO CUSTO -->
                 <div class="chart-card">
                     <div class="chart-header">
                         <div>
                             <div class="chart-title">
-                                Tarifa Média de Energia por Dia
+                                Decomposição do Custo Diário
                             </div>
                             <div class="chart-subtitle">
-                                Variação diária do preço do kWh (R$/kWh) ao longo do mês
+                                Variação do custo por efeito de consumo e efeito de tarifa (R$)
                             </div>
                         </div>
                         <span class="chart-badge past">
-                            Energia
+                            Drivers
                         </span>
                     </div>
 
                     <div class="chart-canvas-wrapper" style="height: 280px;">
-                        <canvas id="chartTarifaDiaria"></canvas>
+                        <canvas id="chartDecomposicaoCusto"></canvas>
                     </div>
                 </div>
 
