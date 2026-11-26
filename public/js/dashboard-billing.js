@@ -34,9 +34,24 @@ if (sidebarOverlay) {
 
 // true = utiliza dados mockados
 // false = busca os dados reais no backend
-const USAR_DADOS_MOCKADOS = true;
+// Com backend ativo, mantém falso para usar dados reais.
+const USAR_DADOS_MOCKADOS = false;
 
-const MESES_DISPONIVEIS = ['2026-09', '2026-10', '2026-11'];
+function montarMesesPadrao(quantidade) {
+    const meses = [];
+    const hoje = new Date();
+
+    for (let i = quantidade - 1; i >= 0; i--) {
+        const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        meses.push(`${ano}-${mes}`);
+    }
+
+    return meses;
+}
+
+let MESES_DISPONIVEIS = montarMesesPadrao(3);
 
 function gerarRotulosDiarios(chaveMes, quantidadeDias) {
     const mes = chaveMes.split('-')[1];
@@ -299,7 +314,8 @@ function calcularMetricasMes(dados) {
         dados.historicoDiario.diasProjecao.length
     );
     const projecaoFechamento = acumuladoMes + somarValores(custosProjetados);
-    const impactoTarifa = somarValores(dados.decomposicaoDiaria.impactoTarifa);
+    const impactoTarifa = dados.decomposicaoDiaria.impactoTarifa
+        .reduce((acc, valor) => acc + Math.abs(Number(valor || 0)), 0);
     const tarifaMedia = dados.periodoMensal.consumoKwh > 0
         ? acumuladoMes / dados.periodoMensal.consumoKwh
         : 0;
@@ -314,8 +330,12 @@ function calcularMetricasMes(dados) {
     };
 }
 
-function calcularComparativo(valorAtual, valorAnterior) {
+function calcularComparativo(valorAtual, valorAnterior, minimoBaseAbsoluta = 0) {
     if (valorAnterior === null || valorAnterior === undefined) {
+        return null;
+    }
+
+    if (Math.abs(Number(valorAnterior || 0)) < minimoBaseAbsoluta) {
         return null;
     }
 
@@ -469,7 +489,10 @@ function renderizarGraficoCustoProjecao(dados, metricas) {
                 intersect: false
             },
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
                 tooltip: {
                     callbacks: {
                         label: function (context) {
@@ -646,7 +669,11 @@ function obterMesAnterior(chaveMes) {
 function processarDadosDashboard(chaveMes, dados) {
     const metricas = calcularMetricasMes(dados);
     const chaveMesAnterior = obterMesAnterior(chaveMes);
-    const metricasMesAnterior = chaveMesAnterior ? calcularMetricasMes(dadosMockadosPorMes[chaveMesAnterior]) : null;
+    // Quando o backend já envia o mês anterior, usa direto.
+    // Em modo mock, mantém o comportamento antigo para comparação local.
+    const metricasMesAnterior = dados.metricasMesAnterior
+        ? dados.metricasMesAnterior
+        : (chaveMesAnterior ? calcularMetricasMes(dadosMockadosPorMes[chaveMesAnterior]) : null);
 
     const alertasPorNode = obterAlertasPorNode(dados.rankingNodes, dados.alertasDiarios);
 
@@ -661,6 +688,18 @@ function preencherSeletorMes() {
     if (!seletorMes) return;
 
     seletorMes.innerHTML = '';
+
+    if (!MESES_DISPONIVEIS.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Sem meses com dados';
+        option.disabled = true;
+        option.selected = true;
+        seletorMes.appendChild(option);
+        mesSelecionadoAtual = null;
+        return;
+    }
+
     MESES_DISPONIVEIS.forEach((chaveMes) => {
         const option = document.createElement('option');
         option.value = chaveMes;
@@ -672,10 +711,65 @@ function preencherSeletorMes() {
     seletorMes.value = mesSelecionadoAtual;
 }
 
+async function carregarMesesDisponiveis() {
+    if (USAR_DADOS_MOCKADOS) {
+        MESES_DISPONIVEIS = Object.keys(dadosMockadosPorMes).sort();
+        return;
+    }
+
+    const idEmpresa = Number(sessionStorage.ID_EMPRESA);
+    if (!Number.isSafeInteger(idEmpresa) || idEmpresa <= 0) {
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`/dashbilling/meses?idEmpresa=${encodeURIComponent(idEmpresa)}`);
+        if (!resposta.ok) {
+            throw new Error(`Falha ao carregar meses (${resposta.status})`);
+        }
+
+        const dados = await resposta.json();
+        if (!Array.isArray(dados.meses)) {
+            return;
+        }
+
+        const mesesValidos = dados.meses
+            .map((mes) => String(mes))
+            .filter((mes) => /^\d{4}-\d{2}$/.test(mes))
+            .sort();
+
+        if (mesesValidos.length) {
+            MESES_DISPONIVEIS = mesesValidos;
+        }
+    } catch (erro) {
+        console.warn('Não foi possível carregar meses de billing. Mantendo meses padrão.', erro);
+    }
+}
+
 async function carregarDadosDashboard(chaveMes) {
     try {
-        const resposta = await fetch(`/api/billing/resumo?mes=${encodeURIComponent(chaveMes)}`);
-        if (!resposta.ok) throw new Error('Erro ao buscar dados de billing');
+        const idEmpresa = Number(sessionStorage.ID_EMPRESA);
+        if (!Number.isSafeInteger(idEmpresa) || idEmpresa <= 0) {
+            throw new Error('Empresa não encontrada na sessão para consultar billing');
+        }
+
+        const resposta = await fetch(
+            `/dashbilling/resumo?idEmpresa=${encodeURIComponent(idEmpresa)}&mes=${encodeURIComponent(chaveMes)}`
+        );
+
+        if (!resposta.ok) {
+            let detalheErro = '';
+            try {
+                const corpoErro = await resposta.json();
+                if (corpoErro?.erro) {
+                    detalheErro = `: ${corpoErro.erro}`;
+                }
+            } catch (_) {
+                detalheErro = '';
+            }
+            throw new Error(`Erro ao buscar dados de billing (${resposta.status})${detalheErro}`);
+        }
+
         const dados = await resposta.json();
         processarDadosDashboard(chaveMes, dados);
     } catch (erro) {
@@ -684,6 +778,7 @@ async function carregarDadosDashboard(chaveMes) {
 }
 
 function atualizarDashboardPorMes(chaveMes) {
+    if (!chaveMes) return;
     mesSelecionadoAtual = chaveMes;
     if (USAR_DADOS_MOCKADOS) {
         processarDadosDashboard(chaveMes, dadosMockadosPorMes[chaveMes]);
@@ -692,7 +787,7 @@ function atualizarDashboardPorMes(chaveMes) {
     carregarDadosDashboard(chaveMes);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     if (typeof Chart === 'undefined') {
         console.error('Chart.js não carregou.');
         document.querySelectorAll('.chart-load-error').forEach(function (el) {
@@ -701,6 +796,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    await carregarMesesDisponiveis();
     preencherSeletorMes();
 
     const seletorMes = document.getElementById('seletorMes');
@@ -710,5 +806,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    atualizarDashboardPorMes(mesSelecionadoAtual);
+    if (mesSelecionadoAtual) {
+        atualizarDashboardPorMes(mesSelecionadoAtual);
+    }
 });
