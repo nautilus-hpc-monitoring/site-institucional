@@ -194,6 +194,40 @@ CREATE TABLE billing_node_horario (
         REFERENCES node(id_node)
 );
 
+CREATE TABLE billing_parametro_node (
+    id_billing_parametro_node INT PRIMARY KEY AUTO_INCREMENT,
+    submercado VARCHAR(10) NOT NULL DEFAULT 'SE/CO',
+    potencia_idle_kw DECIMAL(10,4) NOT NULL DEFAULT 0.3500,
+    potencia_max_kw DECIMAL(10,4) NOT NULL DEFAULT 0.8000,
+    fator_gamma DECIMAL(6,3) NOT NULL DEFAULT 1.200,
+    tarifa_alpha DECIMAL(8,4) NOT NULL DEFAULT 1.0000,
+    tarifa_beta DECIMAL(10,6) NOT NULL DEFAULT 0.000000,
+    encargos_kwh DECIMAL(10,6) NOT NULL DEFAULT 0.120000,
+    tarifa_fallback_kwh DECIMAL(10,6) NOT NULL DEFAULT 0.850000,
+    amostras_calibracao INT NOT NULL DEFAULT 0,
+    dt_ultima_calibracao DATETIME NULL,
+    observacao VARCHAR(255) NULL,
+    fk_node INT NOT NULL,
+
+    CONSTRAINT unqBillingParametroNode
+        UNIQUE (fk_node),
+    CONSTRAINT ckBillingPotenciaIdle
+        CHECK (potencia_idle_kw >= 0),
+    CONSTRAINT ckBillingPotenciaMax
+        CHECK (potencia_max_kw >= potencia_idle_kw),
+    CONSTRAINT ckBillingGamma
+        CHECK (fator_gamma > 0),
+    CONSTRAINT ckBillingTarifaAlpha
+        CHECK (tarifa_alpha >= 0),
+    CONSTRAINT ckBillingEncargos
+        CHECK (encargos_kwh >= 0),
+    CONSTRAINT ckBillingTarifaFallback
+        CHECK (tarifa_fallback_kwh >= 0),
+    CONSTRAINT cFkBillingParametroNode
+        FOREIGN KEY (fk_node)
+        REFERENCES node(id_node)
+);
+
 INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
 ('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
 ('DataData HPC Solutions', '98765432000110', '2024-03-20', 'datadata.io'),
@@ -218,14 +252,31 @@ INSERT INTO permissao_nivel_acesso (fk_permissao, fk_nivel_acesso) VALUES
 (1, 2), (2, 2),
 (1, 3);
 
+INSERT INTO usuario (nome, email_institucional, cpf, senha, verificado, fk_nivel_acesso, fk_empresa) VALUES
+('Administrador TechCorp', 'admin@techcorp.com.br', '12345678901', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 1),
+('Analista TechCorp', 'analista@techcorp.com.br', '12345678904', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 1),
+('Operador TechCorp', 'operador@techcorp.com.br', '12345678907', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 1),
+
+('Administrador DataData', 'admin@datadata.io', '12345678902', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 2),
+('Analista DataData', 'analista@datadata.io', '12345678905', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 2),
+('Operador DataData', 'operador@datadata.io', '12345678908', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 2),
+
+('Administrador SPTECH', 'admin@sptech.school', '12345678903', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 3),
+('Analista SPTECH', 'analista@sptech.school', '12345678906', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 3),
+('Operador SPTECH', 'operador@sptech.school', '12345678909', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 3);
+
 INSERT INTO ambiente_hpc (nome, status, endereco_localizacao, fk_empresa) VALUES
 ('Ambiente IA & Analytics', 'ativo', 'Rua das Laranjas, 123', 1),
-('Ambiente Processamento Pesado', 'manut.', 'Rua das Abóboras, 166', 1);
+('Ambiente Processamento Pesado', 'manut.', 'Rua das Abóboras, 166', 1),
+('Ambiente Simulacao DataData', 'ativo', 'Rua 7 de Setembro, 500', 2),
+('Ambiente Pesquisa SPTECH', 'ativo', 'Rua Haddock Lobo, 595', 3);
 
 INSERT INTO cluster (nome, status, fk_ambiente_hpc) VALUES
 ('Cluster-Alpha-GPU', 'ativo', 1),
 ('Cluster-Beta-CPU', 'ativo', 2),
-('Cluster-Gamma-Render', 'manut.', 2);
+('Cluster-Gamma-Render', 'manut.', 2),
+('Cluster-Delta-DataData', 'ativo', 3),
+('Cluster-Epsilon-SPTECH', 'ativo', 4);
 
 INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster) VALUES
 ('alpha-node01', '10.0.1.10', 'Ubuntu Server 22.04 LTS', 'ativo', 1),
@@ -244,4 +295,70 @@ INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster) VALUES
 ('gamma-node02', '10.0.3.11', 'Ubuntu Server 22.04 LTS', 'ativo', 3),
 ('gamma-node03', '10.0.3.12', 'Ubuntu Server 22.04 LTS', 'ativo', 3),
 ('gamma-node04', '10.0.3.13', 'Ubuntu Server 22.04 LTS', 'ativo', 3),
-('gamma-node05', '10.0.3.14', 'Ubuntu Server 22.04 LTS', 'ativo', 3);e
+('gamma-node05', '10.0.3.14', 'Ubuntu Server 22.04 LTS', 'ativo', 3),
+
+('delta-node01', '10.0.4.10', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
+('delta-node02', '10.0.4.11', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
+('delta-node03', '10.0.4.12', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
+
+('epsilon-node01', '10.0.5.10', 'Ubuntu Server 22.04 LTS', 'ativo', 5),
+('epsilon-node02', '10.0.5.11', 'Ubuntu Server 22.04 LTS', 'ativo', 5),
+('epsilon-node03', '10.0.5.12', 'Ubuntu Server 22.04 LTS', 'ativo', 5);
+
+INSERT INTO componente (tipo, fabricante, modelo, unidade_medida) VALUES
+('CPU', 'Nautilus Labs', 'Perfil CPU', '%'),
+('Memoria', 'Nautilus Labs', 'Perfil Memoria', '%'),
+('Disco', 'Nautilus Labs', 'Perfil Disco', '%');
+
+INSERT INTO componente_node (
+    pico_max,
+    pico_min,
+    percentual,
+    limite_atencao,
+    limite_critico,
+    fk_componente,
+    fk_node
+)
+SELECT
+    100,
+    0,
+    100,
+    CASE c.tipo
+        WHEN 'CPU' THEN 68 + MOD(n.id_node, 5)
+        WHEN 'Memoria' THEN 72 + MOD(n.id_node, 5)
+        ELSE 76 + MOD(n.id_node, 5)
+    END AS limite_atencao,
+    CASE c.tipo
+        WHEN 'CPU' THEN 84 + MOD(n.id_node, 5)
+        WHEN 'Memoria' THEN 88 + MOD(n.id_node, 5)
+        ELSE 90 + MOD(n.id_node, 5)
+    END AS limite_critico,
+    c.id_componente,
+    n.id_node
+FROM node n
+JOIN componente c ON c.tipo IN ('CPU', 'Memoria', 'Disco');
+
+INSERT INTO billing_parametro_node (
+    submercado,
+    potencia_idle_kw,
+    potencia_max_kw,
+    fator_gamma,
+    tarifa_alpha,
+    tarifa_beta,
+    encargos_kwh,
+    tarifa_fallback_kwh,
+    observacao,
+    fk_node
+)
+SELECT
+    'SE/CO',
+    ROUND(0.2200 + (MOD(n.id_node, 5) * 0.0700) + (FLOOR((n.id_node - 1) / 5) * 0.0300), 4),
+    ROUND(0.6500 + (MOD(n.id_node, 5) * 0.1500) + (FLOOR((n.id_node - 1) / 5) * 0.0800), 4),
+    ROUND(1.080 + (MOD(n.id_node, 4) * 0.080), 3),
+    ROUND(0.8800 + (MOD(n.id_node, 6) * 0.0700), 4),
+    ROUND((MOD(n.id_node, 3) - 1) * 0.004500, 6),
+    ROUND(0.090000 + (MOD(n.id_node, 4) * 0.018000), 6),
+    ROUND(0.780000 + (MOD(n.id_node, 5) * 0.040000), 6),
+    'Parâmetro inicial. Recalibrar após dados reais.',
+    n.id_node
+FROM node n;

@@ -106,6 +106,7 @@ async function autenticar(req, res, somenteCredenciais = false) {
 
         return res.status(200).json({
             autenticado: true,
+            empresa_id: empresa.id_empresa,
             hostname: node.hostname,
             node: node,
             componentesnode: componentesnode

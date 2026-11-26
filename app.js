@@ -40,6 +40,7 @@ app.use("/dashcluster", require("./src/routes/dashCluster"));
 app.use("/dashoperador", require("./src/routes/dashOperador"));
 app.use("/dashanalista", require("./src/routes/dashAnalista"));
 app.use("/alertas", require("./src/routes/alertas"));
+app.use("/dashbilling", require("./src/routes/dashBilling"));
 
 if (process.env.AWS_CREDENTIAL_SYNC_ENABLED === 'true') {
     require('./src/services/awsService').iniciar();
