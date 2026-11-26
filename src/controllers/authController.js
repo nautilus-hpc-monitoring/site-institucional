@@ -96,14 +96,7 @@ async function autenticar(req, res, somenteCredenciais = false) {
             componentesnode[i]["componente"] = componente[0];
         }
         // Fim da consulta dos componentes
-
-        // Consulta dos parametros
-        for (let i = 0; i < componentesnode.length; i++) {
-            const parametro = await authModel.buscarParametro(componentesnode[i].id_componente_node);
-            componentesnode[i]["parametro"] = parametro[0];
-        }
-        // Fim da consulta dos parametros
-
+        
         return res.status(200).json({
             autenticado: true,
             empresa_id: empresa.id_empresa,
