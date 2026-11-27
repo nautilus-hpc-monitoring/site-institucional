@@ -119,6 +119,52 @@ async function buscarComponente(id_componente) {
     return database.executar(sql, [id_componente]);
 }
 
+async function buscarParametrosBilling(empresaId, hostnames = []) {
+    console.log("Entrou em buscar parametros billing");
+
+    const filtros = ["h.fk_empresa = ?"];
+    const parametros = [empresaId];
+
+    if (Array.isArray(hostnames) && hostnames.length > 0) {
+        const lista = hostnames
+            .map((hostname) => String(hostname || "").trim())
+            .filter((hostname) => hostname.length > 0);
+
+        if (lista.length > 0) {
+            filtros.push(`n.hostname IN (${lista.map(() => "?").join(", ")})`);
+            parametros.push(...lista);
+        }
+    }
+
+    const sql = `
+        SELECT
+            n.id_node,
+            n.hostname,
+            b.id_billing_parametro_node,
+            b.potencia_idle_kw,
+            b.potencia_max_kw,
+            b.fator_gamma,
+            b.tarifa_alpha,
+            b.tarifa_beta,
+            b.encargos_kwh,
+            b.tarifa_fallback_kwh,
+            b.submercado,
+            b.dt_ultima_calibracao,
+            b.observacao
+        FROM ambiente_hpc h
+        JOIN cluster c
+            ON c.fk_ambiente_hpc = h.id_ambiente_hpc
+        JOIN node n
+            ON n.fk_cluster = c.id_cluster
+        LEFT JOIN billing_parametro_node b
+            ON b.fk_node = n.id_node
+        WHERE ${filtros.join(" AND ")}
+        ORDER BY n.hostname
+    `;
+
+    return database.executar(sql, parametros);
+}
+
 module.exports = {
     buscarUsuario,
     buscarEmpresa,
@@ -126,5 +172,6 @@ module.exports = {
     buscarCluster,
     buscarNode,
     buscarComponenteNode,
-    buscarComponente
+    buscarComponente,
+    buscarParametrosBilling
 }

@@ -460,6 +460,28 @@ function desenharFormularioNode(id, componentes) {
                     ${componentes.map(componente => gerarCaixaComponente(componente.tipo, componente.id)).join("")}
                     ${componentes.length == 0 ? "<p>Nenhum componente disponível para monitoramento.</p>" : ""}
                 </div>
+
+                <hr style="margin: 20px 0; border: 1px solid #E2E8F0;">
+
+                <div style="margin-bottom: 12px;">
+                    <h3 style="margin: 0 0 5px 0; color: #0F172A; text-align: left;">Parâmetros de Billing (Energia)</h3>
+                    <p style="margin: 0; font-size: 13px; color: #64748B;">Esses valores alimentam o cálculo de custo energético da dashboard Billing para este node.</p>
+                </div>
+
+                <div style="display:flex; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex:1; min-width: 190px;">
+                        <label>P_min (kW):</label>
+                        <input type="number" min="0" step="0.0001" id="ipt_billing_pmin" value="0.35" placeholder="Ex.: 0.3500">
+                    </div>
+                    <div style="flex:1; min-width: 190px;">
+                        <label>P_max (kW):</label>
+                        <input type="number" min="0" step="0.0001" id="ipt_billing_pmax" value="0.8" placeholder="Ex.: 0.8000">
+                    </div>
+                    <div style="flex:1; min-width: 190px;">
+                        <label>Gamma:</label>
+                        <input type="number" min="0.0001" step="0.001" id="ipt_billing_gamma" value="1.2" placeholder="Ex.: 1.200">
+                    </div>
+                </div>
                 
                 <div class="form-actions" style="margin-top: 24px;">
                     <button class="btn" onclick="listarNodes(${clusterSelecionado.id})">Cancelar</button>
@@ -489,6 +511,11 @@ function desenharFormularioNode(id, componentes) {
                         }
                     }
                 });
+
+                const billing = nodeCompleto.billing || {};
+                document.getElementById("ipt_billing_pmin").value = billing.potenciaIdleKw ?? "";
+                document.getElementById("ipt_billing_pmax").value = billing.potenciaMaxKw ?? "";
+                document.getElementById("ipt_billing_gamma").value = billing.fatorGamma ?? "";
             })
             .catch(mostrarErro);
     }
@@ -525,7 +552,12 @@ function salvarNode(id) {
         sistemaOperacionalServer: document.getElementById("ipt_so_node").value,
         ipServer: document.getElementById("ipt_ip_node").value,
         statusServer: document.getElementById("sel_status_node").value,
-        componentesServer: arrComponentes
+        componentesServer: arrComponentes,
+        billingServer: {
+            potenciaIdleKw: document.getElementById("ipt_billing_pmin").value,
+            potenciaMaxKw: document.getElementById("ipt_billing_pmax").value,
+            fatorGamma: document.getElementById("ipt_billing_gamma").value
+        }
     };
 
     let rota = id ? "editarNode" : "cadastrarNode";

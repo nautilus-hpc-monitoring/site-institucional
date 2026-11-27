@@ -39,6 +39,34 @@ function componentesValidos(componentes) {
     return true;
 }
 
+function validarParametrosBilling(parametrosBilling) {
+    if (!parametrosBilling || typeof parametrosBilling !== "object") {
+        return "Informe os parâmetros de billing do node.";
+    }
+
+    var potenciaIdle = Number(parametrosBilling.potenciaIdleKw);
+    var potenciaMax = Number(parametrosBilling.potenciaMaxKw);
+    var fatorGamma = Number(parametrosBilling.fatorGamma);
+
+    if (![potenciaIdle, potenciaMax, fatorGamma].every(Number.isFinite)) {
+        return "P_min, P_max e gamma devem ser números válidos.";
+    }
+
+    if (potenciaIdle < 0) {
+        return "P_min (potência idle) não pode ser negativo.";
+    }
+
+    if (potenciaMax < potenciaIdle) {
+        return "P_max deve ser maior ou igual ao P_min.";
+    }
+
+    if (fatorGamma <= 0) {
+        return "Gamma deve ser maior que zero.";
+    }
+
+    return null;
+}
+
 // Confere o tipo pelo cadastro do banco, sem confiar no tipo enviado pela tela.
 async function validarLimites(componentes) {
     if (componentes.length === 0) return;
@@ -261,7 +289,8 @@ function cadastrarNode(req, res) {
         ipServer: ip,
         sistemaOperacionalServer: sistemaOperacional,
         statusServer: status,
-        componentesServer: componentes
+        componentesServer: componentes,
+        billingServer: parametrosBilling
     } = req.body;
 
     if (!idCluster || !hostname || !ip || !sistemaOperacional) {
@@ -273,9 +302,13 @@ function cadastrarNode(req, res) {
     if (!componentesValidos(componentes)) {
         return res.status(400).json({ erro: "Selecione componentes válidos, sem repetição, e use números nos limites." });
     }
+    let erroBilling = validarParametrosBilling(parametrosBilling);
+    if (erroBilling) {
+        return res.status(400).json({ erro: erroBilling });
+    }
 
     validarLimites(componentes)
-        .then(() => hpcModel.cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status, componentes))
+        .then(() => hpcModel.cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status, componentes, parametrosBilling))
         .then(resultado => res.json(resultado))
         .catch(erro => tratarErro(res, erro));
 }
@@ -287,7 +320,8 @@ function editarNode(req, res) {
         ipServer: ip,
         sistemaOperacionalServer: sistemaOperacional,
         statusServer: status,
-        componentesServer: componentes
+        componentesServer: componentes,
+        billingServer: parametrosBilling
     } = req.body;
 
     if (!idNode || !hostname || !ip || !sistemaOperacional) {
@@ -299,9 +333,13 @@ function editarNode(req, res) {
     if (!componentesValidos(componentes)) {
         return res.status(400).json({ erro: "Selecione componentes válidos, sem repetição, e use números nos limites." });
     }
+    let erroBilling = validarParametrosBilling(parametrosBilling);
+    if (erroBilling) {
+        return res.status(400).json({ erro: erroBilling });
+    }
 
     validarLimites(componentes)
-        .then(() => hpcModel.editarNode(idNode, hostname, ip, sistemaOperacional, status, componentes))
+        .then(() => hpcModel.editarNode(idNode, hostname, ip, sistemaOperacional, status, componentes, parametrosBilling))
         .then(resultado => {
             if (resultado.affectedRows == 0) {
                 return res.status(404).json({ erro: "Node não encontrado." });
