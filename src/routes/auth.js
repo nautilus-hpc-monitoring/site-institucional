@@ -8,5 +8,6 @@ router.post("/", function (req, res) {
 });
 
 router.post('/credenciais', (req, res) => authController.autenticar(req, res, true));
+router.post('/billing-parametros', (req, res) => authController.billingParametros(req, res));
 
 module.exports = router;

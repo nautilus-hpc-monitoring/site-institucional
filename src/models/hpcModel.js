@@ -109,6 +109,27 @@ async function buscarNode(idNode) {
         limiteAtencao: v.limite_atencao,
         limiteCritico: v.limite_critico
     }));
+
+    var instrucaoBilling = `
+        SELECT potencia_idle_kw, potencia_max_kw, fator_gamma,
+               tarifa_alpha, tarifa_beta, encargos_kwh, tarifa_fallback_kwh
+        FROM billing_parametro_node
+        WHERE fk_node = ?
+        LIMIT 1;
+    `;
+    var billing = await database.executar(instrucaoBilling, [idNode]);
+    var parametro = billing[0] || null;
+
+    nodes[0].billing = {
+        potenciaIdleKw: parametro ? parametro.potencia_idle_kw : null,
+        potenciaMaxKw: parametro ? parametro.potencia_max_kw : null,
+        fatorGamma: parametro ? parametro.fator_gamma : null,
+        tarifaAlpha: parametro ? parametro.tarifa_alpha : null,
+        tarifaBeta: parametro ? parametro.tarifa_beta : null,
+        encargosKwh: parametro ? parametro.encargos_kwh : null,
+        tarifaFallbackKwh: parametro ? parametro.tarifa_fallback_kwh : null
+    };
+
     return nodes[0];
 }
 // Os IDs vêm do banco, pois CPU, RAM, disco e swap podem ter IDs diferentes.
@@ -176,7 +197,33 @@ async function salvarComponentes(conexao, idNode, componentes) {
     }
 }
 
-async function cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status, componentes) {
+function numeroObrigatorio(valor) {
+    return Number(valor);
+}
+
+async function salvarParametrosBilling(conexao, idNode, parametrosBilling) {
+    var instrucao = `
+        INSERT INTO billing_parametro_node (
+            potencia_idle_kw,
+            potencia_max_kw,
+            fator_gamma,
+            fk_node
+        ) VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            potencia_idle_kw = VALUES(potencia_idle_kw),
+            potencia_max_kw = VALUES(potencia_max_kw),
+            fator_gamma = VALUES(fator_gamma);
+    `;
+
+    await conexao.query(instrucao, [
+        numeroObrigatorio(parametrosBilling.potenciaIdleKw),
+        numeroObrigatorio(parametrosBilling.potenciaMaxKw),
+        numeroObrigatorio(parametrosBilling.fatorGamma),
+        idNode
+    ]);
+}
+
+async function cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status, componentes, parametrosBilling) {
     return database.executarTransacao(async function (conexao) {
         var [resultado] = await conexao.query(`
             INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster)
@@ -184,11 +231,12 @@ async function cadastrarNode(idCluster, hostname, ip, sistemaOperacional, status
         `, [hostname, ip, sistemaOperacional, status, idCluster]);
 
         await salvarComponentes(conexao, resultado.insertId, componentes);
+        await salvarParametrosBilling(conexao, resultado.insertId, parametrosBilling);
         return resultado;
     });
 }
 
-async function editarNode(idNode, hostname, ip, sistemaOperacional, status, componentes) {
+async function editarNode(idNode, hostname, ip, sistemaOperacional, status, componentes, parametrosBilling) {
     return database.executarTransacao(async function (conexao) {
         var [nodes] = await conexao.query("SELECT id_node FROM node WHERE id_node = ? FOR UPDATE;", [idNode]);
         if (nodes.length == 0) return { affectedRows: 0 };
@@ -200,6 +248,7 @@ async function editarNode(idNode, hostname, ip, sistemaOperacional, status, comp
         `, [hostname, ip, sistemaOperacional, status, idNode]);
 
         await salvarComponentes(conexao, idNode, componentes);
+        await salvarParametrosBilling(conexao, idNode, parametrosBilling);
         // O SELECT já confirmou que o node existe, mesmo quando nada foi alterado.
         return { ...resultado, affectedRows: 1 };
     });
