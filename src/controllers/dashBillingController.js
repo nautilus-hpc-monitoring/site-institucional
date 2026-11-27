@@ -20,8 +20,23 @@ function prefixoBilling() {
 }
 
 function billingLocalDir() {
-    const dir = process.env.BILLING_GOLD_LOCAL_DIR;
-    return dir ? path.resolve(dir) : null;
+    const candidatos = [];
+    if (process.env.BILLING_GOLD_LOCAL_DIR) {
+        candidatos.push(path.resolve(process.env.BILLING_GOLD_LOCAL_DIR));
+    }
+
+    const raizAtual = process.cwd();
+    candidatos.push(path.resolve(raizAtual, '..', 'captura-de-dados', 'gold_local'));
+    candidatos.push(path.resolve(raizAtual, 'gold_local'));
+    candidatos.push(path.resolve(__dirname, '..', '..', '..', 'captura-de-dados', 'gold_local'));
+
+    for (const caminho of candidatos) {
+        if (fs.existsSync(caminho)) {
+            return caminho;
+        }
+    }
+
+    return null;
 }
 
 function lerJsonLocal(caminhoArquivo) {
