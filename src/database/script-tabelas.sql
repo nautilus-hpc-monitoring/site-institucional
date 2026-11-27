@@ -27,7 +27,7 @@ CREATE TABLE endereco (
     fk_empresa INT NOT NULL,
     CONSTRAINT cFkEnderecoEmpresa
         FOREIGN KEY (fk_empresa)
-        REFERENCES empresa(id_empresa)
+        REFERENCES empresa(id_empresa) ON DELETE CASCADE
 );
 
 CREATE TABLE nivel_acesso (
@@ -47,10 +47,10 @@ CREATE TABLE permissao_nivel_acesso (
     PRIMARY KEY (fk_permissao, fk_nivel_acesso),
     CONSTRAINT cFkPnaPermissao
         FOREIGN KEY (fk_permissao)
-        REFERENCES permissao(id_permissao),
+        REFERENCES permissao(id_permissao) ON DELETE CASCADE,
     CONSTRAINT cFkPnaNivelAcesso
         FOREIGN KEY (fk_nivel_acesso)
-        REFERENCES nivel_acesso(id_nivel_acesso)
+        REFERENCES nivel_acesso(id_nivel_acesso) ON DELETE CASCADE
 );
 
 CREATE TABLE usuario (
@@ -64,10 +64,10 @@ CREATE TABLE usuario (
     fk_empresa INT,
     CONSTRAINT cFkUsuarioNivelAcesso
         FOREIGN KEY (fk_nivel_acesso)
-        REFERENCES nivel_acesso(id_nivel_acesso),
+        REFERENCES nivel_acesso(id_nivel_acesso) ON DELETE SET NULL,
     CONSTRAINT cFkUsuarioEmpresa
         FOREIGN KEY (fk_empresa)
-        REFERENCES empresa(id_empresa)
+        REFERENCES empresa(id_empresa) ON DELETE CASCADE
 );
 
 CREATE TABLE verificacao_email (
@@ -77,7 +77,7 @@ CREATE TABLE verificacao_email (
     fk_usuario INT NOT NULL,
     CONSTRAINT cFkVerificacaoUsuario
         FOREIGN KEY (fk_usuario)
-        REFERENCES usuario(id_usuario)
+        REFERENCES usuario(id_usuario) ON DELETE CASCADE
 );
 
 CREATE TABLE ambiente_hpc (
@@ -90,7 +90,7 @@ CREATE TABLE ambiente_hpc (
         CHECK (status IN ('ativo', 'inativo', 'manut.')),
     CONSTRAINT cFkAmbienteEmpresa
         FOREIGN KEY (fk_empresa)
-        REFERENCES empresa(id_empresa)
+        REFERENCES empresa(id_empresa) ON DELETE CASCADE
 );
 
 CREATE TABLE cluster (
@@ -102,7 +102,7 @@ CREATE TABLE cluster (
         CHECK (status IN ('ativo', 'inativo', 'manut.')),
     CONSTRAINT cFkClusterAmbiente
         FOREIGN KEY (fk_ambiente_hpc)
-        REFERENCES ambiente_hpc(id_ambiente_hpc)
+        REFERENCES ambiente_hpc(id_ambiente_hpc) ON DELETE CASCADE
 );
 
 CREATE TABLE node (
@@ -116,7 +116,7 @@ CREATE TABLE node (
         CHECK (status IN ('ativo', 'inativo', 'manut.')),
     CONSTRAINT cFkNodeCluster
         FOREIGN KEY (fk_cluster)
-        REFERENCES cluster(id_cluster)
+        REFERENCES cluster(id_cluster) ON DELETE CASCADE
 );
 
 CREATE TABLE componente (
@@ -142,10 +142,10 @@ CREATE TABLE componente_node (
         UNIQUE (fk_componente, fk_node),
     CONSTRAINT cFkCnComponente
         FOREIGN KEY (fk_componente)
-        REFERENCES componente(id_componente),
+        REFERENCES componente(id_componente) ON DELETE CASCADE,
     CONSTRAINT cFkCnNode
         FOREIGN KEY (fk_node)
-        REFERENCES node(id_node)
+        REFERENCES node(id_node) ON DELETE CASCADE
 );
 
 CREATE TABLE alerta (
@@ -167,7 +167,7 @@ CREATE TABLE alerta (
         CHECK (situacao_atendimento IN ('nao_visto', 'ciente', 'em_analise')),
     CONSTRAINT cFkAlertaComponenteNode
         FOREIGN KEY (fk_componente_node)
-        REFERENCES componente_node(id_componente_node)
+        REFERENCES componente_node(id_componente_node) ON DELETE CASCADE
 );
 
 CREATE TABLE billing_parametro_node (
@@ -201,21 +201,22 @@ CREATE TABLE billing_parametro_node (
         CHECK (tarifa_fallback_kwh >= 0),
     CONSTRAINT cFkBillingParametroNode
         FOREIGN KEY (fk_node)
-        REFERENCES node(id_node)
+        REFERENCES node(id_node) ON DELETE CASCADE
 );
 
 INSERT INTO empresa (razao_social, cnpj, dt_registro, dominio) VALUES
-('TechCorp Solucoes em TI', '12345678000195', '2024-01-15', 'techcorp.com.br'),
-('DataData HPC Solutions', '98765432000110', '2024-03-20', 'datadata.io'),
-('SPTECH', '18765432000110', '2022-08-20', 'sptech.school');
+('Petróleo Brasileiro S.A.', '12345678000195', '2024-01-15', 'petrobras.com.br'),
+('Schlumberger Serviços de Petróleo Ltda.', '98765432000110', '2024-03-20', 'slb.com.br'),
+('Invision Geofísica Ltda.', '18765432000110', '2022-08-20', 'invision.io');
 
 INSERT INTO endereco (logradouro, numero, cidade, estado, fk_empresa) VALUES
 ('Av. Paulista', '1000', 'Sao Paulo', 'SP', 1),
-('Rua da Assembleia', '50', 'Rio de Janeiro', 'RJ', 2);
+('Rua da Assembleia', '50', 'Rio de Janeiro', 'RJ', 2),
+('Av. Catarinense', '667', 'Santa Catarina', 'SC', 3);
 
 INSERT INTO nivel_acesso (nome) VALUES
 ('Administrador'),
-('Analista de Infraestrutura'),
+('Analista de dados'),
 ('Operador');
 
 INSERT INTO permissao (nome, descricao) VALUES
@@ -225,27 +226,27 @@ INSERT INTO permissao (nome, descricao) VALUES
 
 INSERT INTO permissao_nivel_acesso (fk_permissao, fk_nivel_acesso) VALUES
 (1, 1), (2, 1), (3, 1),
-(1, 2), (2, 2),
+(1, 2), (2, 2), (2,3),
 (1, 3);
 
 INSERT INTO usuario (nome, email_institucional, cpf, senha, verificado, fk_nivel_acesso, fk_empresa) VALUES
-('Administrador TechCorp', 'admin@techcorp.com.br', '12345678901', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 1),
-('Analista TechCorp', 'analista@techcorp.com.br', '12345678904', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 1),
-('Operador TechCorp', 'operador@techcorp.com.br', '12345678907', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 1),
+('Nina Lopes', 'nina.lopes@petrobras.com.br', '12345678901', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 1),
+('Vitor Brito', 'vitor.brito@petrobras.com.br', '12345678902', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 1),
+('Roger Machado', 'roger.machado@petrobras.com.br', '12345678903', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 1),
 
-('Administrador DataData', 'admin@datadata.io', '12345678902', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 2),
-('Analista DataData', 'analista@datadata.io', '12345678905', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 2),
-('Operador DataData', 'operador@datadata.io', '12345678908', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 2),
+('Administrador SLB', 'admin@slb.com.br', '12345678904', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 2),
+('Analista SLB', 'analista@slb.com.br', '12345678905', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 2),
+('Operador SLB', 'operador@slb.com.br', '12345678906', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 2),
 
-('Administrador SPTECH', 'admin@sptech.school', '12345678903', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 3),
-('Analista SPTECH', 'analista@sptech.school', '12345678906', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 3),
-('Operador SPTECH', 'operador@sptech.school', '12345678909', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 3);
+('Administrador Invision', 'admin@invision.io', '12345678907', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 3),
+('Analista Invision', 'analista@invision.io', '12345678908', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 3),
+('Operador Invision', 'operador@invision.io', '12345678909', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 3);
 
 INSERT INTO ambiente_hpc (nome, status, endereco_localizacao, fk_empresa) VALUES
 ('Ambiente IA & Analytics', 'ativo', 'Rua das Laranjas, 123', 1),
-('Ambiente Processamento Pesado', 'manut.', 'Rua das Abóboras, 166', 1),
-('Ambiente Simulacao DataData', 'ativo', 'Rua 7 de Setembro, 500', 2),
-('Ambiente Pesquisa SPTECH', 'ativo', 'Rua Haddock Lobo, 595', 3);
+('Ambiente Processamento Pesado', 'manut.', 'Rua das Abóboras, 166', 2),
+('Ambiente Simulacao DataData', 'ativo', 'Rua 7 de Setembro, 500', 3),
+('Ambiente Pesquisa Pretobras', 'ativo', 'Rua Haddock Lobo, 595', 1);
 
 INSERT INTO cluster (nome, status, fk_ambiente_hpc) VALUES
 ('Cluster-Alpha-GPU', 'ativo', 1),
@@ -276,15 +277,20 @@ INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster) VALUES
 ('delta-node01', '10.0.4.10', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
 ('delta-node02', '10.0.4.11', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
 ('delta-node03', '10.0.4.12', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
+('delta-node04', '10.0.4.13', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
+('delta-node05', '10.0.4.14', 'Ubuntu Server 22.04 LTS', 'ativo', 4),
 
 ('epsilon-node01', '10.0.5.10', 'Ubuntu Server 22.04 LTS', 'ativo', 5),
 ('epsilon-node02', '10.0.5.11', 'Ubuntu Server 22.04 LTS', 'ativo', 5),
-('epsilon-node03', '10.0.5.12', 'Ubuntu Server 22.04 LTS', 'ativo', 5);
+('epsilon-node03', '10.0.5.12', 'Ubuntu Server 22.04 LTS', 'ativo', 5),
+('epsilon-node04', '10.0.5.13', 'Ubuntu Server 22.04 LTS', 'ativo', 5),
+('epsilon-node05', '10.0.5.14', 'Ubuntu Server 22.04 LTS', 'ativo', 5);
 
 INSERT INTO componente (tipo, fabricante, modelo, unidade_medida) VALUES
 ('CPU', 'Nautilus Labs', 'Perfil CPU', '%'),
-('Memoria', 'Nautilus Labs', 'Perfil Memoria', '%'),
-('Disco', 'Nautilus Labs', 'Perfil Disco', '%');
+('RAM', 'Nautilus Labs', 'Perfil Memória', '%'),
+('SWAP', 'Nautilus Labs', 'Perfil Swap', '%'),
+('DISCO', 'Nautilus Labs', 'Perfil Disco', '%');
 
 INSERT INTO componente_node (
     pico_max,
@@ -298,21 +304,23 @@ INSERT INTO componente_node (
 SELECT
     100,
     0,
-    100,
+    5,
     CASE c.tipo
         WHEN 'CPU' THEN 68 + MOD(n.id_node, 5)
-        WHEN 'Memoria' THEN 72 + MOD(n.id_node, 5)
+        WHEN 'RAM' THEN 72 + MOD(n.id_node, 5)
+        WHEN 'SWAP' THEN 5 + MOD(n.id_node, 5)
         ELSE 76 + MOD(n.id_node, 5)
     END AS limite_atencao,
     CASE c.tipo
         WHEN 'CPU' THEN 84 + MOD(n.id_node, 5)
-        WHEN 'Memoria' THEN 88 + MOD(n.id_node, 5)
+        WHEN 'RAM' THEN 88 + MOD(n.id_node, 5)
+        WHEN 'SWAP' THEN 10 + MOD(n.id_node, 5)
         ELSE 90 + MOD(n.id_node, 5)
     END AS limite_critico,
     c.id_componente,
     n.id_node
 FROM node n
-JOIN componente c ON c.tipo IN ('CPU', 'Memoria', 'Disco');
+JOIN componente c ON c.tipo IN ('CPU', 'RAM', 'SWAP', 'DISCO');
 
 INSERT INTO billing_parametro_node (
     submercado,
