@@ -1,3 +1,9 @@
+if (typeof Chart !== "undefined") {
+    const estilo = getComputedStyle(document.body);
+    Chart.defaults.font.family = estilo.fontFamily;
+    Chart.defaults.font.size = Number.parseFloat(estilo.getPropertyValue("--dashboard-fonte-pequena")) || 14;
+}
+
 /* Dashboard do analista: consome /dashanalista e desenha a tela.
  *
  * MAPA DO ARQUIVO
@@ -683,8 +689,7 @@ function criarGraficoComponente(node, chave) {
                         callback: function (valor) {
                             return valor + "%";
                         },
-                        color: "#9ca3af",
-                        font: { size: 10 }
+                        color: "#9ca3af"
                     },
                     grid: { color: "#f1f3f5", drawBorder: false },
                     border: { display: false }
@@ -694,7 +699,6 @@ function criarGraficoComponente(node, chave) {
                     border: { display: false },
                     ticks: {
                         color: "#9ca3af",
-                        font: { size: 10 },
                         maxRotation: 0,
                         autoSkip: false,
                         // Mostra apenas alguns rótulos para não poluir o eixo.
@@ -823,27 +827,27 @@ function criarGraficoCorrelacao(node) {
                 x: {
                     min: 0,
                     max: 100,
-                    ticks: { stepSize: 25, color: "#9ca3af", font: { size: 10 } },
+                    ticks: { stepSize: 25, color: "#9ca3af" },
                     grid: { color: "#eceff2", drawBorder: false },
                     border: { display: false },
                     title: {
                         display: true,
                         text: correlacao.rotulo_x || "Uso do disco (%)",
                         color: "#6b7480",
-                        font: { size: 10, weight: "600" }
+                        font: { weight: "600" }
                     }
                 },
                 y: {
                     min: 0,
                     max: maximoY,
-                    ticks: { color: "#9ca3af", font: { size: 10 } },
+                    ticks: { color: "#9ca3af" },
                     grid: { color: "#eceff2", drawBorder: false },
                     border: { display: false },
                     title: {
                         display: true,
                         text: correlacao.rotulo_y || "IO wait da CPU (%)",
                         color: "#6b7480",
-                        font: { size: 10, weight: "600" }
+                        font: { weight: "600" }
                     }
                 }
             }

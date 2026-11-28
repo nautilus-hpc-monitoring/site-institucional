@@ -1,7 +1,10 @@
 /* Renderização da dashboard com Chart.js. Dados e cálculos ficam em dashboard-cluster.js. */
 const graficosDashboard = {};
-Chart.defaults.font.family = "Exo 2, sans-serif";
-Chart.defaults.font.size = 11;
+if (typeof Chart !== "undefined") {
+    const estilo = getComputedStyle(document.body);
+    Chart.defaults.font.family = estilo.fontFamily;
+    Chart.defaults.font.size = Number.parseFloat(estilo.getPropertyValue("--dashboard-fonte-pequena")) || 14;
+}
 Chart.defaults.color = "#64748b";
 Chart.defaults.animation = false;
 
@@ -115,14 +118,15 @@ const marcaColeta = {
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = "#8293aa";
-        ctx.font = "10px sans-serif";
-        ctx.textAlign = x > chartArea.right - 60 ? "right" : "left";
-        if (options.texto !== "")
-            ctx.fillText(
-                options.texto || "Última coleta",
-                x + (x > chartArea.right - 60 ? -4 : 4),
-                chartArea.top + 10
-            );
+        ctx.font = Chart.defaults.font.size + "px " + Chart.defaults.font.family;
+        const texto = options.texto ?? "Última coleta";
+        const largura = ctx.measureText(texto).width;
+        const alinharDireita = x + largura + 4 > chartArea.right;
+        ctx.textAlign = alinharDireita ? "right" : "left";
+        if (texto) {
+            ctx.fillText(texto, x + (alinharDireita ? -4 : 4),
+                chartArea.top + Chart.defaults.font.size);
+        }
         ctx.restore();
     }
 };
@@ -181,16 +185,19 @@ const matrizCalor = {
                 );
                 ctx.fill();
                 ctx.fillStyle = "#334155";
-                ctx.font = "600 11px sans-serif";
+                ctx.font = "600 " + Chart.defaults.font.size + "px " + Chart.defaults.font.family;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText(p.v === null ? "—" : options.formatar(p.v), x, y);
+                const rotulo = p.v === null ? "—" : options.formatar(p.v);
+                if (ctx.measureText(rotulo).width <= largura - 4) {
+                    ctx.fillText(rotulo, x, y);
+                }
             });
         }
         ctx.restore();
         if (options.continuo) {
             const inicio = chartArea.left + 75,
-                fim = chartArea.right - 25,
+                fim = chartArea.right - 32,
                 y = chartArea.top - 17;
             const gradiente = ctx.createLinearGradient(inicio, 0, fim, 0);
             [0, 35, 65, 100].forEach((v) =>
@@ -199,7 +206,7 @@ const matrizCalor = {
             ctx.save();
             ctx.fillStyle = gradiente;
             ctx.fillRect(inicio, y, Math.max(1, fim - inicio), 8);
-            ctx.font = "10px sans-serif";
+            ctx.font = Chart.defaults.font.size + "px " + Chart.defaults.font.family;
             ctx.fillStyle = "#64748b";
             ctx.textAlign = "left";
             ctx.fillText(options.recurso + " (%)", chartArea.left, y + 8);
@@ -403,19 +410,19 @@ const tabelaIncidentes = {
     afterDatasetsDraw(chart, args, options) {
         const { ctx, chartArea, scales } = chart;
         ctx.save();
-        ctx.font = "10px sans-serif";
+        ctx.font = Chart.defaults.font.size + "px " + Chart.defaults.font.family;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ["Crítico", "Atenção", "Total"].forEach((t, i) => {
             ctx.fillStyle = ["#c52e3e", "#b45309", "#475569"][i];
-            ctx.fillText(t, chartArea.right + 28 + i * 48, chartArea.top - 12);
+            ctx.fillText(t, chartArea.right + 28 + i * 56, chartArea.top - 12);
         });
         options.linhas.forEach((n, i) =>
             [n.criticos, n.atencao, n.criticos + n.atencao].forEach((v, j) => {
                 ctx.fillStyle = ["#c52e3e", "#b45309", "#475569"][j];
                 ctx.fillText(
                     v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }),
-                    chartArea.right + 28 + j * 48,
+                    chartArea.right + 28 + j * 56,
                     scales.y.getPixelForValue(i)
                 );
             })
@@ -461,7 +468,7 @@ function renderizarRankingIncidentes(id, dados, titulo) {
             },
             options: {
                 indexAxis: "y",
-                layout: { padding: { right: 150, top: 22 } },
+                layout: { padding: { right: 166, top: 26 } },
                 plugins: { legend: { display: false }, tabelaIncidentes: { linhas } },
                 scales: {
                     x: {

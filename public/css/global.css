@@ -14,6 +14,10 @@
     --cor-cinza: #d9d9d9;
 
     --fonte-principal: "Exo 2", sans-serif;
+
+    --dashboard-fonte-pequena: 14px;
+    --dashboard-fonte-texto: 16px;
+    --dashboard-fonte-destaque: 18px;
 }
 
 * {

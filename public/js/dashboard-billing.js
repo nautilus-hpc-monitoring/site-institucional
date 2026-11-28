@@ -1,3 +1,9 @@
+if (typeof Chart !== "undefined") {
+    const estilo = getComputedStyle(document.body);
+    Chart.defaults.font.family = estilo.fontFamily;
+    Chart.defaults.font.size = Number.parseFloat(estilo.getPropertyValue("--dashboard-fonte-pequena")) || 14;
+}
+
 if (sessionStorage.NOME_USUARIO) {
     const elUsuario = document.getElementById("b_usuario");
     if (elUsuario) elUsuario.innerHTML = sessionStorage.NOME_USUARIO;

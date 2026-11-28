@@ -46,7 +46,7 @@
 
 .area-filtro-acoes .btn {
     padding: 9px 16px;
-    font-size: 14px;
+    font-size: var(--dashboard-fonte-destaque);
 }
 
 .area-filtro input {
@@ -57,7 +57,7 @@
     border-radius: 6px;
     box-shadow: none;
     outline: none;
-    font-size: 14px;
+    font-size: var(--dashboard-fonte-destaque);
     margin: 0;
     box-sizing: border-box;
 }
@@ -126,7 +126,7 @@
 
 .item-titulo p {
     color: #64748B;
-    font-size: 13px;
+    font-size: var(--dashboard-fonte-texto);
     margin-top: 5px;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .status p {
-    font-size: 12px;
+    font-size: var(--dashboard-fonte-texto);
     font-weight: bold;
     color: #222223;
 }
@@ -234,7 +234,7 @@
     padding: 4px 9px;
     border-radius: 20px;
 
-    font-size: 11px;
+    font-size: var(--dashboard-fonte-pequena);
     font-weight: 600;
 }
 
@@ -256,6 +256,16 @@
     color: #F59E0B;
 }
 
+.operador-status.critico {
+    color: #B91C1C;
+    background-color: #FEF2F2;
+}
+
+.operador-status.neutro {
+    color: #475569;
+    background-color: #F1F5F9;
+}
+
 .operador-kpi-valor {
     display: flex;
     align-items: flex-end;
@@ -270,14 +280,14 @@
 }
 
 .operador-kpi-valor span {
-    font-size: 14px;
+    font-size: var(--dashboard-fonte-destaque);
     color: #94A3B8;
     margin-bottom: 2px;
 }
 
 .operador-kpi > p {
     margin-top: 6px;
-    font-size: 13px;
+    font-size: var(--dashboard-fonte-texto);
     font-weight: 500;
     color: #64748B;
 }
@@ -318,14 +328,14 @@
 
 .operador-kpi-descricao {
     margin-top: 6px;
-    font-size: 13px;
+    font-size: var(--dashboard-fonte-texto);
     font-weight: 500;
     color: #64748B;
 }
 
 .operador-kpi-node {
     margin-top: 4px;
-    font-size: 12px;
+    font-size: var(--dashboard-fonte-texto);
     font-weight: 600;
     color: var(--cor-secundaria);
 
@@ -376,7 +386,7 @@
 
 .operador-grafico-titulo strong {
     color: #0F172A;
-    font-size: 13px;
+    font-size: var(--dashboard-fonte-texto);
     font-weight: 600;
 }
 
@@ -401,7 +411,7 @@
 }
 
 .operador-grafico-valor span {
-    font-size: 12px;
+    font-size: var(--dashboard-fonte-texto);
     color: #94A3B8;
 }
 
@@ -418,6 +428,8 @@
 
 .operador-grafico-footer {
     display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
     align-items: center;
     justify-content: space-between;
 
@@ -426,12 +438,12 @@
     padding-top: 7px;
     margin-top: 3px;
 
-    font-size: 11px;
+    font-size: var(--dashboard-fonte-pequena);
     color: #94A3B8;
 }
 
 .operador-grafico-footer span:last-child {
-    color: var(--cor-primaria);
+    color: var(--cor-secundaria);
 }
 
 .dashboard-header {
@@ -455,7 +467,7 @@
     color: white;
     cursor: pointer;
     font-family: inherit;
-    font-size: 14px;
+    font-size: var(--dashboard-fonte-destaque);
 }
 
 .btn-voltar:hover {

@@ -9,6 +9,11 @@ var METRICAS = [
     { chave: "disco", coluna: "DISCO" }
 ];
 
+function lerGoldOperador() {
+    var prefixo = process.env.OPERADOR_GOLD_PREFIX || "03-gold/operador/";
+    return awsService.lerUltimoJson(prefixo.replace(/\/+$/, "") + "/");
+}
+
 function formatarDataParaBanco(data) {
     return data.toISOString().slice(0, 19).replace("T", " ");
 }
@@ -115,10 +120,9 @@ async function campeoes(req, res) {
         var idEmpresa = usuarios[0].fk_empresa;
         var agora = new Date();
         var inicioDaSemana = new Date(clusterCalculos.inicioDaSemana(agora.getTime()));
-        var prefixo = process.env.OPERADOR_GOLD_PREFIX || "03-gold/operador/";
 
         var [arquivo, nodes, alertas] = await Promise.all([
-            awsService.lerUltimoJson(prefixo.replace(/\/+$/, "") + "/"),
+            lerGoldOperador(),
             dashOperadorModel.nodesDaEmpresa(idEmpresa),
             dashOperadorModel.alertasDaSemana(
                 idEmpresa,
@@ -164,4 +168,80 @@ async function campeoes(req, res) {
     }
 }
 
-module.exports = { campeoes };
+async function detalhe(req, res) {
+    var idUsuario = Number(req.query.idUsuario);
+    var idNode = Number(req.params.id);
+    if (!Number.isSafeInteger(idUsuario) || idUsuario <= 0 ||
+        !Number.isSafeInteger(idNode) || idNode <= 0) {
+        return res.status(400).json({ erro: "Usuário ou node inválido." });
+    }
+
+    try {
+        var [usuario] = await dashClusterModel.usuario(idUsuario);
+        if (!usuario || !usuario.fk_empresa) {
+            return res.status(404).json({ erro: "Usuário ou empresa não encontrados." });
+        }
+
+        var idEmpresa = usuario.fk_empresa;
+        var cadastrados = await dashOperadorModel.nodesDaEmpresa(idEmpresa);
+        var cadastro = cadastrados.find(node => Number(node.id_node) === idNode);
+        if (!cadastro) {
+            return res.status(404).json({ erro: "Node não disponível para este usuário." });
+        }
+
+        var agora = new Date();
+        var inicioDaSemana = new Date(clusterCalculos.inicioDaSemana(agora.getTime()));
+        var [arquivo, limitesDoCluster, alertasDaEmpresa] = await Promise.all([
+            lerGoldOperador(),
+            dashClusterModel.limites(cadastro.id_cluster, idEmpresa),
+            dashOperadorModel.alertasDaSemana(
+                idEmpresa, formatarDataParaBanco(inicioDaSemana), formatarDataParaBanco(agora)
+            )
+        ]);
+
+        var gold = arquivo.dados;
+        var metadados = gold?.metadados;
+        var pertenceAEmpresa = !metadados?.empresa_id || Number(metadados.empresa_id) === Number(idEmpresa);
+        var nodeGold = pertenceAEmpresa && Array.isArray(gold?.nodes) && !metadados?.demonstrativo
+            ? gold.nodes.find(node => node && node.hostname === cadastro.hostname &&
+                (!Number(node.cluster_id) || Number(node.cluster_id) === Number(cadastro.id_cluster)))
+            : null;
+        var telemetria = nodeGold?.telemetria_24h || null;
+        var resumo = nodeGold?.medias_semana;
+        var legado = nodeGold && !telemetria ? {
+            fim: resumo?.fim,
+            medias: resumo?.valores,
+            consumo: nodeGold.consumo,
+        } : null;
+        var limitePorComponente = {};
+        for (var limite of limitesDoCluster) {
+            if (limite.hostname === cadastro.hostname) {
+                var componente = String(limite.componente || "").trim().toUpperCase();
+                limitePorComponente[componente] = {
+                    atencao: limite.limite_atencao,
+                    critico: limite.limite_critico,
+                };
+            }
+        }
+
+        var alertas = alertasDaEmpresa.find(item => item.hostname === cadastro.hostname);
+        var avisos = [];
+        if (arquivo.aviso) avisos.push(arquivo.aviso);
+        if (legado) avisos.push("A série de 24 horas estará disponível após a atualização da ETL do operador.");
+        if (!nodeGold && !arquivo.aviso) avisos.push("Nenhuma telemetria do operador publicada para este node.");
+
+        res.set("Cache-Control", "no-store");
+        return res.status(200).json({
+            telemetria: telemetria,
+            legado: legado,
+            limites: limitePorComponente,
+            quantidade_alertas: Number(alertas?.quantidade) || 0,
+            avisos: avisos,
+        });
+    } catch (erro) {
+        console.error("Detalhe do operador:", erro.code || erro.name);
+        return res.status(503).json({ erro: "Não foi possível carregar a telemetria do node." });
+    }
+}
+
+module.exports = { campeoes, detalhe };

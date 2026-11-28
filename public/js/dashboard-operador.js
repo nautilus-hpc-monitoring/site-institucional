@@ -1,3 +1,9 @@
+if (typeof Chart !== "undefined") {
+    const estilo = getComputedStyle(document.body);
+    Chart.defaults.font.family = estilo.fontFamily;
+    Chart.defaults.font.size = Number.parseFloat(estilo.getPropertyValue("--dashboard-fonte-pequena")) || 14;
+}
+
 if (sessionStorage.NOME_USUARIO) {
     document.getElementById("b_usuario").innerHTML = sessionStorage.NOME_USUARIO;
 }
@@ -487,7 +493,8 @@ function desenharTabelaNodes(lista) {
 // DASHBOARD DO NODE
 
 function numeroPercentual(valor) {
-    const numero = typeof valor === "string" && valor.trim() === "" ? NaN : Number(valor);
+    if (typeof valor !== "number" && (typeof valor !== "string" || !valor.trim())) return null;
+    const numero = Number(valor);
     return Number.isFinite(numero) && numero >= 0 && numero <= 100 ? numero : null;
 }
 
@@ -502,7 +509,7 @@ function ultimoValor(lista) {
     return null;
 }
 
-function formatarHora(valor) {
+function formatarHora(valor, incluirData = false) {
     if (valor === null || valor === undefined || valor === "") return "";
 
     const data = new Date(valor);
@@ -510,74 +517,13 @@ function formatarHora(valor) {
         return new Intl.DateTimeFormat("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
-            timeZone: "America/Sao_Paulo"
+            timeZone: "America/Sao_Paulo",
+            ...(incluirData ? { day: "2-digit", month: "2-digit" } : {})
         }).format(data);
     }
 
     const texto = String(valor);
     return /^\d{2}:\d{2}/.test(texto.slice(11)) ? texto.slice(11, 16) : texto;
-}
-
-function mediasValidas(nodeTelemetria) {
-    const resumo = nodeTelemetria?.medias_semana;
-    if (!resumo || !resumo.valores) return null;
-
-    const inicio = Date.parse(resumo.inicio);
-    const fim = Date.parse(resumo.fim);
-    if (!Number.isFinite(inicio) || !Number.isFinite(fim) || inicio > fim || fim > Date.now()) {
-        return null;
-    }
-
-    return resumo.valores;
-}
-
-function dadosDoNode() {
-    if (!painelTelemetria || !nodeSelecionado) return null;
-
-    return painelTelemetria.telemetria?.nodes?.find(
-        node => node.hostname === nodeSelecionado.hostname
-    ) || null;
-}
-
-function serieDoConsumo(nodeTelemetria) {
-    const consumo = nodeTelemetria?.consumo;
-    if (!consumo || !Array.isArray(consumo.datas) || consumo.datas.length === 0) return null;
-
-    const cpu = Array.isArray(consumo.cpuObserved) ? consumo.cpuObserved : [];
-    const ram = Array.isArray(consumo.ramObserved) ? consumo.ramObserved : [];
-    if (!cpu.some(numeroPercentual) && !ram.some(numeroPercentual)) return null;
-
-    return {
-        labels: consumo.datas.map(formatarHora),
-        cpu: consumo.datas.map((_, indice) => numeroPercentual(cpu[indice])),
-        ram: consumo.datas.map((_, indice) => numeroPercentual(ram[indice]))
-    };
-}
-
-function serieDoCalor(nodeTelemetria, componente) {
-    const calor = nodeTelemetria?.calor;
-    if (!calor || !Array.isArray(calor.leituras) || calor.leituras.length === 0) return null;
-
-    const ultimaLinha = calor.leituras[calor.leituras.length - 1];
-    if (!Array.isArray(ultimaLinha) || ultimaLinha.length === 0) return null;
-
-    const chave = Object.keys(ultimaLinha[0] || {}).find(
-        nome => nome.toUpperCase() === componente.toUpperCase()
-    );
-    if (!chave) return null;
-
-    const dados = ultimaLinha.map(leitura => numeroPercentual(leitura?.[chave]));
-    if (!dados.some(valor => valor !== null)) return null;
-
-    return {
-        labels: dados.map((_, indice) => String(indice).padStart(2, "0") + ":00"),
-        dados: dados
-    };
-}
-
-function serieDaMedia(valor, tamanho) {
-    if (valor === null) return [];
-    return Array.from({ length: tamanho }, () => valor);
 }
 
 function definirGrafico(id, labels, dados) {
@@ -598,8 +544,9 @@ function definirGrafico(id, labels, dados) {
                 borderColor: "#42B8C4",
                 borderWidth: 2,
                 backgroundColor: "transparent",
-                pointRadius: 0,
+                pointRadius: 2,
                 pointHoverRadius: 4,
+                spanGaps: false,
                 tension: 0.35
             }]
         },
@@ -630,10 +577,8 @@ function definirGrafico(id, labels, dados) {
                     },
                     ticks: {
                         color: "#94A3B8",
-                        font: {
-                            family: "Exo 2",
-                            size: 10
-                        }
+                        maxTicksLimit: 8,
+                        maxRotation: 0
                     }
                 },
                 y: {
@@ -641,11 +586,7 @@ function definirGrafico(id, labels, dados) {
                     max: 100,
                     ticks: {
                         stepSize: 25,
-                        color: "#94A3B8",
-                        font: {
-                            family: "Exo 2",
-                            size: 10
-                        }
+                        color: "#94A3B8"
                     },
                     grid: {
                         color: "#F1F5F9",
@@ -662,38 +603,36 @@ function definirGrafico(id, labels, dados) {
 
 function definirStatus(id, situacao, texto) {
     const elemento = document.getElementById(id);
-    elemento.className = "operador-status " + (situacao === "atencao" ? "atencao" : "normal");
+    elemento.className = "operador-status " + situacao;
     elemento.innerHTML = "<span>•</span> " + texto;
 }
 
-function situacaoDoComponente(componente, hostname, nome) {
-    if (!componente || componente.hostname !== hostname) return null;
-    if (String(componente.componente || "").toUpperCase() !== nome.toUpperCase()) return null;
-
-    const situacao = String(componente.status_uso || "").toLowerCase();
-    if (["atencao", "alerta", "ruim"].includes(situacao)) return "atencao";
-    if (situacao === "bom") return "normal";
-    return null;
-}
-
-function definirKpi(valorId, statusId, valor, situacao) {
+function definirKpi(valorId, statusId, valor, limite) {
     document.getElementById(valorId).textContent = valor === null ? "—" : valor.toFixed(1);
 
-    if (!situacao) {
-        definirStatus(statusId, "normal", "Sem referência");
+    if (valor === null) {
+        definirStatus(statusId, "neutro", "Sem dados");
         return;
     }
 
-    definirStatus(statusId, situacao, situacao === "atencao" ? "Atenção" : "Normal");
+    const atencao = numeroPercentual(limite?.atencao);
+    const critico = numeroPercentual(limite?.critico);
+    if (atencao === null || critico === null || critico <= atencao) {
+        definirStatus(statusId, "neutro", "Sem referência");
+    } else if (valor >= critico) {
+        definirStatus(statusId, "critico", "Crítico");
+    } else if (valor >= atencao) {
+        definirStatus(statusId, "atencao", "Atenção");
+    } else {
+        definirStatus(statusId, "normal", "Normal");
+    }
 }
 
-function definirRodapes(periodos, painel) {
-    const coleta = painel?.telemetria?.metadados?.telemetria_ate;
-
+function definirRodapes(periodos, coleta) {
     document.querySelectorAll("#dashboard .operador-grafico-footer").forEach((rodape, indice) => {
         rodape.querySelector("span").textContent = periodos[indice];
         rodape.querySelector("span:last-child").textContent = coleta
-            ? "Coleta: " + formatarHora(coleta)
+            ? "Coleta: " + formatarHora(coleta, true)
             : "Sem coleta informada";
     });
 }
@@ -714,7 +653,7 @@ function limparKpisEgraficos() {
     });
 
     ["kpiCpuStatus", "kpiRamStatus", "kpiDiscoStatus", "kpiAlertasStatus"].forEach(id => {
-        definirStatus(id, "normal", "Carregando");
+        definirStatus(id, "neutro", "Carregando");
     });
 
     ["graficoCpu", "graficoRam", "graficoDisco", "graficoSwap"].forEach(id => {
@@ -724,79 +663,52 @@ function limparKpisEgraficos() {
     definirRodapes(["Últimas 24 h", "Últimas 24 h", "Últimas 24 h", "Últimas 24 h"], null);
 }
 
-function quantidadeAlertasDoNode(painel, hostname) {
-    const observado = painel?.alertas?.observados?.find(item => item.node === hostname);
-    if (!observado) return 0;
-    return (Number(observado.criticos) || 0) + (Number(observado.atencao) || 0);
-}
-
 function aplicarTelemetria(erro) {
-    const painel = painelTelemetria;
-    const hostname = nodeSelecionado?.hostname;
-    const node = dadosDoNode();
-    const medias = mediasValidas(node);
-    const serie = serieDoConsumo(node);
-    const serieDisco = serieDoCalor(node, "Disco");
-    const serieSwap = serieDoCalor(node, "Swap");
-    const componente = painel?.componente;
-    const labelsPadrao = serie?.labels.length
-        ? serie.labels
-        : Array.from({ length: 24 }, (_, indice) => String(indice).padStart(2, "0") + ":00");
+    const atual = painelTelemetria?.telemetria;
+    const legado = painelTelemetria?.legado;
+    const datas = atual?.datas || legado?.consumo?.datas || [];
+    const labels = datas.map(data => formatarHora(data));
+    const periodos = [];
 
-    const avisos = painel?.avisos ? painel.avisos.slice() : [];
-    if (erro) avisos.push(erro);
-    if (!node) avisos.push("Nenhuma telemetria publicada para este node no S3.");
+    for (const [recurso, sufixo, nomeMedia, chaveConsumo] of [
+        ["CPU", "Cpu", "CPU", "cpuObserved"],
+        ["RAM", "Ram", "RAM", "ramObserved"],
+        ["DISCO", "Disco", "Disco"],
+        ["SWAP", "Swap", "Swap"],
+    ]) {
+        const serie = atual?.series?.[recurso] || legado?.consumo?.[chaveConsumo] || [];
+        const dados = serie.map(numeroPercentual);
+        const valorHorario = legado ? ultimoValor(dados) : null;
+        const valor = atual
+            ? numeroPercentual(atual.valores?.[recurso])
+            : valorHorario ?? numeroPercentual(legado?.medias?.[nomeMedia]);
 
-    const cpu = serie ? ultimoValor(serie.cpu) : numeroPercentual(medias?.CPU);
-    const ram = serie ? ultimoValor(serie.ram) : numeroPercentual(medias?.RAM);
-    const disco = numeroPercentual(medias?.Disco);
-    const swap = numeroPercentual(medias?.Swap);
-    const situacaoCpu = situacaoDoComponente(componente, hostname, "CPU");
-    const situacaoRam = situacaoDoComponente(componente, hostname, "RAM");
-    const situacaoDisco = situacaoDoComponente(componente, hostname, "Disco");
+        if (recurso !== "SWAP") {
+            definirKpi("kpi" + sufixo + "Valor", "kpi" + sufixo + "Status",
+                valor, painelTelemetria?.limites?.[recurso]);
+        }
+        document.getElementById("valorGrafico" + sufixo).textContent =
+            valor === null ? "—" : valor.toFixed(1);
+        definirGrafico("grafico" + sufixo, dados.length ? labels : [], dados);
+        periodos.push(atual ? "Últimas 24 h · médias por hora"
+            : valorHorario !== null ? "Dia publicado · médias por hora"
+            : valor !== null ? "Destaque · média semanal" : "Sem série disponível");
+    }
 
-    definirKpi("kpiCpuValor", "kpiCpuStatus", cpu, situacaoCpu);
-    definirKpi("kpiRamValor", "kpiRamStatus", ram, situacaoRam);
-    definirKpi("kpiDiscoValor", "kpiDiscoStatus", disco, situacaoDisco);
-
-    document.getElementById("valorGraficoCpu").textContent = cpu === null ? "—" : cpu.toFixed(1);
-    document.getElementById("valorGraficoRam").textContent = ram === null ? "—" : ram.toFixed(1);
-    document.getElementById("valorGraficoDisco").textContent = disco === null ? "—" : disco.toFixed(1);
-    document.getElementById("valorGraficoSwap").textContent = swap === null ? "—" : swap.toFixed(1);
-
-    const quantidadeAlertas = painel ? quantidadeAlertasDoNode(painel, hostname) : null;
+    const quantidadeAlertas = painelTelemetria?.quantidade_alertas ?? null;
     document.getElementById("kpiAlertasValor").textContent =
         quantidadeAlertas === null ? "—" : String(quantidadeAlertas);
     definirStatus(
         "kpiAlertasStatus",
-        quantidadeAlertas > 0 ? "atencao" : "normal",
+        quantidadeAlertas === null ? "neutro" : quantidadeAlertas > 0 ? "atencao" : "normal",
         quantidadeAlertas === null ? "Sem dados" : quantidadeAlertas > 0 ? "Atenção" : "Normal"
     );
 
-    definirGrafico("graficoCpu", labelsPadrao, serie ? serie.cpu : []);
-    definirGrafico("graficoRam", labelsPadrao, serie ? serie.ram : []);
-    definirGrafico(
-        "graficoDisco",
-        serieDisco ? serieDisco.labels : labelsPadrao,
-        serieDisco ? serieDisco.dados : serieDaMedia(disco, labelsPadrao.length)
-    );
-    definirGrafico(
-        "graficoSwap",
-        serieSwap ? serieSwap.labels : labelsPadrao,
-        serieSwap ? serieSwap.dados : serieDaMedia(swap, labelsPadrao.length)
-    );
-
-    definirRodapes([
-        "Últimas 24 h",
-        "Últimas 24 h",
-        serieDisco ? "Últimas 24 h" : "Média semanal",
-        serieSwap ? "Últimas 24 h" : "Média semanal"
-    ], painel);
-
-    definirAviso(avisos);
+    definirRodapes(periodos, atual?.ultima_coleta || legado?.fim);
+    definirAviso([...(painelTelemetria?.avisos || []), erro]);
 }
 
-async function buscarPainelDoCluster(idCluster, signal) {
+async function buscarPainelDoNode(idNode, signal) {
     const idUsuario = sessionStorage.getItem("ID_USUARIO");
     if (!idUsuario) {
         location.href = "./login.html";
@@ -804,7 +716,7 @@ async function buscarPainelDoCluster(idCluster, signal) {
     }
 
     const resposta = await fetch(
-        "/dashcluster/clusters/" + encodeURIComponent(idCluster) +
+        "/dashoperador/nodes/" + encodeURIComponent(idNode) +
             "/dados?idUsuario=" + encodeURIComponent(idUsuario),
         { signal: signal, cache: "no-store" }
     );
@@ -836,8 +748,8 @@ async function abrirDash(idNode) {
     controladorTelemetria = new AbortController();
 
     try {
-        const painel = await buscarPainelDoCluster(
-            clusterSelecionado.id,
+        const painel = await buscarPainelDoNode(
+            nodeSelecionado.id,
             controladorTelemetria.signal
         );
         if (sequencia !== sequenciaTelemetria) return;
