@@ -230,30 +230,21 @@ INSERT INTO permissao_nivel_acesso (fk_permissao, fk_nivel_acesso) VALUES
 (1, 3);
 
 INSERT INTO usuario (nome, email_institucional, cpf, senha, verificado, fk_nivel_acesso, fk_empresa) VALUES
-('Nina Lopes', 'nina.lopes@petrobras.com.br', '12345678901', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 1),
-('Vitor Brito', 'vitor.brito@petrobras.com.br', '12345678902', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 1),
-('Roger Machado', 'roger.machado@petrobras.com.br', '12345678903', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 1),
-
-('Administrador SLB', 'admin@slb.com.br', '12345678904', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 2),
-('Analista SLB', 'analista@slb.com.br', '12345678905', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 2),
-('Operador SLB', 'operador@slb.com.br', '12345678906', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 2),
-
-('Administrador Invision', 'admin@invision.io', '12345678907', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 1, 3),
-('Analista Invision', 'analista@invision.io', '12345678908', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 2, 3),
-('Operador Invision', 'operador@invision.io', '12345678909', '$2b$10$m5sQ8naAqpKorCp6JfMVe.kUcn.CyiH0VYi8vnGEUoEMQLPxOxZtu', 1, 3, 3);
+('Nina Lopes', 'nina.lopes@petrobras.com.br', '12345678901', '$2b$10$TWO7jLtqCqwesswtvC.WbO5qD6IlkhRETuMGuKeLsmZvWQ.6LSBpq', 1, 1, 1),
+('Vitor Brito', 'vitor.brito@petrobras.com.br', '12345678902', '$2b$10$TWO7jLtqCqwesswtvC.WbO5qD6IlkhRETuMGuKeLsmZvWQ.6LSBpq', 1, 2, 1),
+('Roger Machado', 'roger.machado@petrobras.com.br', '12345678903', '$2b$10$TWO7jLtqCqwesswtvC.WbO5qD6IlkhRETuMGuKeLsmZvWQ.6LSBpq', 1, 3, 1);
 
 INSERT INTO ambiente_hpc (nome, status, endereco_localizacao, fk_empresa) VALUES
 ('Ambiente IA & Analytics', 'ativo', 'Rua das Laranjas, 123', 1),
 ('Ambiente Processamento Pesado', 'manut.', 'Rua das Abóboras, 166', 2),
-('Ambiente Simulacao DataData', 'ativo', 'Rua 7 de Setembro, 500', 3),
-('Ambiente Pesquisa Pretobras', 'ativo', 'Rua Haddock Lobo, 595', 1);
+('Ambiente Pesquisa Petrobras', 'ativo', 'Rua Haddock Lobo, 595', 1);
 
 INSERT INTO cluster (nome, status, fk_ambiente_hpc) VALUES
 ('Cluster-Alpha-GPU', 'ativo', 1),
 ('Cluster-Beta-CPU', 'ativo', 2),
 ('Cluster-Gamma-Render', 'manut.', 2),
 ('Cluster-Delta-DataData', 'ativo', 3),
-('Cluster-Epsilon-SPTECH', 'ativo', 4);
+('Cluster-Epsilon-SPTECH', 'ativo', 3);
 
 INSERT INTO node (hostname, ip, sistema_operacional, status, fk_cluster) VALUES
 ('alpha-node01', '10.0.1.10', 'Ubuntu Server 22.04 LTS', 'ativo', 1),
