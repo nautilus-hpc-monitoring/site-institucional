@@ -526,11 +526,55 @@ function formatarHora(valor, incluirData = false) {
     return /^\d{2}:\d{2}/.test(texto.slice(11)) ? texto.slice(11, 16) : texto;
 }
 
-function definirGrafico(id, labels, dados) {
+function definirGrafico(id, labels, dados, limites) {
+    const atencao = numeroPercentual(limites?.atencao);
+    const critico = numeroPercentual(limites?.critico);
+    const temLimites = atencao !== null && critico !== null && critico > atencao;
+
+    const datasets = [{
+        label: "Uso",
+        data: dados,
+        borderColor: "#42B8C4",
+        borderWidth: 2,
+        backgroundColor: "transparent",
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        spanGaps: false,
+        tension: 0.35
+    }];
+
+    if (temLimites) {
+        datasets.push({
+            label: "Alerta",
+            data: labels.map(() => atencao),
+            borderColor: "#F59E0B",
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            fill: false,
+            spanGaps: true,
+            tension: 0
+        });
+        datasets.push({
+            label: "Crítico",
+            data: labels.map(() => critico),
+            borderColor: "#DC2626",
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            fill: false,
+            spanGaps: true,
+            tension: 0
+        });
+    }
+
     const existente = Chart.getChart(id);
     if (existente) {
         existente.data.labels = labels;
-        existente.data.datasets[0].data = dados;
+        existente.data.datasets = datasets;
+        existente.options.plugins.legend.display = temLimites;
         existente.update();
         return;
     }
@@ -539,16 +583,7 @@ function definirGrafico(id, labels, dados) {
         type: "line",
         data: {
             labels: labels,
-            datasets: [{
-                data: dados,
-                borderColor: "#42B8C4",
-                borderWidth: 2,
-                backgroundColor: "transparent",
-                pointRadius: 2,
-                pointHoverRadius: 4,
-                spanGaps: false,
-                tension: 0.35
-            }]
+            datasets: datasets
         },
         options: {
             responsive: true,
@@ -556,10 +591,21 @@ function definirGrafico(id, labels, dados) {
             animation: false,
             plugins: {
                 legend: {
-                    display: false
+                    display: temLimites,
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        color: "#64748B",
+                        filter: function (item) {
+                            return item.text !== "Uso";
+                        }
+                    }
                 },
                 tooltip: {
                     enabled: true,
+                    filter: function (item) {
+                        return item.dataset.label === "Uso";
+                    },
                     callbacks: {
                         label: function (context) {
                             return context.parsed.y + "%";
@@ -689,7 +735,7 @@ function aplicarTelemetria(erro) {
         }
         document.getElementById("valorGrafico" + sufixo).textContent =
             valor === null ? "—" : valor.toFixed(1);
-        definirGrafico("grafico" + sufixo, dados.length ? labels : [], dados);
+        definirGrafico("grafico" + sufixo, dados.length ? labels : [], dados, painelTelemetria?.limites?.[recurso]);
         periodos.push(atual ? "Últimas 24 h · médias por hora"
             : valorHorario !== null ? "Dia publicado · médias por hora"
             : valor !== null ? "Destaque · média semanal" : "Sem série disponível");
