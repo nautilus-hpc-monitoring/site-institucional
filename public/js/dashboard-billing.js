@@ -409,7 +409,8 @@ function renderizarGraficoCustoProjecao(dados, metricas) {
         chartCustoInstancia.destroy();
     }
 
-    const historicoDiario = dados.historicoDiario;
+    const historicoDiario = dados.grafico1?.historicoDiario || dados.historicoDiario;
+    const alertasDiarios = dados.grafico1?.alertasDiarios || dados.alertasDiarios;
     const labelsTotais = [...historicoDiario.dias, ...historicoDiario.diasProjecao];
     const indiceCorte = historicoDiario.custos.length - 1;
 
@@ -422,8 +423,8 @@ function renderizarGraficoCustoProjecao(dados, metricas) {
         });
     }
 
-    const alertasAviso = [...dados.alertasDiarios.aviso, ...new Array(historicoDiario.diasProjecao.length).fill(0)];
-    const alertasCritico = [...dados.alertasDiarios.critico, ...new Array(historicoDiario.diasProjecao.length).fill(0)];
+    const alertasAviso = [...(alertasDiarios?.aviso || []), ...new Array(historicoDiario.diasProjecao.length).fill(0)];
+    const alertasCritico = [...(alertasDiarios?.critico || []), ...new Array(historicoDiario.diasProjecao.length).fill(0)];
 
     chartCustoInstancia = new Chart(ctx, {
         data: {

@@ -346,3 +346,132 @@ SELECT
     'Parâmetro inicial. Recalibrar após dados reais.',
     n.id_node
 FROM node n;
+
+-- Povoamento inicial de alertas para alimentar dashboards que consultam o banco.
+-- Gera ocorrencias diariamente de 01/09 ate 15/11 (ano de referencia) para CPU, RAM, SWAP e DISCO.
+-- Versao sem CTE (compatível com MySQL 5.7+).
+INSERT INTO alerta (
+    titulo,
+    descricao,
+    nivel,
+    valor_capturado,
+    dt_hora,
+    fk_componente_node
+)
+SELECT
+    CONCAT(
+        CASE
+            WHEN seq.seq = 3 OR (seq.seq = 2 AND base.fator_custo >= 0.86) THEN 'Critico'
+            ELSE 'Aviso'
+        END,
+        ' de ', base.tipo,
+        ' no node ', base.hostname
+    ) AS titulo,
+    CONCAT(
+        'Leitura de ', base.tipo,
+        ' em linha com o pico de custo diário (fator ', ROUND(base.fator_custo * 100, 1), '%) para o node ',
+        base.hostname, ' no dia ', DATE_FORMAT(base.dia, '%d/%m/%Y'), '.'
+    ) AS descricao,
+    CASE
+        WHEN seq.seq = 3 OR (seq.seq = 2 AND base.fator_custo >= 0.86) THEN 'critico'
+        ELSE 'aviso'
+    END AS nivel,
+    ROUND(
+        CASE
+            WHEN seq.seq = 3 OR (seq.seq = 2 AND base.fator_custo >= 0.86)
+                THEN base.limite_critico + 1 + (base.fator_custo * 6)
+            ELSE base.limite_atencao + 1 + (base.fator_custo * 5)
+        END,
+        2
+    ) AS valor_capturado,
+    TIMESTAMP(
+        base.dia,
+        MAKETIME(
+            MOD((base.id_node * 3) + (base.id_componente * 5) + DAY(base.dia) + seq.seq, 24),
+            MOD((base.id_node * 7) + (base.id_componente * 11) + (seq.seq * 13), 60),
+            0
+        )
+    ) AS dt_hora,
+    base.id_componente_node AS fk_componente_node
+FROM (
+    SELECT
+        d.dia,
+        cn.id_componente_node,
+        n.id_node,
+        n.hostname,
+        c.id_componente,
+        c.tipo,
+        cn.limite_atencao,
+        cn.limite_critico,
+        LEAST(
+            1,
+            GREATEST(
+                0,
+                ((SIN((2 * PI()) * (WEEKDAY(d.dia) / 7.0) + (n.id_node / 5.0)) + 1) / 2)
+                + CASE
+                    WHEN MOD(n.id_node, 5) = 0 THEN 0.18
+                    WHEN MOD(n.id_node, 5) = 4 THEN 0.10
+                    WHEN MOD(n.id_node, 5) = 1 THEN -0.08
+                    ELSE 0
+                  END
+            )
+        ) AS fator_custo
+    FROM (
+        SELECT DATE_ADD(base.inicio, INTERVAL seq.n DAY) AS dia
+        FROM (
+            SELECT u.n + (d.n * 10) AS n
+            FROM (
+                SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+                UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+            ) u
+            CROSS JOIN (
+                SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+                UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+            ) d
+        ) seq
+        CROSS JOIN (
+            SELECT
+                STR_TO_DATE(
+                    CONCAT(
+                        CASE WHEN MONTH(CURDATE()) >= 9 THEN YEAR(CURDATE()) ELSE YEAR(CURDATE()) - 1 END,
+                        '-09-01'
+                    ),
+                    '%Y-%m-%d'
+                ) AS inicio,
+                STR_TO_DATE(
+                    CONCAT(
+                        CASE WHEN MONTH(CURDATE()) >= 9 THEN YEAR(CURDATE()) ELSE YEAR(CURDATE()) - 1 END,
+                        '-11-15'
+                    ),
+                    '%Y-%m-%d'
+                ) AS fim
+        ) base
+        WHERE DATE_ADD(base.inicio, INTERVAL seq.n DAY) <= base.fim
+    ) d
+    JOIN componente_node cn ON 1 = 1
+    JOIN componente c ON c.id_componente = cn.fk_componente
+    JOIN node n ON n.id_node = cn.fk_node
+    WHERE c.tipo IN ('CPU', 'RAM', 'SWAP', 'DISCO')
+) base
+JOIN (
+    SELECT 1 AS seq
+    UNION ALL SELECT 2
+    UNION ALL SELECT 3
+) seq
+    ON seq.seq <= CASE
+        WHEN base.fator_custo >= 0.82 THEN 3
+        WHEN base.fator_custo >= 0.62 THEN 2
+        WHEN base.fator_custo >= 0.42 THEN 1
+        ELSE 0
+    END
+LEFT JOIN alerta a
+    ON a.fk_componente_node = base.id_componente_node
+   AND a.dt_hora = TIMESTAMP(
+        base.dia,
+        MAKETIME(
+            MOD((base.id_node * 3) + (base.id_componente * 5) + DAY(base.dia) + seq.seq, 24),
+            MOD((base.id_node * 7) + (base.id_componente * 11) + (seq.seq * 13), 60),
+            0
+        )
+    )
+WHERE a.id_alerta IS NULL;
