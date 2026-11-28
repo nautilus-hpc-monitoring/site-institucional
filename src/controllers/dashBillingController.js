@@ -178,18 +178,19 @@ function alinharAlertasAoCusto(alertasOriginais, custos) {
     const minCusto = Math.min(...custosSeguros, 0);
     const faixa = Math.max(1, maxCusto - minCusto);
 
-    const pesosAviso = custosSeguros.map((custo) => 0.35 + ((custo - minCusto) / faixa) * 0.65);
-    const pesosCritico = custosSeguros.map((custo) => {
-        const normalizado = (custo - minCusto) / faixa;
-        return 0.15 + normalizado * normalizado * 0.85;
-    });
+    const normalizados = custosSeguros.map((custo) => (custo - minCusto) / faixa);
+    const pesosAviso = normalizados.map((n) => Math.pow(Math.max(0, n - 0.35), 2));
+    const pesosCritico = normalizados.map((n) => Math.pow(Math.max(0, n - 0.65), 3));
+
+    const somaAvisoPesos = somar(pesosAviso);
+    const somaCriticoPesos = somar(pesosCritico);
 
     const totalAviso = somar(alertasOriginais?.aviso || []);
     const totalCritico = somar(alertasOriginais?.critico || []);
 
     return {
-        aviso: distribuirPorPesos(totalAviso, pesosAviso),
-        critico: distribuirPorPesos(totalCritico, pesosCritico)
+        aviso: distribuirPorPesos(totalAviso, somaAvisoPesos > 0 ? pesosAviso : normalizados),
+        critico: distribuirPorPesos(totalCritico, somaCriticoPesos > 0 ? pesosCritico : normalizados)
     };
 }
 
